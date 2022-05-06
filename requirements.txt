@@ -1,0 +1,3 @@
+black
+fastapi[all]
+pytest
