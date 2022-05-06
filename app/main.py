@@ -8,6 +8,20 @@ DB_PATH = "db.sqlite3"
 
 app = FastAPI()
 
+# Models
+
+
+class UserBase(BaseModel):
+    name: str
+    description: str
+
+
+class User(UserBase):
+    id: str
+
+
+# Dependencyes
+
 
 def init_con(con: Connection):
     with con:
@@ -34,13 +48,7 @@ def get_con() -> Connection:
         con.close()
 
 
-class UserBase(BaseModel):
-    name: str
-    description: str
-
-
-class User(UserBase):
-    id: str
+# Users: DB
 
 
 def read_user(con: Connection, userid: int) -> dict:
@@ -59,6 +67,9 @@ def create_user(con: Connection, user: UserBase) -> User:
     return read_user(con, cur.lastrowid)
 
 
+# Users: routes
+
+
 @app.get("/users/{userid}", response_model=User)
 async def users(userid: int, con: Connection = Depends(get_con)):
     if user := read_user(con, userid):
@@ -74,10 +85,3 @@ async def users(user: UserBase, con: Connection = Depends(get_con)):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="User already exists"
         )
-
-
-# HTML /: main page
-# JSON /{userid}: returns info about an user
-# HTML /{userid}: logged user main page
-# JSON /{userid}/{voucherid}: returns the state of a voucher for an user
-# HTML /{userid}/{voucherid}: display the state of a voucher for an user
