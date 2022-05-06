@@ -20,7 +20,7 @@ class User(UserBase):
     id: str
 
 
-# Dependencyes
+# Dependencies
 
 
 def init_con(con: Connection):
