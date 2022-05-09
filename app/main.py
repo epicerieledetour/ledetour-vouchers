@@ -42,9 +42,9 @@ class User(UserBase):
     id: str
 
 
-class Message(UserBase):
+class Message(BaseModel):
     text: str
-    severity: int  # TODO: use an enum
+    severity: int = 0  # TODO: use an enum
 
 
 class Action(BaseModel):
@@ -184,7 +184,7 @@ def build_next_actions(user: User) -> Dict[str, Action]:
                 url="/vouchers/{voucherid}",
                 verb="PATCH",
                 body={"state": 1},  # distributed
-                message=None,
+                message=Message(text="Scan to distribute a voucher"),
             )
         )
 
@@ -194,6 +194,6 @@ def build_next_actions(user: User) -> Dict[str, Action]:
                 url="/vouchers/{voucherid}",
                 verb="PATCH",
                 body={"state": 2},  # cashedin
-                message=None,
+                message=Message(text="Scan to cash a voucher in"),
             )
         )

@@ -112,7 +112,7 @@ def test_auth__distributor(distributor_client, user_distributor):
                 "url": "/vouchers/{voucherid}",
                 "verb": "PATCH",
                 "body": {"state": 1},  # distributed
-                "message": None,
+                "message": {"text": "Scan to distribute a voucher", "severity": 0},
             },
             "button": None,
         },
@@ -129,7 +129,7 @@ def test_auth__cashier(cashier_client, user_cashier):
                 "url": "/vouchers/{voucherid}",
                 "verb": "PATCH",
                 "body": {"state": 2},  # distributed
-                "message": None,
+                "message": {"text": "Scan to cash a voucher in", "severity": 0},
             },
             "button": None,
         },
