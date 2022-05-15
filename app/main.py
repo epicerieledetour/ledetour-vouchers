@@ -112,6 +112,14 @@ vouchers (
     value INTEGER NOT NULL,
     state INTEGER NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS
+history (
+    date TEXT NOT NULL,
+    userid TEXT NOT NULL,
+    voucherid TEXT NOT NULL,
+    state INTEGER NOT NULL
+)
 """
         )
 
@@ -150,7 +158,7 @@ async def get_current_user(
     con: Connection = Depends(get_con), token: str = Depends(oauth2_scheme)
 ) -> User:
     if user := get_user(con, token):
-        return user
+        return User(**user)
 
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -191,9 +199,69 @@ def new_voucher(con: Connection, voucher: VoucherBase) -> Voucher:
     return get_voucher(con, values["id"])
 
 
-def patch_voucher(con: Connection, voucher: VoucherBase, patch: VoucherPatch) -> None:
+def get_voucher_history(con: Connection, voucherid: str) -> dict:
+    cur = con.cursor()
+    cur.execute(
+        """
+        SELECT history.date, users.name, vouchers.state
+        FROM history
+        INNER JOIN users ON history.userid = users.id
+        INNER JOIN vouchers ON history.voucherid = vouchers.id;
+        """
+    )
+    return cur.fetchall()
+
+
+_HISTORY_MESSAGE = {1: "Distributed by", 2: "Cashed-in by"}
+
+
+def _build_last_history_message(con: Connection, voucherid: str) -> str | None:
+    cur = con.cursor()
+    cur.execute(
+        """
+        SELECT history.date, users.name, vouchers.state
+        FROM history
+        INNER JOIN users ON history.userid = users.id
+        INNER JOIN vouchers ON history.voucherid = vouchers.id
+        ORDER BY history.date DESC
+        LIMIT 1
+        """
+    )
+    data = cur.fetchone()
+    if not data:
+        return None
+
+    by = _HISTORY_MESSAGE[data["state"]]
+    return "{by} {name} {date}".format(by=by, **data)
+
+
+# Used in tests
+def _last_history_date(con: Connection, voucherid: str) -> str:
+    cur = con.cursor()
+    cur.execute(
+        """
+        SELECT MAX(date)
+        FROM history
+        WHERE voucherid = :voucherid;
+        """,
+        {"voucherid": voucherid},
+    )
+    return cur.fetchone()[0]
+
+
+def patch_voucher(
+    con: Connection, user: User, voucher: Voucher, patch: VoucherPatch
+) -> None:
+    # TODO: ensure user ACL
     with con:
         cur = con.cursor()
+        cur.execute(
+            """
+            INSERT INTO history(date, userid, voucherid, state)
+            VALUES(DATETIME('now'), :userid, :voucherid, :state)
+            """,
+            {"userid": user.id, "voucherid": voucher.id, "state": patch.state},
+        )
         cur.execute(
             """
             UPDATE vouchers
@@ -204,7 +272,7 @@ def patch_voucher(con: Connection, voucher: VoucherBase, patch: VoucherPatch) ->
         )
 
 
-# Users: DB
+# Users: DBs
 
 
 def get_user(con: Connection, userid: str) -> dict:
@@ -274,12 +342,12 @@ async def vouchers(
 ):
     try:
         patch_voucher_func = _PATCH_VOUCHER_FUNCTIONS[
-            bool(user["ac_distribute"]),
-            bool(user["ac_cashin"]),
+            user.ac_distribute,
+            user.ac_cashin,
             voucher.state,
             patch.state,
         ]
-        patch_voucher_func(con, voucher, patch)
+        patch_voucher_func(con, user, voucher, patch)
     except KeyError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -287,15 +355,15 @@ async def vouchers(
         )
     updated_voucher = Voucher(**get_voucher(con, voucher.id))
     message_builders = _MESSAGES[
-        bool(user["ac_distribute"]),
-        bool(user["ac_cashin"]),
+        user.ac_distribute,
+        user.ac_cashin,
         voucher.state,
         updated_voucher.state,
     ]
     message_main = message_builders["main"]
-    message_detail = message_builders["detail"](updated_voucher)
+    message_detail = message_builders["detail"](con, updated_voucher)
     return ActionResponse(
-        user=User(**user),
+        user=user,
         voucher=updated_voucher,
         message_main=message_main,
         message_detail=message_detail,
@@ -306,7 +374,7 @@ async def vouchers(
 @app.get("/auth", response_model=ActionResponse)
 async def auth(user: User = Depends(get_current_user)):
     return ActionResponse(
-        user=User(**user),
+        user=user,
         next_actions=build_next_actions(user, None, None),
     )
 
@@ -375,6 +443,11 @@ _BUILDERS = {  # (ac_distribute, ac_cashin, cur_state, next_state)
     ),
 }
 
+
+def _last_state_message(con: Connection, voucher: Voucher) -> Message:
+    return Message(text=_build_last_history_message(con, voucher.id), severity=0)
+
+
 _MESSAGES = {
     (True, False, 0, 1): {
         "main": {"text": "Distributed", "severity": 1},
@@ -386,11 +459,11 @@ _MESSAGES = {
     },
     (True, False, 1, 1): {
         "main": {"text": "Already distributed", "severity": 2},
-        "detail": _build_none,
+        "detail": _last_state_message,
     },
     (True, False, 2, 1): {
         "main": {"text": "Already spent", "severity": 2},
-        "detail": _build_none,
+        "detail": _last_state_message,
     },
 }
 
@@ -401,7 +474,5 @@ def build_next_actions(
     cur_state = voucher.state if voucher else None
     # TODO: data model really needs to be sorted out:
     # bool(user["ac_distribute"]) should be user.ac_distribute
-    builders = _BUILDERS[
-        (bool(user["ac_distribute"]), bool(user["ac_cashin"]), cur_state, next_state)
-    ]
+    builders = _BUILDERS[(user.ac_distribute, user.ac_cashin, cur_state, next_state)]
     return NextActions(scan=builders.scan(), button=builders.button(voucher))

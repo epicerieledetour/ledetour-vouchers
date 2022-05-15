@@ -24,8 +24,27 @@ def expiration_date():
 
 
 @fixture
-def con(tmpdir):
-    return main.init_con(tmpdir / "db.sqlite3")
+def con_uri(tmpdir):
+    return tmpdir / "db.sqlite3"
+
+
+@fixture
+def con(con_uri):
+    return main.init_con(con_uri)
+
+
+@fixture
+def user_admin(con):
+    values = main.new_user(
+        con,
+        main.UserBase(
+            name="ADMIN",
+            description="An admin user",
+            ac_distribute=True,
+            ac_cashin=True,
+        ),
+    )
+    return main.User(**values)
 
 
 @fixture
@@ -71,17 +90,20 @@ def voucher_registered(con, expiration_date):
 
 
 @fixture
-def voucher_distributed(con, expiration_date):
+def voucher_distributed(con, user_distributor, expiration_date):
     values = main.new_voucher(
         con,
         main.VoucherBase(
             label=f"Voucher-distributed",
             expiration_date=expiration_date,
             value=20,
-            state=1,  # TODO: use an enum
+            state=0,  # TODO: use an enum
         ),
     )
-    return main.Voucher(**values)
+    voucher = main.Voucher(**values)
+    patch = main.VoucherPatch(state=1)
+    main.patch_voucher(con, user_distributor, voucher, patch)
+    return main.Voucher(**main.get_voucher(con, voucher.id))
 
 
 @fixture
@@ -257,13 +279,16 @@ def test_vouchers_patch__distributor__distributed_to_registered(
 
 
 def test_vouchers_patch__distributor__distributed_to_distributed(
-    distributor_client, user_distributor, voucher_distributed
+    con_uri, distributor_client, user_distributor, voucher_distributed
 ):
     response = distributor_client.patch(
         f"/vouchers/{voucher_distributed.id}", json={"state": 1}
     )
     voucher = voucher_distributed.dict()
     # voucher["state"] = 1
+
+    con = main.init_con(con_uri)
+    dist_date = main._last_history_date(con, voucher_distributed.id)
 
     assert response.status_code == status.HTTP_200_OK
     j = response.json()
@@ -272,7 +297,7 @@ def test_vouchers_patch__distributor__distributed_to_distributed(
         "user": user_distributor.dict(),
         "voucher": voucher,
         "message_main": {"text": "Already distributed", "severity": 2},
-        "message_detail": None,
+        "message_detail": {"text": f"Distributed by DIST {dist_date}", "severity": 0},
         "next_actions": {
             "scan": {
                 "url": "/vouchers/{voucherid}",
