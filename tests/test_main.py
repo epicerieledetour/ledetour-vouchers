@@ -107,6 +107,25 @@ def voucher_distributed(con, user_distributor, expiration_date):
 
 
 @fixture
+def voucher_spent(con, user_distributor, user_cashier, expiration_date):
+    values = main.new_voucher(
+        con,
+        main.VoucherBase(
+            label=f"Voucher-spent",
+            expiration_date=expiration_date,
+            value=20,
+            state=0,  # TODO: use an enum
+        ),
+    )
+    voucher = main.Voucher(**values)
+    patch = main.VoucherPatch(state=1)
+    main.patch_voucher(con, user_distributor, voucher, patch)
+    patch = main.VoucherPatch(state=2)
+    main.patch_voucher(con, user_cashier, voucher, patch)
+    return main.Voucher(**main.get_voucher(con, voucher.id))
+
+
+@fixture
 def app(con):
     def get_con():
         try:
@@ -311,5 +330,37 @@ def test_vouchers_patch__distributor__distributed_to_distributed(
                 "body": {"state": 0},
                 "message": {"text": "Cancel distribution", "severity": 2},
             },
+        },
+    }
+
+
+def test_vouchers_patch__distributor__spent_to_distributed(
+    con_uri, distributor_client, user_distributor, voucher_spent
+):
+    response = distributor_client.patch(
+        f"/vouchers/{voucher_spent.id}", json={"state": 1}
+    )
+    voucher = voucher_spent.dict()
+    # voucher["state"] = 1
+
+    con = main.init_con(con_uri)
+    spent_date = main._last_history_date(con, voucher_spent.id)
+
+    assert response.status_code == status.HTTP_200_OK
+    j = response.json()
+    expected_action_response = main.ActionResponse(**j)
+    assert expected_action_response.dict() == {
+        "user": user_distributor.dict(),
+        "voucher": voucher,
+        "message_main": {"text": "Already spent", "severity": 2},
+        "message_detail": {"text": f"Cashed-in by POS {spent_date}", "severity": 0},
+        "next_actions": {
+            "scan": {
+                "url": "/vouchers/{voucherid}",
+                "verb": "PATCH",
+                "body": {"state": 1},  # distributed
+                "message": {"text": "Scan to distribute a voucher", "severity": 0},
+            },
+            "button": None,
         },
     }

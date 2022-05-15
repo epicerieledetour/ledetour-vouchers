@@ -223,7 +223,9 @@ def _build_last_history_message(con: Connection, voucherid: str) -> str | None:
         FROM history
         INNER JOIN users ON history.userid = users.id
         INNER JOIN vouchers ON history.voucherid = vouchers.id
-        ORDER BY history.date DESC
+        ORDER BY
+            history.date DESC,
+            history.rowid DESC
         LIMIT 1
         """
     )
@@ -326,6 +328,7 @@ _PATCH_VOUCHER_FUNCTIONS = {
     (True, False, 0, 1): patch_voucher,
     (True, False, 1, 0): patch_voucher,
     (True, False, 1, 1): _noop,
+    (True, False, 2, 1): _noop,
     (False, True, 1, 1): _noop,
     (False, True, 1, 2): patch_voucher,
     (False, True, 2, 1): patch_voucher,
@@ -438,6 +441,9 @@ _BUILDERS = {  # (ac_distribute, ac_cashin, cur_state, next_state)
     (True, False, 1, 1): Builder(
         scan=_build_scan_to_distribute_action, button=_build_cancel_distribute_action
     ),
+    (True, False, 2, 1): Builder(
+        scan=_build_scan_to_distribute_action, button=_build_none
+    ),
     (False, True, None, None): Builder(
         scan=_build_scan_to_cashin_action, button=_build_none
     ),
@@ -461,7 +467,7 @@ _MESSAGES = {
         "main": {"text": "Already distributed", "severity": 2},
         "detail": _last_state_message,
     },
-    (True, False, 2, 1): {
+    (True, False, 2, 2): {
         "main": {"text": "Already spent", "severity": 2},
         "detail": _last_state_message,
     },
