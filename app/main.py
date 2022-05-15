@@ -1,3 +1,8 @@
+import datetime
+
+from collections.abc import Callable
+from dataclasses import dataclass
+
 from typing import Dict
 
 import shortuuid
@@ -5,7 +10,7 @@ import shortuuid
 import sqlite3
 from sqlite3 import connect, Connection, Row
 
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import Body, Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 
@@ -22,13 +27,29 @@ app = FastAPI()
 # 1: distributed
 # 2: cashedin
 # 3: expired
-# 4: desactivated
+# 4: deactivated
 
 # Severity
 # 0: default
 # 1: action
 # 2: warning
 # 3: error
+
+
+class VoucherPatch(BaseModel):
+    state: int  # TODO: use an enum
+    # dummy: str
+
+
+class VoucherBase(BaseModel):
+    label: str
+    expiration_date: datetime.date
+    value: int
+    state: int  # TODO: use an enum
+
+
+class Voucher(VoucherBase):
+    id: str
 
 
 class UserBase(BaseModel):
@@ -61,6 +82,9 @@ class NextActions(BaseModel):
 
 class ActionResponse(BaseModel):
     user: User
+    voucher: Voucher | None
+    message_main: Message | None
+    message_detail: Message | None
     next_actions: NextActions
 
 
@@ -78,6 +102,15 @@ users (
     description TEXT NOT NULL,
     ac_distribute INTEGER DEFAULT 0,
     ac_cashin INTEGER DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS
+vouchers (
+    id TEXT PRIMARY KEY,
+    label TEXT NOT NULL,
+    expiration_date TEXT NOT NULL,
+    value INTEGER NOT NULL,
+    state INTEGER NOT NULL
 );
 """
         )
@@ -116,7 +149,59 @@ def decode_token(token):
 async def get_current_user(
     con: Connection = Depends(get_con), token: str = Depends(oauth2_scheme)
 ) -> User:
-    return get_user(con, token)
+    if user := get_user(con, token):
+        return user
+
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Not authenticated",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+
+async def get_current_voucher(
+    voucherid: str, con: Connection = Depends(get_con)
+) -> Voucher:
+    if voucher := get_voucher(con, voucherid):
+        return Voucher(**voucher)
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+
+
+# Vouchers: DB
+
+
+def get_voucher(con: Connection, voucherid: str) -> dict:
+    cur = con.cursor()
+    cur.execute("SELECT * FROM vouchers WHERE id=?", (voucherid,))
+    return cur.fetchone()
+
+
+def new_voucher(con: Connection, voucher: VoucherBase) -> Voucher:
+    values = voucher.dict()
+    values["id"] = shortuuid.uuid()  # TODO: check for uniqueness in DB
+    with con:
+        cur = con.cursor()
+        cur.execute(
+            """
+            INSERT INTO vouchers(id, label, expiration_date, value, state)
+            VALUES(:id, :label, :expiration_date, :value, :state)
+            """,
+            values,
+        )
+    return get_voucher(con, values["id"])
+
+
+def patch_voucher(con: Connection, voucher: VoucherBase, patch: VoucherPatch) -> None:
+    with con:
+        cur = con.cursor()
+        cur.execute(
+            """
+            UPDATE vouchers
+            SET state = :state
+            WHERE id = :id
+            """,
+            {"id": voucher.id, "state": patch.state},
+        )
 
 
 # Users: DB
@@ -140,7 +225,7 @@ def new_user(con: Connection, user: UserBase) -> dict:
             """,
             values,
         )
-    return get_user(con, cur.lastrowid)
+    return get_user(con, values["id"])
 
 
 # Users: routes
@@ -163,37 +248,160 @@ async def users(user: UserBase, con: Connection = Depends(get_con)):
         )
 
 
-@app.get("/auth", response_model=ActionResponse)
-async def auth(user: User = Depends(get_current_user)):
-    if user:
-        return ActionResponse(
-            user=User(**user),
-            next_actions=build_next_actions(user),
+def _noop(*_, **__):
+    pass
+
+
+_PATCH_VOUCHER_FUNCTIONS = {
+    # ac_distribute, ac_cashin, cur_state, next_state
+    (True, False, 0, 0): _noop,
+    (True, False, 0, 1): patch_voucher,
+    (True, False, 1, 0): patch_voucher,
+    (True, False, 1, 1): _noop,
+    (False, True, 1, 1): _noop,
+    (False, True, 1, 2): patch_voucher,
+    (False, True, 2, 1): patch_voucher,
+    (False, True, 2, 2): _noop,
+}
+
+
+@app.patch("/vouchers/{voucherid}", response_model=ActionResponse)
+async def vouchers(
+    patch: VoucherPatch,
+    user: User = Depends(get_current_user),
+    voucher: Voucher = Depends(get_current_voucher),
+    con: Connection = Depends(get_con),
+):
+    try:
+        patch_voucher_func = _PATCH_VOUCHER_FUNCTIONS[
+            bool(user["ac_distribute"]),
+            bool(user["ac_cashin"]),
+            voucher.state,
+            patch.state,
+        ]
+        patch_voucher_func(con, voucher, patch)
+    except KeyError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authorized to perform this action.",
         )
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Not authenticated",
-        headers={"WWW-Authenticate": "Bearer"},
+    updated_voucher = Voucher(**get_voucher(con, voucher.id))
+    message_builders = _MESSAGES[
+        bool(user["ac_distribute"]),
+        bool(user["ac_cashin"]),
+        voucher.state,
+        updated_voucher.state,
+    ]
+    message_main = message_builders["main"]
+    message_detail = message_builders["detail"](updated_voucher)
+    return ActionResponse(
+        user=User(**user),
+        voucher=updated_voucher,
+        message_main=message_main,
+        message_detail=message_detail,
+        next_actions=build_next_actions(user, voucher, patch.state),
     )
 
 
-def build_next_actions(user: User) -> Dict[str, Action]:
-    if user["ac_distribute"]:
-        return NextActions(
-            scan=Action(
-                url="/vouchers/{voucherid}",
-                verb="PATCH",
-                body={"state": 1},  # distributed
-                message=Message(text="Scan to distribute a voucher"),
-            )
-        )
+@app.get("/auth", response_model=ActionResponse)
+async def auth(user: User = Depends(get_current_user)):
+    return ActionResponse(
+        user=User(**user),
+        next_actions=build_next_actions(user, None, None),
+    )
 
-    if user["ac_cashin"]:
-        return NextActions(
-            scan=Action(
-                url="/vouchers/{voucherid}",
-                verb="PATCH",
-                body={"state": 2},  # cashedin
-                message=Message(text="Scan to cash a voucher in"),
-            )
-        )
+
+@dataclass
+class Builder:
+    scan: Callable[[], Action]
+    button: Callable[[], Action]
+
+
+def _build_scan_to_distribute_action() -> Action:
+    return Action(
+        url="/vouchers/{voucherid}",
+        verb="PATCH",
+        body={"state": 1},  # distributed
+        message=Message(text="Scan to distribute a voucher"),
+    )
+
+
+def _build_scan_to_cashin_action() -> Action:
+    return Action(
+        url="/vouchers/{voucherid}",
+        verb="PATCH",
+        body={"state": 2},  # cashedin
+        message=Message(text="Scan to cash a voucher in"),
+    )
+
+
+def _build_distribute_action(voucher: Voucher) -> Action:
+    return Action(
+        url=f"/vouchers/{voucher.id}",
+        verb="PATCH",
+        body={"state": 1},  # cashedin
+        message=Message(text="Distribute", severity=1),
+    )
+
+
+def _build_cancel_distribute_action(voucher: Voucher) -> Action:
+    return Action(
+        url=f"/vouchers/{voucher.id}",
+        verb="PATCH",
+        body={"state": 0},  # cashedin
+        message=Message(text="Cancel distribution", severity=2),
+    )
+
+
+def _build_none(*_, **__) -> None:
+    return None
+
+
+_BUILDERS = {  # (ac_distribute, ac_cashin, cur_state, next_state)
+    (True, False, None, None): Builder(
+        scan=_build_scan_to_distribute_action, button=_build_none
+    ),
+    (True, False, 0, 1): Builder(
+        scan=_build_scan_to_distribute_action, button=_build_cancel_distribute_action
+    ),
+    (True, False, 1, 0): Builder(
+        scan=_build_scan_to_distribute_action, button=_build_distribute_action
+    ),
+    (True, False, 1, 1): Builder(
+        scan=_build_scan_to_distribute_action, button=_build_cancel_distribute_action
+    ),
+    (False, True, None, None): Builder(
+        scan=_build_scan_to_cashin_action, button=_build_none
+    ),
+}
+
+_MESSAGES = {
+    (True, False, 0, 1): {
+        "main": {"text": "Distributed", "severity": 1},
+        "detail": _build_none,
+    },
+    (True, False, 1, 0): {
+        "main": {"text": "Distribution cancelled", "severity": 2},
+        "detail": _build_none,
+    },
+    (True, False, 1, 1): {
+        "main": {"text": "Already distributed", "severity": 2},
+        "detail": _build_none,
+    },
+    (True, False, 2, 1): {
+        "main": {"text": "Already spent", "severity": 2},
+        "detail": _build_none,
+    },
+}
+
+
+def build_next_actions(
+    user: User, voucher: Voucher | None, next_state: int | None
+) -> NextActions:
+    cur_state = voucher.state if voucher else None
+    # TODO: data model really needs to be sorted out:
+    # bool(user["ac_distribute"]) should be user.ac_distribute
+    builders = _BUILDERS[
+        (bool(user["ac_distribute"]), bool(user["ac_cashin"]), cur_state, next_state)
+    ]
+    return NextActions(scan=builders.scan(), button=builders.button(voucher))
