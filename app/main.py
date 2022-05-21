@@ -11,12 +11,19 @@ import sqlite3
 from sqlite3 import connect, Connection, Row
 
 from fastapi import Body, Depends, FastAPI, HTTPException, status
+from fastapi.staticfiles import StaticFiles
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 
 DB_PATH = "db.sqlite3"
 
 app = FastAPI()
+
+app.mount(
+    "/static",
+    StaticFiles(directory="/home/charles/src/github/epicerieledetour/vouchers/static"),
+    name="static",
+)
 
 
 # Models
