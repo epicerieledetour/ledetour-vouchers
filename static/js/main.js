@@ -3,9 +3,8 @@ STATE = null
 window.addEventListener('load', () => start(), false)
 window.addEventListener('load', () => setup_scanner(), false)
 
-
 async function setup_scanner() {
-    const scanPreviewElem = document.getElementById('scan-preview');
+    const scanPreviewElem = document.getElementById('scan-preview')
 
     // Debug feature: if an URL fragment is present (#some-voucher-id), then clicking
     // on the video preview will trigger a process of the code defined by the fragment
@@ -16,6 +15,11 @@ async function setup_scanner() {
             process_code(url_code)
         }
     })
+
+    // Setup the action button
+
+    const actionButtonElem = document.getElementById('action')
+    actionButtonElem.addEventListener("click", process_button)
 
     // Barcode scanning setup
 
@@ -34,24 +38,27 @@ async function setup_scanner() {
 }
 
 async function process_code(code) {
-    const action_scan = STATE.next_actions.scan
+    await process_action(STATE.next_actions.scan, code)
+}
 
-    // TODO: error handling if action_scan if not present
+async function process_button() {
+    await process_action(STATE.next_actions.button)
+}
+
+async function process_action(action, code) {
+    if (!action) {
+        return
+    }
 
     const options = {
-        method: action_scan.verb
+        method: action.verb
     }
-    if (action_scan.body) {
-        options.headers = {
-            'Accept': 'application/json, */*;q=0.5',
-            'Content-Type': 'application/json;charset=utf-8'
-        }
-        options.body = JSON.stringify(action_scan.body)
+    if (action.body) {
+        options.body = JSON.stringify(action.body)
     }
-    await query(
-        action_scan.url.replace("{code}", code),
-        options
-    )
+    const url = code ? action.url.replace("{code}", code) : action.url
+
+    await query(url, options)
 }
 
 async function start() {
@@ -61,6 +68,9 @@ async function start() {
 async function query(url, options) {
     options = options || {}
     options.headers = options.headers || {}
+    options.headers["Accept"] = 'application/json, */*;q=0.5'
+    options.headers['Content-Type'] = 'application/json;charset=utf-8'
+
     if (STATE && STATE.user) {
         options.headers["Authorization"] = "Bearer " + STATE.user.id
     }
