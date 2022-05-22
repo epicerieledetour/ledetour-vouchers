@@ -173,7 +173,6 @@ async def get_current_voucher(
     voucherid: str, con: Connection = Depends(get_con)
 ) -> Voucher:
     if voucher := get_voucher(con, voucherid):
-        print("get_current_voucher", voucher)
         return Voucher(**voucher)
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
 
@@ -184,7 +183,10 @@ async def get_current_voucher(
 def get_voucher(con: Connection, voucherid: str) -> dict:
     cur = con.cursor()
     cur.execute("SELECT * FROM vouchers WHERE id=?", (voucherid,))
-    ret = dict(**cur.fetchone())
+    voucher = cur.fetchone()
+    if not voucher:
+        return
+    ret = dict(**voucher)
     ret["history"] = [
         _history_text(dict(**data)) for data in get_voucher_history(con, voucherid)
     ]
@@ -351,7 +353,7 @@ _PATCH_VOUCHER_FUNCTIONS = {
     (True, False, 1, 0): patch_voucher,
     (True, False, 1, 1): _noop,
     (True, False, 2, 1): _noop,
-    (False, True, 1, 1): _noop,
+    (False, True, 0, 2): _noop,
     (False, True, 1, 2): patch_voucher,
     (False, True, 2, 1): patch_voucher,
     (False, True, 2, 2): _noop,
@@ -464,6 +466,24 @@ def _build_cancel_distribute_action(voucher: Voucher) -> Action:
     )
 
 
+def _build_cancel_cashin_action(voucher: Voucher) -> Action:
+    return Action(
+        url=f"/vouchers/{voucher.id}",
+        verb="PATCH",
+        body={"state": 1},  # distributed
+        message=Message(text="Cancel cashing-in", severity=2),
+    )
+
+
+def _build_cashin_action(voucher: Voucher) -> Action:
+    return Action(
+        url=f"/vouchers/{voucher.id}",
+        verb="PATCH",
+        body={"state": 2},  # distributed
+        message=Message(text="Cash-in", severity=1),
+    )
+
+
 def _build_none(*_, **__) -> None:
     return None
 
@@ -486,6 +506,16 @@ _BUILDERS = {  # (ac_distribute, ac_cashin, cur_state, next_state)
     ),
     (False, True, None, None): Builder(
         scan=_build_scan_to_cashin_action, button=_build_none
+    ),
+    (False, True, 0, 2): Builder(scan=_build_scan_to_cashin_action, button=_build_none),
+    (False, True, 1, 2): Builder(
+        scan=_build_scan_to_cashin_action, button=_build_cancel_cashin_action
+    ),
+    (False, True, 2, 1): Builder(
+        scan=_build_scan_to_cashin_action, button=_build_cashin_action
+    ),
+    (False, True, 2, 2): Builder(
+        scan=_build_scan_to_cashin_action, button=_build_cancel_cashin_action
     ),
 }
 
@@ -511,6 +541,22 @@ _MESSAGES = {
         "main": {"text": "Already spent", "severity": 2},
         "detail": _last_state_message,
     },
+    (False, True, 0, 0): {
+        "main": {"text": "Not yet distributed", "severity": 2},
+        "detail": _build_none,
+    },
+    (False, True, 1, 2): {
+        "main": {"text": "Cashed-in", "severity": 1},
+        "detail": _build_none,
+    },
+    (False, True, 2, 1): {
+        "main": {"text": "Cashed-in cancelled", "severity": 2},
+        "detail": _build_none,
+    },
+    (False, True, 2, 2): {
+        "main": {"text": "Already cashed-in", "severity": 2},
+        "detail": _last_state_message,
+    },
 }
 
 
@@ -518,8 +564,6 @@ def build_next_actions(
     user: User, voucher: Voucher | None, next_state: int | None
 ) -> NextActions:
     cur_state = voucher.state if voucher else None
-    # TODO: data model really needs to be sorted out:
-    # bool(user["ac_distribute"]) should be user.ac_distribute
     builders = _BUILDERS[(user.ac_distribute, user.ac_cashin, cur_state, next_state)]
     return NextActions(scan=builders.scan(), button=builders.button(voucher))
 
