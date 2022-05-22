@@ -3,7 +3,7 @@ import datetime
 from collections.abc import Callable
 from dataclasses import dataclass
 
-from typing import Dict
+from typing import Dict, List
 
 import shortuuid
 
@@ -51,6 +51,7 @@ class VoucherBase(BaseModel):
 
 class Voucher(VoucherBase):
     id: str
+    history: List[str]
 
 
 class UserBase(BaseModel):
@@ -183,14 +184,25 @@ async def get_current_voucher(
 def get_voucher(con: Connection, voucherid: str) -> dict:
     cur = con.cursor()
     cur.execute("SELECT * FROM vouchers WHERE id=?", (voucherid,))
-    return cur.fetchone()
+    ret = dict(**cur.fetchone())
+    ret["history"] = [
+        _history_text(dict(**data)) for data in get_voucher_history(con, voucherid)
+    ]
+    return ret
 
 
-def new_voucher(con: Connection, voucher: VoucherBase) -> Voucher:
+def new_voucher(con: Connection, user: User, voucher: VoucherBase) -> Voucher:
     values = voucher.dict()
     values["id"] = shortuuid.uuid()  # TODO: check for uniqueness in DB
     with con:
         cur = con.cursor()
+        cur.execute(
+            """
+            INSERT INTO history(date, userid, voucherid, state)
+            VALUES(DATETIME('now'), :userid, :voucherid, :state)
+            """,
+            {"userid": user.id, "voucherid": values["id"], "state": voucher.state},
+        )
         cur.execute(
             """
             INSERT INTO vouchers(id, label, expiration_date, value, state)
@@ -208,13 +220,18 @@ def get_voucher_history(con: Connection, voucherid: str) -> dict:
         SELECT history.date, users.name, vouchers.state
         FROM history
         INNER JOIN users ON history.userid = users.id
-        INNER JOIN vouchers ON history.voucherid = vouchers.id;
-        """
+        INNER JOIN vouchers ON history.voucherid = vouchers.id
+        WHERE history.voucherid = :voucherid
+        ORDER BY
+            history.date DESC,
+            history.rowid DESC
+        """,
+        (voucherid,),
     )
     return cur.fetchall()
 
 
-_HISTORY_MESSAGE = {1: "Distributed by", 2: "Cashed-in by"}
+_HISTORY_MESSAGE = {0: "Registered by", 1: "Distributed by", 2: "Cashed-in by"}
 
 
 def _build_last_history_message(con: Connection, voucherid: str) -> str | None:
@@ -225,16 +242,19 @@ def _build_last_history_message(con: Connection, voucherid: str) -> str | None:
         FROM history
         INNER JOIN users ON history.userid = users.id
         INNER JOIN vouchers ON history.voucherid = vouchers.id
+        WHERE history.voucherid = :voucherid
         ORDER BY
             history.date DESC,
             history.rowid DESC
         LIMIT 1
-        """
+        """,
+        (voucherid,),
     )
     data = cur.fetchone()
-    if not data:
-        return None
+    return _history_text(data) if data else None
 
+
+def _history_text(data):
     by = _HISTORY_MESSAGE[data["state"]]
     return "{by} {name} {date}".format(by=by, **data)
 
@@ -345,9 +365,6 @@ async def vouchers(
     voucher: Voucher = Depends(get_current_voucher),
     con: Connection = Depends(get_con),
 ):
-    print("patch", patch)
-    print("user", user)
-    print("voucher", voucher)
     try:
         patch_voucher_func = _PATCH_VOUCHER_FUNCTIONS[
             user.ac_distribute,

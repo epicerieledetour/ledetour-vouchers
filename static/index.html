@@ -27,7 +27,7 @@
   <header id="header">
     <button id="exit">Exit</button>
     <p>Caisse Le Détour #1</p>
-    <button>History</button>
+    <button id="history">History</button>
   </header>
   <section id="scan">
     <video id="scan-preview"></video>
@@ -43,6 +43,12 @@
   </section>
   <section id="detail">Distributed by: Marché solidaire 2022-07-13 14:37</section>
   <button id="action">Cancel distribution</button>
+
+  <dialog id="dialog">
+    <h1 id="dialog-title"></h1>
+    <section id="dialog-content">
+    </section>
+  </dialog>
 
   <script type="text/javascript" src="js/zxing-library-v0.19.1.min.js"></script>
   <script type="text/javascript" src="js/main.js"></script>

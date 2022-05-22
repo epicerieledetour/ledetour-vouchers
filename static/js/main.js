@@ -26,13 +26,26 @@ async function setup_scanner() {
     const actionButtonElem = document.getElementById('action')
     actionButtonElem.addEventListener("click", process_button)
 
+    // Setup the history button
+
+    const historyButtonElem = document.getElementById('history')
+    historyButtonElem.addEventListener("click", show_history)
+
+    // Setup the dialog
+
+    const dialogElem = document.getElementById('dialog')
+    dialogElem.addEventListener("click", (el) => {
+        debugger
+        el.currentTarget.open = false
+    }, false)
+
     // Barcode scanning setup
 
     const codeReader = new ZXing.BrowserMultiFormatReader()
     const videoInputDevices = await codeReader.listVideoInputDevices();
 
     // TODO: let the user choose what camera to use
-    const selectedDeviceId = videoInputDevices[1].deviceId;
+    const selectedDeviceId = videoInputDevices[0].deviceId;
 
     const controls = await codeReader.decodeFromVideoDevice(selectedDeviceId, scanPreviewElem, async (result, err) => {
         // TODO: handle error
@@ -92,6 +105,9 @@ function refresh() {
     const header = document.getElementById('header')
     set_visible(header, Boolean(STATE.user))
 
+    const history = document.getElementById('history')
+    set_visible(history, Boolean(STATE.voucher))
+
     const voucher = document.getElementById('voucher')
     set_visible(voucher, Boolean(STATE.voucher))
 
@@ -133,4 +149,23 @@ function set_message(el, message) {
     } else {
         el.textContent = ""
     }
+}
+
+function show_history() {
+    const dialogTitleElem = document.getElementById('dialog-title')
+    dialogTitleElem.textContent = "History"
+
+    const dialogContentElem = document.getElementById('dialog-content')
+    dialogContentElem.innerHTML = '';
+
+    if (STATE.voucher) {
+        STATE.voucher.history.forEach(el => {
+            const p = document.createElement("p")
+            p.textContent = el
+            dialogContentElem.appendChild(p)
+        })
+    }
+
+    const dialogElem = document.getElementById('dialog')
+    dialogElem.open = true
 }

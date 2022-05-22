@@ -76,9 +76,10 @@ def user_cashier(con):
 
 
 @fixture
-def voucher_registered(con, expiration_date):
+def voucher_registered(con, user_admin, expiration_date):
     values = main.new_voucher(
         con,
+        user_admin,
         main.VoucherBase(
             label=f"Voucher-registered",
             expiration_date=expiration_date,
@@ -90,9 +91,10 @@ def voucher_registered(con, expiration_date):
 
 
 @fixture
-def voucher_distributed(con, user_distributor, expiration_date):
+def voucher_distributed(con, user_admin, user_distributor, expiration_date):
     values = main.new_voucher(
         con,
+        user_admin,
         main.VoucherBase(
             label=f"Voucher-distributed",
             expiration_date=expiration_date,
@@ -101,15 +103,17 @@ def voucher_distributed(con, user_distributor, expiration_date):
         ),
     )
     voucher = main.Voucher(**values)
+    assert voucher.history
     patch = main.VoucherPatch(state=1)
     main.patch_voucher(con, user_distributor, voucher, patch)
     return main.Voucher(**main.get_voucher(con, voucher.id))
 
 
 @fixture
-def voucher_spent(con, user_distributor, user_cashier, expiration_date):
+def voucher_spent(con, user_admin, user_distributor, user_cashier, expiration_date):
     values = main.new_voucher(
         con,
+        user_admin,
         main.VoucherBase(
             label=f"Voucher-spent",
             expiration_date=expiration_date,
@@ -230,13 +234,14 @@ def test_vouchers__patch__invalid_bearer_token(
 
 
 def test_vouchers_patch__distributor__registered_to_distributed(
-    distributor_client, user_distributor, voucher_registered
+    con_uri, distributor_client, user_distributor, voucher_registered
 ):
     response = distributor_client.patch(
         f"/vouchers/{voucher_registered.id}", json={"state": 1}
     )
-    voucher = voucher_registered.dict()
-    voucher["state"] = 1
+
+    con = main.init_con(con_uri)
+    voucher = main.Voucher(**main.get_voucher(con, voucher_registered.id))
 
     assert response.status_code == status.HTTP_200_OK
     j = response.json()
@@ -264,17 +269,30 @@ def test_vouchers_patch__distributor__registered_to_distributed(
 
 
 def test_vouchers_patch__distributor__distributed_to_registered(
-    distributor_client, user_distributor, voucher_distributed
+    con_uri, distributor_client, user_distributor, voucher_distributed
 ):
     response = distributor_client.patch(
         f"/vouchers/{voucher_distributed.id}", json={"state": 0}
     )
-    voucher = voucher_distributed.dict()
-    voucher["state"] = 0
+
+    con = main.init_con(con_uri)
+    voucher = main.Voucher(**main.get_voucher(con, voucher_distributed.id))
 
     assert response.status_code == status.HTTP_200_OK
     j = response.json()
     expected_action_response = main.ActionResponse(**j)
+
+    # expected_action_response
+    # 0:'Registered by DIST 2022-05-22 19:38:39'
+    # 1:'Registered by DIST 2022-05-22 19:38:39'
+    # 2:'Registered by ADMIN 2022-05-22 19:38:39'
+
+    # voucher
+
+    # 0:'Registered by DIST 2022-05-22 19:38:39'
+    # 1:'Registered by DIST 2022-05-22 19:38:39'
+    # 2:'Registered by ADMIN 2022-05-22 19:38:39'
+
     assert expected_action_response.dict() == {
         "user": user_distributor.dict(),
         "voucher": voucher,
@@ -364,6 +382,12 @@ def test_vouchers_patch__distributor__spent_to_distributed(
             "button": None,
         },
     }
+
+
+def test_vouchers__history(voucher_spent):
+    assert voucher_spent.history[0].startswith("Cashed-in by POS ")
+    assert voucher_spent.history[1].startswith("Cashed-in by DIST ")
+    assert voucher_spent.history[2].startswith("Cashed-in by ADMIN ")
 
 
 def test_start(unauthenticated_client):
