@@ -16,6 +16,11 @@ async function setup_scanner() {
         }
     })
 
+    // Setup the exit button
+
+    const exitButtonElem = document.getElementById('exit')
+    exitButtonElem.addEventListener("click", start)
+
     // Setup the action button
 
     const actionButtonElem = document.getElementById('action')
