@@ -19,12 +19,6 @@ DB_PATH = "db.sqlite3"
 
 app = FastAPI()
 
-app.mount(
-    "/static",
-    StaticFiles(directory="/home/charles/src/github/epicerieledetour/vouchers/static"),
-    name="static",
-)
-
 
 # Models
 
@@ -50,7 +44,7 @@ class VoucherPatch(BaseModel):
 
 class VoucherBase(BaseModel):
     label: str
-    expiration_date: datetime.date
+    expiration_date: datetime.date  # TODO: handle expiration date
     value: int
     state: int  # TODO: use an enum
 
@@ -78,7 +72,7 @@ class Message(BaseModel):
 class Action(BaseModel):
     url: str
     verb: str  # TODO: use an enum
-    body: dict
+    body: dict | None
     message: Message | None
 
 
@@ -88,7 +82,7 @@ class NextActions(BaseModel):
 
 
 class ActionResponse(BaseModel):
-    user: User
+    user: User | None
     voucher: Voucher | None
     message_main: Message | None
     message_detail: Message | None
@@ -140,7 +134,7 @@ def init_con(uri: str) -> Connection:
 
 
 def get_con() -> Connection:
-    con = init_cont(DB_PATH)
+    con = init_con(DB_PATH)
     try:
         yield con
     finally:
@@ -178,6 +172,7 @@ async def get_current_voucher(
     voucherid: str, con: Connection = Depends(get_con)
 ) -> Voucher:
     if voucher := get_voucher(con, voucherid):
+        print("get_current_voucher", voucher)
         return Voucher(**voucher)
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
 
@@ -350,6 +345,9 @@ async def vouchers(
     voucher: Voucher = Depends(get_current_voucher),
     con: Connection = Depends(get_con),
 ):
+    print("patch", patch)
+    print("user", user)
+    print("voucher", voucher)
     try:
         patch_voucher_func = _PATCH_VOUCHER_FUNCTIONS[
             user.ac_distribute,
@@ -381,12 +379,30 @@ async def vouchers(
     )
 
 
+@app.get("/auth/{userid}", response_model=ActionResponse)
+async def auth(userid: str, con: Connection = Depends(get_con)):
+    if user := get_user(con, userid):
+        user = User(**user)
+        response = ActionResponse(
+            user=user,
+            next_actions=build_next_actions(user, None, None),
+        )
+        # TODO: fix the data model, this is ugly
+        response.message_main = response.next_actions.scan.message
+        return response
+
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid user")
+
+
 @app.get("/auth", response_model=ActionResponse)
 async def auth(user: User = Depends(get_current_user)):
-    return ActionResponse(
+    response = ActionResponse(
         user=user,
         next_actions=build_next_actions(user, None, None),
     )
+    # TODO: fix the data model, this is ugly
+    response.message_main = response.next_actions.scan.message
+    return response
 
 
 @dataclass
@@ -397,7 +413,7 @@ class Builder:
 
 def _build_scan_to_distribute_action() -> Action:
     return Action(
-        url="/vouchers/{voucherid}",
+        url="/vouchers/{code}",
         verb="PATCH",
         body={"state": 1},  # distributed
         message=Message(text="Scan to distribute a voucher"),
@@ -406,7 +422,7 @@ def _build_scan_to_distribute_action() -> Action:
 
 def _build_scan_to_cashin_action() -> Action:
     return Action(
-        url="/vouchers/{voucherid}",
+        url="/vouchers/{code}",
         verb="PATCH",
         body={"state": 2},  # cashedin
         message=Message(text="Scan to cash a voucher in"),
@@ -489,3 +505,23 @@ def build_next_actions(
     # bool(user["ac_distribute"]) should be user.ac_distribute
     builders = _BUILDERS[(user.ac_distribute, user.ac_cashin, cur_state, next_state)]
     return NextActions(scan=builders.scan(), button=builders.button(voucher))
+
+
+# Start
+
+
+@app.get("/start", response_model=ActionResponse)
+async def start():
+    return ActionResponse(
+        message_main=Message(text="Scan an authentification barcode", severity=0),
+        next_actions=NextActions(scan=Action(url="/auth/{code}", verb="GET")),
+    )
+
+
+# Static
+
+app.mount(
+    "/",
+    StaticFiles(directory="/home/charles/src/github/epicerieledetour/vouchers/static"),
+    name="static",
+)

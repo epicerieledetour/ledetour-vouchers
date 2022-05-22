@@ -97,6 +97,10 @@ header,
     text-align: center;
 }
 
+#message .severity-0 {
+    font-size: unset;
+}
+
 #action {
     border: none;
     border-radius: .5rem;
@@ -107,4 +111,20 @@ header,
     margin-left: .5rem;
     margin-right: .5rem;
     margin-bottom: .5rem;
+}
+
+.severity-0 {
+    color: var(--black);
+}
+
+.severity-1 {
+    color: var(--green);
+}
+
+.severity-2 {
+    color: var(--orange);
+}
+
+.severity-3 {
+    color: var(--red);
 }

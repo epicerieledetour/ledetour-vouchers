@@ -1,16 +1,21 @@
-window.addEventListener('load', () => main(), false)
+STATE = null
+
+window.addEventListener('load', () => start(), false)
+window.addEventListener('load', () => setup_scanner(), false)
 
 
-async function main() {
+async function setup_scanner() {
     const scanPreviewElem = document.getElementById('scan-preview');
 
     // Debug feature: if an URL fragment is present (#some-voucher-id), then clicking
     // on the video preview will trigger a process of the code defined by the fragment
 
-    const url_code = window.location.hash.substring(1);
-    if (url_code) {
-        scanPreviewElem.addEventListener("click", () => process_code(url_code));
-    }
+    scanPreviewElem.addEventListener("click", () => {
+        const url_code = window.location.hash.substring(1)
+        if (url_code) {
+            process_code(url_code)
+        }
+    })
 
     // Barcode scanning setup
 
@@ -28,6 +33,89 @@ async function main() {
     })
 }
 
-async function process_code(text) {
-    console.log(text)
+async function process_code(code) {
+    const action_scan = STATE.next_actions.scan
+
+    // TODO: error handling if action_scan if not present
+
+    const options = {
+        method: action_scan.verb
+    }
+    if (action_scan.body) {
+        options.headers = {
+            'Accept': 'application/json, */*;q=0.5',
+            'Content-Type': 'application/json;charset=utf-8'
+        }
+        options.body = JSON.stringify(action_scan.body)
+    }
+    await query(
+        action_scan.url.replace("{code}", code),
+        options
+    )
+}
+
+async function start() {
+    await query("/start")
+}
+
+async function query(url, options) {
+    options = options || {}
+    options.headers = options.headers || {}
+    if (STATE && STATE.user) {
+        options.headers["Authorization"] = "Bearer " + STATE.user.id
+    }
+    const response = await fetch(url, options)
+    if (response.ok) {
+        STATE = await response.json()
+        refresh()
+    } else {
+        console.error(response)
+    }
+}
+
+function refresh() {
+    const header = document.getElementById('header')
+    set_visible(header, Boolean(STATE.user))
+
+    const voucher = document.getElementById('voucher')
+    set_visible(voucher, Boolean(STATE.voucher))
+
+    const message = document.getElementById('message')
+    set_message(message, STATE.message_main)
+    set_visible(message, Boolean(STATE.message_main))
+
+    const detail = document.getElementById('detail')
+    set_message(detail, STATE.message_detail)
+    set_visible(detail, Boolean(STATE.message_detail))
+
+    const action = document.getElementById('action')
+    action_button = STATE.next_actions.button
+    set_message(action, action_button ? action_button.message : null)
+    set_visible(action, Boolean(action_button))
+}
+
+function set_severity_class(el, severity) {
+    el.classList.remove("severity-0")
+    el.classList.remove("severity-1")
+    el.classList.remove("severity-2")
+    el.classList.remove("severity-3")
+    el.classList.add("severity-" + severity)
+}
+
+function set_visible(el, visibility) {
+    if (visibility) {
+        el.classList.remove("invisible")
+    }
+    else {
+        el.classList.add("invisible")
+    }
+}
+
+function set_message(el, message) {
+    if (message) {
+        el.textContent = message.text
+        set_severity_class(el, message.severity)
+    } else {
+        el.textContent = ""
+    }
 }
