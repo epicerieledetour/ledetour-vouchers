@@ -233,6 +233,9 @@ def test_vouchers__patch__invalid_bearer_token(
     assert response.json() == {"detail": "Not authenticated"}
 
 
+# Distributor tests
+
+
 def test_vouchers_patch__distributor__registered_to_distributed(
     con_uri, distributor_client, user_distributor, voucher_registered
 ):
@@ -282,17 +285,6 @@ def test_vouchers_patch__distributor__distributed_to_registered(
     j = response.json()
     expected_action_response = main.ActionResponse(**j)
 
-    # expected_action_response
-    # 0:'Registered by DIST 2022-05-22 19:38:39'
-    # 1:'Registered by DIST 2022-05-22 19:38:39'
-    # 2:'Registered by ADMIN 2022-05-22 19:38:39'
-
-    # voucher
-
-    # 0:'Registered by DIST 2022-05-22 19:38:39'
-    # 1:'Registered by DIST 2022-05-22 19:38:39'
-    # 2:'Registered by ADMIN 2022-05-22 19:38:39'
-
     assert expected_action_response.dict() == {
         "user": user_distributor.dict(),
         "voucher": voucher,
@@ -322,7 +314,6 @@ def test_vouchers_patch__distributor__distributed_to_distributed(
         f"/vouchers/{voucher_distributed.id}", json={"state": 1}
     )
     voucher = voucher_distributed.dict()
-    # voucher["state"] = 1
 
     con = main.init_con(con_uri)
     dist_date = main._last_history_date(con, voucher_distributed.id)
@@ -384,6 +375,144 @@ def test_vouchers_patch__distributor__spent_to_distributed(
     }
 
 
+# Cashier tests
+
+
+def test_vouchers_patch__cashier__registered_to_cashedin(
+    con_uri, cashier_client, user_cashier, voucher_registered
+):
+    response = cashier_client.patch(
+        f"/vouchers/{voucher_registered.id}", json={"state": 2}
+    )
+
+    con = main.init_con(con_uri)
+    voucher = main.Voucher(**main.get_voucher(con, voucher_registered.id))
+
+    assert response.status_code == status.HTTP_200_OK
+    j = response.json()
+    expected_action_response = main.ActionResponse(**j)
+    assert expected_action_response.dict() == {
+        "user": user_cashier.dict(),
+        "voucher": voucher,
+        "message_main": {"text": "Not yet distributed", "severity": 2},
+        "message_detail": None,
+        "next_actions": {
+            "scan": {
+                "url": "/vouchers/{code}",
+                "verb": "PATCH",
+                "body": {"state": 2},  # distributed
+                "message": {"text": "Scan to cash a voucher in", "severity": 0},
+            },
+            "button": None,
+        },
+    }
+
+
+def test_vouchers_patch__cashier__distributed_to_cashedin(
+    con_uri, cashier_client, user_cashier, voucher_distributed
+):
+    response = cashier_client.patch(
+        f"/vouchers/{voucher_distributed.id}", json={"state": 2}
+    )
+
+    con = main.init_con(con_uri)
+    voucher = main.Voucher(**main.get_voucher(con, voucher_distributed.id))
+
+    assert response.status_code == status.HTTP_200_OK
+    j = response.json()
+    expected_action_response = main.ActionResponse(**j)
+    assert expected_action_response.dict() == {
+        "user": user_cashier.dict(),
+        "voucher": voucher,
+        "message_main": {"text": "Cashed-in", "severity": 1},
+        "message_detail": None,
+        "next_actions": {
+            "scan": {
+                "url": "/vouchers/{code}",
+                "verb": "PATCH",
+                "body": {"state": 2},
+                "message": {"text": "Scan to cash a voucher in", "severity": 0},
+            },
+            "button": {
+                "url": f"/vouchers/{voucher_distributed.id}",
+                "verb": "PATCH",
+                "body": {"state": 1},
+                "message": {"text": "Cancel cashing-in", "severity": 2},
+            },
+        },
+    }
+
+
+def test_vouchers_patch__cashier__cashedin_to_distributed(
+    con_uri, cashier_client, user_cashier, voucher_spent
+):
+    response = cashier_client.patch(f"/vouchers/{voucher_spent.id}", json={"state": 1})
+
+    con = main.init_con(con_uri)
+    voucher = main.Voucher(**main.get_voucher(con, voucher_spent.id))
+
+    assert response.status_code == status.HTTP_200_OK
+    j = response.json()
+    expected_action_response = main.ActionResponse(**j)
+    assert expected_action_response.dict() == {
+        "user": user_cashier.dict(),
+        "voucher": voucher,
+        "message_main": {"text": "Cashed-in cancelled", "severity": 2},
+        "message_detail": None,
+        "next_actions": {
+            "scan": {
+                "url": "/vouchers/{code}",
+                "verb": "PATCH",
+                "body": {"state": 2},
+                "message": {"text": "Scan to cash a voucher in", "severity": 0},
+            },
+            "button": {
+                "url": f"/vouchers/{voucher_spent.id}",
+                "verb": "PATCH",
+                "body": {"state": 2},
+                "message": {"text": "Cash-in", "severity": 1},
+            },
+        },
+    }
+
+
+def test_vouchers_patch__cashier__cashedin_to_cashedin(
+    con_uri, cashier_client, user_cashier, voucher_spent
+):
+    response = cashier_client.patch(f"/vouchers/{voucher_spent.id}", json={"state": 2})
+
+    con = main.init_con(con_uri)
+    voucher = main.Voucher(**main.get_voucher(con, voucher_spent.id))
+    spent_date = main._last_history_date(con, voucher_spent.id)
+
+    assert response.status_code == status.HTTP_200_OK
+    j = response.json()
+    expected_action_response = main.ActionResponse(**j)
+    assert expected_action_response.dict() == {
+        "user": user_cashier.dict(),
+        "voucher": voucher,
+        "message_main": {"text": "Already cashed-in", "severity": 2},
+        "message_detail": {"text": f"Cashed-in by POS {spent_date}", "severity": 0},
+        "next_actions": {
+            "scan": {
+                "url": "/vouchers/{code}",
+                "verb": "PATCH",
+                "body": {"state": 2},
+                "message": {"text": "Scan to cash a voucher in", "severity": 0},
+            },
+            "button": {
+                "url": f"/vouchers/{voucher_spent.id}",
+                "verb": "PATCH",
+                "body": {"state": 1},
+                "message": {"text": "Cancel cashing-in", "severity": 2},
+            },
+        },
+    }
+
+
+# Other tests
+
+
 def test_vouchers__history(voucher_spent):
     assert voucher_spent.history[0].startswith("Cashed-in by POS ")
     assert voucher_spent.history[1].startswith("Cashed-in by DIST ")
@@ -432,6 +561,27 @@ def test_auth__from_id__distributor(unauthenticated_client, user_distributor):
                 "verb": "PATCH",
                 "body": {"state": 1},
                 "message": {"text": "Scan to distribute a voucher", "severity": 0},
+            },
+            "button": None,
+        },
+    }
+
+
+def test_auth__from_id__cashier(unauthenticated_client, user_cashier):
+    response = unauthenticated_client.get("/auth/{}".format(user_cashier.id))
+    assert response.status_code == status.HTTP_200_OK
+    expected_action_response = main.ActionResponse(**response.json())
+    assert expected_action_response.dict() == {
+        "user": user_cashier.dict(),
+        "voucher": None,
+        "message_main": {"text": "Scan to cash a voucher in", "severity": 0},
+        "message_detail": None,
+        "next_actions": {
+            "scan": {
+                "url": "/vouchers/{code}",
+                "verb": "PATCH",
+                "body": {"state": 2},
+                "message": {"text": "Scan to cash a voucher in", "severity": 0},
             },
             "button": None,
         },

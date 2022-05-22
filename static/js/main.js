@@ -42,15 +42,16 @@ async function setup_scanner() {
     // Barcode scanning setup
 
     const codeReader = new ZXing.BrowserMultiFormatReader()
+    codeReader.timeBetweenScansMillis = 3000
     const videoInputDevices = await codeReader.listVideoInputDevices();
 
     // TODO: let the user choose what camera to use
-    const selectedDeviceId = videoInputDevices[0].deviceId;
+    const selectedDeviceId = videoInputDevices[1].deviceId;
 
     const controls = await codeReader.decodeFromVideoDevice(selectedDeviceId, scanPreviewElem, async (result, err) => {
         // TODO: handle error
         if (result) {
-            await process_code(result.txt)
+            await process_code(result.text)
         }
     })
 }
@@ -104,6 +105,11 @@ async function query(url, options) {
 function refresh() {
     const header = document.getElementById('header')
     set_visible(header, Boolean(STATE.user))
+
+    const user = document.getElementById('user')
+    if (STATE.user) {
+        user.textContent = STATE.user.description
+    }
 
     const history = document.getElementById('history')
     set_visible(history, Boolean(STATE.voucher))
