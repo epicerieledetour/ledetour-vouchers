@@ -29,14 +29,10 @@
     <p>Caisse Le Détour #1</p>
     <button>History</button>
   </header>
-  <section id="scan"></section>
+  <section id="scan">
+    <video id="scan-preview"></video>
+  </section>
   <section id="voucher">
-    <!-- <p>0</p>
-    <p>1</p>
-    <p>2</p>
-    <p>3</p>
-    <p>4</p>
-    <p>5</p> -->
     <p id="voucher-title">Voucher</p>
     <p id="voucher-id">2022-07-0001</p>
     <p id="voucher-expire">Expires: 2022-08-01</p>
@@ -47,7 +43,9 @@
   </section>
   <section id="detail">Distributed by: Marché solidaire 2022-07-13 14:37</section>
   <button id="action">Cancel distribution</button>
-  <script src="js/main.js"></script>
+
+  <script type="text/javascript" src="js/zxing-library-v0.19.1.min.js"></script>
+  <script type="text/javascript" src="js/main.js"></script>
 </body>
 
 </html>
