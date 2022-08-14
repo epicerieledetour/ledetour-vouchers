@@ -35,7 +35,6 @@ async function setup_scanner() {
 
     const dialogElem = document.getElementById('dialog')
     dialogElem.addEventListener("click", (el) => {
-        debugger
         el.currentTarget.open = false
     }, false)
 
@@ -43,20 +42,45 @@ async function setup_scanner() {
 
     const codeReader = new ZXing.BrowserMultiFormatReader()
     codeReader.timeBetweenScansMillis = 3000
+
+    async function setVideoDevice(deviceId) {
+        const controls = await codeReader.decodeFromVideoDevice(deviceId, scanPreviewElem, async (result, err) => {
+            // TODO: handle error
+            if (result) {
+                await process_code(result.text)
+            }
+        })
+        return controls
+    }
+
     const videoInputDevices = await codeReader.listVideoInputDevices();
+    if (videoInputDevices.length == 0) {
+        // TODO: show error message
+        return
+    }
 
-    // TODO: let the user choose what camera to use
-    const selectedDeviceId = videoInputDevices[1].deviceId;
+    if (videoInputDevices.length > 0) {
+        await setVideoDevice(videoInputDevices[0].deviceId)
+    }
 
-    const controls = await codeReader.decodeFromVideoDevice(selectedDeviceId, scanPreviewElem, async (result, err) => {
-        // TODO: handle error
-        if (result) {
-            await process_code(result.text)
+    if (videoInputDevices.length > 1) {
+        const cameraSelectorElem = document.getElementById('camera-selector')
+        for (let i = 0; i < videoInputDevices.length; i++) {
+            const videoDevice = videoInputDevices[i]
+            const buttonElem = document.createElement("BUTTON");
+            buttonElem.textContent = videoDevice.label
+            buttonElem.addEventListener("click", async (el) => {
+                await setVideoDevice(videoDevice.deviceId)
+            }, false)
+            cameraSelectorElem.appendChild(buttonElem)
         }
-    })
+    }
 }
 
 async function process_code(code) {
+    // After a first successful scan the selected camera is expected to stay
+    // valid until the rest of the session, so the camera-selector can be hidden
+    document.getElementById("camera-selector").style.visibility = "hidden"
     await process_action(STATE.next_actions.scan, code)
 }
 

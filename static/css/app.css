@@ -31,6 +31,9 @@ header {
 }
 
 #scan {
+    /* So the camera-selector can be positionned absolute */
+    position: relative;
+
     width: 100%;
     height: 33vh;
     overflow: scroll;
@@ -41,6 +44,11 @@ header {
     width: 100vw;
     /* height: 100%; */
     /* padding-top: 50%; */
+}
+
+#camera-selector {
+    position: absolute;
+    top: 0px;
 }
 
 header,
@@ -93,7 +101,7 @@ header,
 }
 
 #message {
-    font-size: 3rem;
+    font-size: 2.5rem;
     text-align: center;
 }
 
