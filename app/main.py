@@ -1,4 +1,6 @@
 import datetime
+import os
+import pathlib
 
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -15,10 +17,13 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 
-DB_PATH = "db.sqlite3"
+DB_PATH = pathlib.Path(
+    os.environ.get("LDTVOUCHERS_DB_PATH", "ldtvouchers.sqlite3")
+).resolve()
+
+print(f"Using database: {DB_PATH}")
 
 app = FastAPI()
-
 
 # Models
 
@@ -581,8 +586,11 @@ async def start():
 
 # Static
 
-app.mount(
-    "/",
-    StaticFiles(directory="/home/charles/src/github/epicerieledetour/vouchers/static"),
-    name="static",
-)
+if os.environ.get("LDTVOUCHERS_SERVE_STATIC_FILES", True):
+    path = pathlib.Path(__file__).parent.parent / "static"
+    print(f"Serving static files: {path}")
+    app.mount(
+        "/",
+        StaticFiles(directory=path),
+        name="static",
+    )
