@@ -164,7 +164,8 @@ def decode_token(token):
 async def get_current_user(
     con: Connection = Depends(get_con), token: str = Depends(oauth2_scheme)
 ) -> User:
-    if user := get_user(con, token):
+    user = get_user(con, token)
+    if user:
         return User(**user)
 
     raise HTTPException(
@@ -177,7 +178,8 @@ async def get_current_user(
 async def get_current_voucher(
     voucherid: str, con: Connection = Depends(get_con)
 ) -> Voucher:
-    if voucher := get_voucher(con, voucherid):
+    voucher = get_voucher(con, voucherid)
+    if voucher:
         return Voucher(**voucher)
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
 
@@ -332,7 +334,8 @@ def new_user(con: Connection, user: UserBase) -> dict:
 
 @app.get("/users/{userid}", response_model=User)
 async def users(userid: int, con: Connection = Depends(get_con)):
-    if user := read_user(con, userid):
+    user = read_user(con, userid)
+    if user:
         return user
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
@@ -405,7 +408,8 @@ async def vouchers(
 
 @app.get("/auth/{userid}", response_model=ActionResponse)
 async def auth(userid: str, con: Connection = Depends(get_con)):
-    if user := get_user(con, userid):
+    user = get_user(con, userid)
+    if user:
         user = User(**user)
         response = ActionResponse(
             user=user,
