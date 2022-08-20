@@ -435,8 +435,8 @@ async def auth(user: User = Depends(get_current_user)):
 
 @dataclass
 class Builder:
-    scan: Callable[[], Action]
-    button: Callable[[], Action]
+    scan: Callable
+    button: Callable
 
 
 def _build_scan_to_distribute_action() -> Action:
