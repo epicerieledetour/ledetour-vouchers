@@ -162,20 +162,20 @@ def cashier_client(app, user_cashier):
 
 
 def test_auth__get__unauthenticated(unauthenticated_client):
-    response = unauthenticated_client.get("/auth")
+    response = unauthenticated_client.get("/api/auth")
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
     assert response.json() == {"detail": "Not authenticated"}
 
 
 def test_auth__get__invalid_bearer_token(unauthenticated_client):
     unauthenticated_client.auth = BearerAuth("invalid_token")
-    response = unauthenticated_client.get("/auth")
+    response = unauthenticated_client.get("/api/auth")
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
     assert response.json() == {"detail": "Not authenticated"}
 
 
 def test_auth__get__distributor(distributor_client, user_distributor):
-    response = distributor_client.get("/auth")
+    response = distributor_client.get("/api/auth")
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {
         "user": user_distributor.dict(),
@@ -184,7 +184,7 @@ def test_auth__get__distributor(distributor_client, user_distributor):
         "message_detail": None,
         "next_actions": {
             "scan": {
-                "url": "/vouchers/{code}",
+                "url": "/api/vouchers/{code}",
                 "verb": "PATCH",
                 "body": {"state": 1},  # distributed
                 "message": {"text": "Scan to distribute a voucher", "severity": 0},
@@ -195,7 +195,7 @@ def test_auth__get__distributor(distributor_client, user_distributor):
 
 
 def test_auth__get__cashier(cashier_client, user_cashier):
-    response = cashier_client.get("/auth")
+    response = cashier_client.get("/api/auth")
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {
         "user": user_cashier.dict(),
@@ -204,7 +204,7 @@ def test_auth__get__cashier(cashier_client, user_cashier):
         "message_detail": None,
         "next_actions": {
             "scan": {
-                "url": "/vouchers/{code}",
+                "url": "/api/vouchers/{code}",
                 "verb": "PATCH",
                 "body": {"state": 2},  # distributed
                 "message": {"text": "Scan to cash a voucher in", "severity": 0},
@@ -216,7 +216,7 @@ def test_auth__get__cashier(cashier_client, user_cashier):
 
 def test_vouchers__patch__unauthenticated(unauthenticated_client, voucher_registered):
     response = unauthenticated_client.patch(
-        f"/vouchers/{voucher_registered.id}", data={"state": 0}
+        f"/api/vouchers/{voucher_registered.id}", data={"state": 0}
     )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
     assert response.json() == {"detail": "Not authenticated"}
@@ -227,7 +227,7 @@ def test_vouchers__patch__invalid_bearer_token(
 ):
     unauthenticated_client.auth = BearerAuth("invalid_token")
     response = unauthenticated_client.patch(
-        f"/vouchers/{voucher_registered.id}", data={"state": 0}
+        f"/api/vouchers/{voucher_registered.id}", data={"state": 0}
     )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
     assert response.json() == {"detail": "Not authenticated"}
@@ -240,7 +240,7 @@ def test_vouchers_patch__distributor__registered_to_distributed(
     con_uri, distributor_client, user_distributor, voucher_registered
 ):
     response = distributor_client.patch(
-        f"/vouchers/{voucher_registered.id}", json={"state": 1}
+        f"/api/vouchers/{voucher_registered.id}", json={"state": 1}
     )
 
     con = main.init_con(con_uri)
@@ -256,13 +256,13 @@ def test_vouchers_patch__distributor__registered_to_distributed(
         "message_detail": None,
         "next_actions": {
             "scan": {
-                "url": "/vouchers/{code}",
+                "url": "/api/vouchers/{code}",
                 "verb": "PATCH",
                 "body": {"state": 1},  # distributed
                 "message": {"text": "Scan to distribute a voucher", "severity": 0},
             },
             "button": {
-                "url": f"/vouchers/{voucher_registered.id}",
+                "url": f"/api/vouchers/{voucher_registered.id}",
                 "verb": "PATCH",
                 "body": {"state": 0},
                 "message": {"text": "Cancel distribution", "severity": 2},
@@ -275,7 +275,7 @@ def test_vouchers_patch__distributor__distributed_to_registered(
     con_uri, distributor_client, user_distributor, voucher_distributed
 ):
     response = distributor_client.patch(
-        f"/vouchers/{voucher_distributed.id}", json={"state": 0}
+        f"/api/vouchers/{voucher_distributed.id}", json={"state": 0}
     )
 
     con = main.init_con(con_uri)
@@ -292,13 +292,13 @@ def test_vouchers_patch__distributor__distributed_to_registered(
         "message_detail": None,
         "next_actions": {
             "scan": {
-                "url": "/vouchers/{code}",
+                "url": "/api/vouchers/{code}",
                 "verb": "PATCH",
                 "body": {"state": 1},  # distributed
                 "message": {"text": "Scan to distribute a voucher", "severity": 0},
             },
             "button": {
-                "url": f"/vouchers/{voucher_distributed.id}",
+                "url": f"/api/vouchers/{voucher_distributed.id}",
                 "verb": "PATCH",
                 "body": {"state": 1},
                 "message": {"text": "Distribute", "severity": 1},
@@ -311,7 +311,7 @@ def test_vouchers_patch__distributor__distributed_to_distributed(
     con_uri, distributor_client, user_distributor, voucher_distributed
 ):
     response = distributor_client.patch(
-        f"/vouchers/{voucher_distributed.id}", json={"state": 1}
+        f"/api/vouchers/{voucher_distributed.id}", json={"state": 1}
     )
     voucher = voucher_distributed.dict()
 
@@ -328,13 +328,13 @@ def test_vouchers_patch__distributor__distributed_to_distributed(
         "message_detail": {"text": f"Distributed by DIST {dist_date}", "severity": 0},
         "next_actions": {
             "scan": {
-                "url": "/vouchers/{code}",
+                "url": "/api/vouchers/{code}",
                 "verb": "PATCH",
                 "body": {"state": 1},  # distributed
                 "message": {"text": "Scan to distribute a voucher", "severity": 0},
             },
             "button": {
-                "url": f"/vouchers/{voucher_distributed.id}",
+                "url": f"/api/vouchers/{voucher_distributed.id}",
                 "verb": "PATCH",
                 "body": {"state": 0},
                 "message": {"text": "Cancel distribution", "severity": 2},
@@ -347,7 +347,7 @@ def test_vouchers_patch__distributor__spent_to_distributed(
     con_uri, distributor_client, user_distributor, voucher_spent
 ):
     response = distributor_client.patch(
-        f"/vouchers/{voucher_spent.id}", json={"state": 1}
+        f"/api/vouchers/{voucher_spent.id}", json={"state": 1}
     )
     voucher = voucher_spent.dict()
     # voucher["state"] = 1
@@ -365,7 +365,7 @@ def test_vouchers_patch__distributor__spent_to_distributed(
         "message_detail": {"text": f"Cashed-in by POS {spent_date}", "severity": 0},
         "next_actions": {
             "scan": {
-                "url": "/vouchers/{code}",
+                "url": "/api/vouchers/{code}",
                 "verb": "PATCH",
                 "body": {"state": 1},  # distributed
                 "message": {"text": "Scan to distribute a voucher", "severity": 0},
@@ -382,7 +382,7 @@ def test_vouchers_patch__cashier__registered_to_cashedin(
     con_uri, cashier_client, user_cashier, voucher_registered
 ):
     response = cashier_client.patch(
-        f"/vouchers/{voucher_registered.id}", json={"state": 2}
+        f"/api/vouchers/{voucher_registered.id}", json={"state": 2}
     )
 
     con = main.init_con(con_uri)
@@ -398,7 +398,7 @@ def test_vouchers_patch__cashier__registered_to_cashedin(
         "message_detail": None,
         "next_actions": {
             "scan": {
-                "url": "/vouchers/{code}",
+                "url": "/api/vouchers/{code}",
                 "verb": "PATCH",
                 "body": {"state": 2},  # distributed
                 "message": {"text": "Scan to cash a voucher in", "severity": 0},
@@ -412,7 +412,7 @@ def test_vouchers_patch__cashier__distributed_to_cashedin(
     con_uri, cashier_client, user_cashier, voucher_distributed
 ):
     response = cashier_client.patch(
-        f"/vouchers/{voucher_distributed.id}", json={"state": 2}
+        f"/api/vouchers/{voucher_distributed.id}", json={"state": 2}
     )
 
     con = main.init_con(con_uri)
@@ -428,13 +428,13 @@ def test_vouchers_patch__cashier__distributed_to_cashedin(
         "message_detail": None,
         "next_actions": {
             "scan": {
-                "url": "/vouchers/{code}",
+                "url": "/api/vouchers/{code}",
                 "verb": "PATCH",
                 "body": {"state": 2},
                 "message": {"text": "Scan to cash a voucher in", "severity": 0},
             },
             "button": {
-                "url": f"/vouchers/{voucher_distributed.id}",
+                "url": f"/api/vouchers/{voucher_distributed.id}",
                 "verb": "PATCH",
                 "body": {"state": 1},
                 "message": {"text": "Cancel cashing-in", "severity": 2},
@@ -446,7 +446,9 @@ def test_vouchers_patch__cashier__distributed_to_cashedin(
 def test_vouchers_patch__cashier__cashedin_to_distributed(
     con_uri, cashier_client, user_cashier, voucher_spent
 ):
-    response = cashier_client.patch(f"/vouchers/{voucher_spent.id}", json={"state": 1})
+    response = cashier_client.patch(
+        f"/api/vouchers/{voucher_spent.id}", json={"state": 1}
+    )
 
     con = main.init_con(con_uri)
     voucher = main.Voucher(**main.get_voucher(con, voucher_spent.id))
@@ -461,13 +463,13 @@ def test_vouchers_patch__cashier__cashedin_to_distributed(
         "message_detail": None,
         "next_actions": {
             "scan": {
-                "url": "/vouchers/{code}",
+                "url": "/api/vouchers/{code}",
                 "verb": "PATCH",
                 "body": {"state": 2},
                 "message": {"text": "Scan to cash a voucher in", "severity": 0},
             },
             "button": {
-                "url": f"/vouchers/{voucher_spent.id}",
+                "url": f"/api/vouchers/{voucher_spent.id}",
                 "verb": "PATCH",
                 "body": {"state": 2},
                 "message": {"text": "Cash-in", "severity": 1},
@@ -479,7 +481,9 @@ def test_vouchers_patch__cashier__cashedin_to_distributed(
 def test_vouchers_patch__cashier__cashedin_to_cashedin(
     con_uri, cashier_client, user_cashier, voucher_spent
 ):
-    response = cashier_client.patch(f"/vouchers/{voucher_spent.id}", json={"state": 2})
+    response = cashier_client.patch(
+        f"/api/vouchers/{voucher_spent.id}", json={"state": 2}
+    )
 
     con = main.init_con(con_uri)
     voucher = main.Voucher(**main.get_voucher(con, voucher_spent.id))
@@ -495,13 +499,13 @@ def test_vouchers_patch__cashier__cashedin_to_cashedin(
         "message_detail": {"text": f"Cashed-in by POS {spent_date}", "severity": 0},
         "next_actions": {
             "scan": {
-                "url": "/vouchers/{code}",
+                "url": "/api/vouchers/{code}",
                 "verb": "PATCH",
                 "body": {"state": 2},
                 "message": {"text": "Scan to cash a voucher in", "severity": 0},
             },
             "button": {
-                "url": f"/vouchers/{voucher_spent.id}",
+                "url": f"/api/vouchers/{voucher_spent.id}",
                 "verb": "PATCH",
                 "body": {"state": 1},
                 "message": {"text": "Cancel cashing-in", "severity": 2},
@@ -520,7 +524,7 @@ def test_vouchers__history(voucher_spent):
 
 
 def test_start(unauthenticated_client):
-    response = unauthenticated_client.get("/start")
+    response = unauthenticated_client.get("/api/start")
     assert response.status_code == status.HTTP_200_OK
     expected_action_response = main.ActionResponse(**response.json())
     assert expected_action_response.dict() == {
@@ -530,7 +534,7 @@ def test_start(unauthenticated_client):
         "message_detail": None,
         "next_actions": {
             "scan": {
-                "url": "/auth/{code}",
+                "url": "/api/auth/{code}",
                 "verb": "GET",
                 "body": None,
                 "message": None,
@@ -541,13 +545,13 @@ def test_start(unauthenticated_client):
 
 
 def test_auth__from_id__unknown_user_id(unauthenticated_client):
-    response = unauthenticated_client.get("/auth/unknown_user_id")
+    response = unauthenticated_client.get("/api/auth/unknown_user_id")
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {"detail": "Invalid user"}
 
 
 def test_auth__from_id__distributor(unauthenticated_client, user_distributor):
-    response = unauthenticated_client.get("/auth/{}".format(user_distributor.id))
+    response = unauthenticated_client.get("/api/auth/{}".format(user_distributor.id))
     assert response.status_code == status.HTTP_200_OK
     expected_action_response = main.ActionResponse(**response.json())
     assert expected_action_response.dict() == {
@@ -557,7 +561,7 @@ def test_auth__from_id__distributor(unauthenticated_client, user_distributor):
         "message_detail": None,
         "next_actions": {
             "scan": {
-                "url": "/vouchers/{code}",
+                "url": "/api/vouchers/{code}",
                 "verb": "PATCH",
                 "body": {"state": 1},
                 "message": {"text": "Scan to distribute a voucher", "severity": 0},
@@ -568,7 +572,7 @@ def test_auth__from_id__distributor(unauthenticated_client, user_distributor):
 
 
 def test_auth__from_id__cashier(unauthenticated_client, user_cashier):
-    response = unauthenticated_client.get("/auth/{}".format(user_cashier.id))
+    response = unauthenticated_client.get("/api/auth/{}".format(user_cashier.id))
     assert response.status_code == status.HTTP_200_OK
     expected_action_response = main.ActionResponse(**response.json())
     assert expected_action_response.dict() == {
@@ -578,7 +582,7 @@ def test_auth__from_id__cashier(unauthenticated_client, user_cashier):
         "message_detail": None,
         "next_actions": {
             "scan": {
-                "url": "/vouchers/{code}",
+                "url": "/api/vouchers/{code}",
                 "verb": "PATCH",
                 "body": {"state": 2},
                 "message": {"text": "Scan to cash a voucher in", "severity": 0},

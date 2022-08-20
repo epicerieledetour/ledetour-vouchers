@@ -12,7 +12,7 @@ import shortuuid
 import sqlite3
 from sqlite3 import connect, Connection, Row
 
-from fastapi import Body, Depends, FastAPI, HTTPException, status
+from fastapi import APIRouter, Body, Depends, FastAPI, HTTPException, status
 from fastapi.staticfiles import StaticFiles
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
@@ -24,6 +24,8 @@ DB_PATH = pathlib.Path(
 print(f"Using database: {DB_PATH}")
 
 app = FastAPI()
+
+api = APIRouter(prefix="/api")
 
 # Models
 
@@ -152,7 +154,7 @@ def get_con() -> Connection:
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
-@app.get("/items/")
+@api.get("/items/")
 async def read_items(token: str = Depends(oauth2_scheme)):
     return {"token": token}
 
@@ -332,7 +334,7 @@ def new_user(con: Connection, user: UserBase) -> dict:
 # Users: routes
 
 
-@app.get("/users/{userid}", response_model=User)
+@api.get("/users/{userid}", response_model=User)
 async def users(userid: int, con: Connection = Depends(get_con)):
     user = read_user(con, userid)
     if user:
@@ -340,7 +342,7 @@ async def users(userid: int, con: Connection = Depends(get_con)):
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
 
-@app.post("/users", response_model=User)
+@api.post("/users", response_model=User)
 async def users(user: UserBase, con: Connection = Depends(get_con)):
     try:
         return create_user(con, user)
@@ -368,7 +370,7 @@ _PATCH_VOUCHER_FUNCTIONS = {
 }
 
 
-@app.patch("/vouchers/{voucherid}", response_model=ActionResponse)
+@api.patch("/vouchers/{voucherid}", response_model=ActionResponse)
 async def vouchers(
     patch: VoucherPatch,
     user: User = Depends(get_current_user),
@@ -406,7 +408,7 @@ async def vouchers(
     )
 
 
-@app.get("/auth/{userid}", response_model=ActionResponse)
+@api.get("/auth/{userid}", response_model=ActionResponse)
 async def auth(userid: str, con: Connection = Depends(get_con)):
     user = get_user(con, userid)
     if user:
@@ -422,7 +424,7 @@ async def auth(userid: str, con: Connection = Depends(get_con)):
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid user")
 
 
-@app.get("/auth", response_model=ActionResponse)
+@api.get("/auth", response_model=ActionResponse)
 async def auth(user: User = Depends(get_current_user)):
     response = ActionResponse(
         user=user,
@@ -441,7 +443,7 @@ class Builder:
 
 def _build_scan_to_distribute_action() -> Action:
     return Action(
-        url="/vouchers/{code}",
+        url="/api/vouchers/{code}",
         verb="PATCH",
         body={"state": 1},  # distributed
         message=Message(text="Scan to distribute a voucher"),
@@ -450,7 +452,7 @@ def _build_scan_to_distribute_action() -> Action:
 
 def _build_scan_to_cashin_action() -> Action:
     return Action(
-        url="/vouchers/{code}",
+        url="/api/vouchers/{code}",
         verb="PATCH",
         body={"state": 2},  # cashedin
         message=Message(text="Scan to cash a voucher in"),
@@ -459,7 +461,7 @@ def _build_scan_to_cashin_action() -> Action:
 
 def _build_distribute_action(voucher: Voucher) -> Action:
     return Action(
-        url=f"/vouchers/{voucher.id}",
+        url=f"/api/vouchers/{voucher.id}",
         verb="PATCH",
         body={"state": 1},  # cashedin
         message=Message(text="Distribute", severity=1),
@@ -468,7 +470,7 @@ def _build_distribute_action(voucher: Voucher) -> Action:
 
 def _build_cancel_distribute_action(voucher: Voucher) -> Action:
     return Action(
-        url=f"/vouchers/{voucher.id}",
+        url=f"/api/vouchers/{voucher.id}",
         verb="PATCH",
         body={"state": 0},  # cashedin
         message=Message(text="Cancel distribution", severity=2),
@@ -477,7 +479,7 @@ def _build_cancel_distribute_action(voucher: Voucher) -> Action:
 
 def _build_cancel_cashin_action(voucher: Voucher) -> Action:
     return Action(
-        url=f"/vouchers/{voucher.id}",
+        url=f"/api/vouchers/{voucher.id}",
         verb="PATCH",
         body={"state": 1},  # distributed
         message=Message(text="Cancel cashing-in", severity=2),
@@ -486,7 +488,7 @@ def _build_cancel_cashin_action(voucher: Voucher) -> Action:
 
 def _build_cashin_action(voucher: Voucher) -> Action:
     return Action(
-        url=f"/vouchers/{voucher.id}",
+        url=f"/api/vouchers/{voucher.id}",
         verb="PATCH",
         body={"state": 2},  # distributed
         message=Message(text="Cash-in", severity=1),
@@ -580,13 +582,15 @@ def build_next_actions(
 # Start
 
 
-@app.get("/start", response_model=ActionResponse)
+@api.get("/start", response_model=ActionResponse)
 async def start():
     return ActionResponse(
         message_main=Message(text="Scan an authentification barcode", severity=0),
-        next_actions=NextActions(scan=Action(url="/auth/{code}", verb="GET")),
+        next_actions=NextActions(scan=Action(url="/api/auth/{code}", verb="GET")),
     )
 
+
+app.include_router(api)
 
 # Static
 

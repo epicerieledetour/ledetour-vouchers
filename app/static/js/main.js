@@ -105,7 +105,7 @@ async function process_action(action, code) {
 }
 
 async function start() {
-    await query("/start")
+    await query("/api/start")
 }
 
 async function query(url, options) {
