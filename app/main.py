@@ -5,7 +5,7 @@ import pathlib
 from collections.abc import Callable
 from dataclasses import dataclass
 
-from typing import Dict, List
+from typing import Dict, List, Union
 
 import shortuuid
 
@@ -78,20 +78,20 @@ class Message(BaseModel):
 class Action(BaseModel):
     url: str
     verb: str  # TODO: use an enum
-    body: dict | None
-    message: Message | None
+    body: Union[dict, None]
+    message: Union[Message, None]
 
 
 class NextActions(BaseModel):
-    scan: Action | None
-    button: Action | None
+    scan: Union[Action, None]
+    button: Union[Action, None]
 
 
 class ActionResponse(BaseModel):
-    user: User | None
-    voucher: Voucher | None
-    message_main: Message | None
-    message_detail: Message | None
+    user: Union[User, None]
+    voucher: Union[Voucher, None]
+    message_main: Union[Message, None]
+    message_detail: Union[Message, None]
     next_actions: NextActions
 
 
@@ -243,7 +243,7 @@ def get_voucher_history(con: Connection, voucherid: str) -> dict:
 _HISTORY_MESSAGE = {0: "Registered by", 1: "Distributed by", 2: "Cashed-in by"}
 
 
-def _build_last_history_message(con: Connection, voucherid: str) -> str | None:
+def _build_last_history_message(con: Connection, voucherid: str) -> Union[str, None]:
     cur = con.cursor()
     cur.execute(
         """
@@ -570,7 +570,7 @@ _MESSAGES = {
 
 
 def build_next_actions(
-    user: User, voucher: Voucher | None, next_state: int | None
+    user: User, voucher: Union[Voucher, None], next_state: Union[int, None]
 ) -> NextActions:
     cur_state = voucher.state if voucher else None
     builders = _BUILDERS[(user.ac_distribute, user.ac_cashin, cur_state, next_state)]

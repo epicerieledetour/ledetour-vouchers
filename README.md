@@ -3,8 +3,16 @@
 ## Develop
 
 ```sh
+# Install
+python -m python3 venv
+venv/bin/activate
+python -m pip install -e . -r requirements.txt
+
+# Test
+pytest
+
 # Serve
-uvicorn app.main:app --reload --host 0.0.0.0 --ssl-keyfile ssl/ca.key --ssl-certfile ssl/ca.pem --ssl-keyfile-password nopasswd --env-file dev.env
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --ssl-keyfile ssl/ca.key --ssl-certfile ssl/ca.pem --ssl-keyfile-password nopasswd --env-file dev.env
 ```
 
 ## Genereate SSL certificate
