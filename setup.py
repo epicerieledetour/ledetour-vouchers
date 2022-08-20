@@ -1,9 +1,10 @@
-from setuptools import find_packages, setup
+from setuptools import setup
 
 setup(
     name="ldtvouchers",
     version="0.0.0",
-    packages=find_packages(include=["app"]),
-    python_requires=">=3.10.0",
+    include_package_data=True,
+    packages=["app"],
+    python_requires=">=3.7",
     install_requires=["fastapi", "uvicorn[standard]", "Jinja2", "shortuuid"],
 )

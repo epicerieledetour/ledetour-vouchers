@@ -591,7 +591,7 @@ async def start():
 # Static
 
 if os.environ.get("LDTVOUCHERS_SERVE_STATIC_FILES", True):
-    path = pathlib.Path(__file__).parent.parent / "static"
+    path = pathlib.Path(__file__).with_name("static")
     print(f"Serving static files: {path}")
     app.mount(
         "/",
