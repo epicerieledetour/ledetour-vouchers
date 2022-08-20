@@ -595,6 +595,6 @@ if os.environ.get("LDTVOUCHERS_SERVE_STATIC_FILES", True):
     print(f"Serving static files: {path}")
     app.mount(
         "/",
-        StaticFiles(directory=path),
+        StaticFiles(directory=path, html=True, check_dir=True),
         name="static",
     )
