@@ -6,12 +6,12 @@ root = {{ root }}
 {% endfor %}
 
 build $root/recto.svg: render $root/{{ data }} | {% for v in vouchers %}$root/{{ v.qrcode }} {% endfor %}
-  template = recto.svg
+  template = vouchers/recto.svg
 
 build $root/{{ recto }}: cairosvg $root/recto.svg
 
 build $root/verso.svg: render $root/{{ data }}
-  template = verso.svg
+  template = vouchers/verso.svg
 
 build $root/{{ verso }}: cairosvg $root/verso.svg
 

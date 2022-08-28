@@ -44,7 +44,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 root_dir = pathlib.Path(__file__).parent.parent
-templates_dir = root_dir / "templates"
+templates_dir = root_dir / "templates" / "printables"
 
 subninja_paths = []
 
@@ -66,6 +66,8 @@ voucher_pages = []
 
 res = conn.execute("SELECT * FROM vouchers").fetchall()
 for rows in group(res, 6, dict):
+    # Create the folder from the vouchers page
+
     first, last = rows[0], rows[-1]
     root = pathlib.Path(
         f"tmp/vouchers/{first['label']}-{last['label']}-{first['id']}-{last['id']}"
@@ -90,15 +92,51 @@ for rows in group(res, 6, dict):
     # Dump the ninja.build
 
     build = root / "ninja.build"
-    build.touch()
 
-    env.get_template("build-vouchers.ninja").stream(
+    env.get_template("vouchers/build.ninja").stream(
         root=root, data=data.name, recto=recto.name, verso=verso.name, vouchers=rows
     ).dump(str(build))
 
     subninja_paths.append(build)
     voucher_pages.append(recto)
     voucher_pages.append(verso)
+
+# Users
+
+users_pages = []
+
+res = conn.execute("SELECT * FROM users").fetchall()
+for user in res:
+    # Create the folder from the user page
+    root = pathlib.Path(f"tmp/users/{user['id']}")
+    root.mkdir(exist_ok=True, parents=True)
+
+    # Add qrcode paths to the rows data
+
+    user = dict(qrcode="qrcode.svg", **user)
+
+    # Dump the JSON
+
+    data = root / "data.json"
+    with data.open("w") as fp:
+        json.dump(user, fp, sort_keys=True, indent=4)
+
+    # Output PDF
+
+    page = root / "user.pdf"
+
+    # Dump the ninja.build
+
+    build = root / "ninja.build"
+
+    env.get_template("users/build.ninja").stream(
+        root=root, data=data.name, user=user, page=page.name
+    ).dump(str(build))
+
+    subninja_paths.append(build)
+
+    users_pages.append(page)
+
 
 # Main
 
@@ -109,4 +147,5 @@ template.stream(
     templates_dir=templates_dir,
     subninja_paths=subninja_paths,
     voucher_pages=voucher_pages,
+    users_pages=users_pages,
 ).dump("build.ninja")

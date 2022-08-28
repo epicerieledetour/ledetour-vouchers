@@ -17,3 +17,5 @@ rule cairosvg
 
 build vouchers.pdf: pdfunite {% for path in voucher_pages %}{{path}} {% endfor %}
 
+build users.pdf: pdfunite {% for path in users_pages %}{{path}} {% endfor %}
+

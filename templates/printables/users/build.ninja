@@ -1,0 +1,10 @@
+root = {{ root }}
+
+build $root/{{ user.qrcode }}: qrencode
+  content = {{ user.id }}
+
+build $root/page.svg: render $root/{{ data }} | $root/{{ user.qrcode }}
+  template = users/page.svg
+
+build $root/{{ page }}: cairosvg $root/page.svg
+
