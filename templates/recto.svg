@@ -68,8 +68,8 @@
      id="namedview1031"
      showgrid="true"
      inkscape:zoom="2.8284271"
-     inkscape:cx="519.90027"
-     inkscape:cy="494.79797"
+     inkscape:cx="521.31448"
+     inkscape:cy="299.45972"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
@@ -322,7 +322,7 @@
      inkscape:label="backgrounds"
      style="display:inline"
      sodipodi:insensitive="true">
-   <!--
+    <!--
     <image
        xlink:href="../../ledetour-products/templates/recto.png"
        width="528"
@@ -890,6 +890,14 @@
          x="654.10809"
          id="tspan1138"
          sodipodi:role="line" /></text>
+    <image
+       width="90"
+       height="90"
+       preserveAspectRatio="none"
+       xlink:href="{{d[0].qrcode}}"
+       id="image1011"
+       x="186.38905"
+       y="188.43396" />
   </g>
   <g
      inkscape:groupmode="layer"

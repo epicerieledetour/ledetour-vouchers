@@ -1,3 +1,4 @@
 black
 fastapi[all]
+ninja
 pytest
