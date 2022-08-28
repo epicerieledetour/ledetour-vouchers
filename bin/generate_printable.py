@@ -1,0 +1,112 @@
+#!/usr/bin/env python
+
+import argparse
+import json
+import pathlib
+import sqlite3
+
+import jinja2
+
+
+def group(iterator, count, default_factory):
+    group = []
+    for item in iterator:
+        group.append(item)
+        if len(group) == count:
+            yield tuple(group)
+            group.clear()
+
+    if group:
+        yield tuple(group)
+
+
+def pad(items, count, default_factory):
+    yield from items
+    for _ in range(count - len(items)):
+        yield default_factory()
+
+
+def last_valid(items):
+    for item in reversed(items):
+        if item:
+            return item
+
+
+parser = argparse.ArgumentParser(
+    description="Generate the build system to extract vouchers and authtification pages from a database."
+)
+parser.add_argument(
+    "db",
+    type=pathlib.Path,
+    help="Path to the database",
+)
+
+args = parser.parse_args()
+
+root_dir = pathlib.Path(__file__).parent.parent
+templates_dir = root_dir / "templates"
+
+subninja_paths = []
+
+# VOUCHERS_BUILD = """
+
+# """
+
+conn = sqlite3.connect(args.db)
+conn.row_factory = sqlite3.Row
+
+env = jinja2.Environment(
+    loader=jinja2.FileSystemLoader(templates_dir),
+    autoescape=jinja2.select_autoescape(["html", "xml"]),
+)
+
+# Vouchers
+
+voucher_pages = []
+
+res = conn.execute("SELECT * FROM vouchers").fetchall()
+for rows in group(res, 6, dict):
+    first, last = rows[0], rows[-1]
+    root = pathlib.Path(
+        f"tmp/vouchers/{first['label']}-{last['label']}-{first['id']}-{last['id']}"
+    )
+    root.mkdir(exist_ok=True, parents=True)
+
+    # Add qrcode paths to the rows data
+
+    rows = [dict(qrcode=f"qrcode-{row['id']}.svg", **row) for row in rows]
+
+    # Dump the JSON
+
+    data = root / "data.json"
+    with data.open("w") as fp:
+        json.dump({"d": list(pad(rows, 6, dict))}, fp, sort_keys=True, indent=4)
+
+    # Output PDFs
+
+    recto = root / "recto.pdf"
+    verso = root / "verso.pdf"
+
+    # Dump the ninja.build
+
+    build = root / "ninja.build"
+    build.touch()
+
+    env.get_template("build-vouchers.ninja").stream(
+        root=root, data=data.name, recto=recto.name, verso=verso.name, vouchers=rows
+    ).dump(str(build))
+
+    subninja_paths.append(build)
+    voucher_pages.append(recto)
+    voucher_pages.append(verso)
+
+# Main
+
+template = env.get_template("build.ninja")
+template.stream(
+    db=args.db,
+    render_jinja_template=root_dir / "bin" / "render_jinja_template.py",
+    templates_dir=templates_dir,
+    subninja_paths=subninja_paths,
+    voucher_pages=voucher_pages,
+).dump("build.ninja")

@@ -2,6 +2,16 @@
 
 ## Develop
 
+### Dependencies
+
+- python>=3.7
+- jq
+- sqlite3
+- pdfunite
+
+
+### Run the server
+
 ```sh
 # Install
 python -m python3 venv
@@ -15,7 +25,7 @@ pytest
 python -m uvicorn app.main:app --reload --host 0.0.0.0 --ssl-keyfile ssl/ca.key --ssl-certfile ssl/ca.pem --ssl-keyfile-password nopasswd --env-file dev.env
 ```
 
-## Genereate SSL certificate
+### Genereate SSL certificate
 
 ```sh
 cd ssl

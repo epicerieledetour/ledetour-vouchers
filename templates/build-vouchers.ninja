@@ -1,0 +1,17 @@
+root = {{ root }}
+
+{% for v in vouchers %}build $root/{{ v.qrcode }}: qrencode
+  content = {{ v.id }}
+  
+{% endfor %}
+
+build $root/recto.svg: render $root/{{ data }} | {% for v in vouchers %}$root/{{ v.qrcode }} {% endfor %}
+  template = recto.svg
+
+build $root/{{ recto }}: cairosvg $root/recto.svg
+
+build $root/verso.svg: render $root/{{ data }}
+  template = verso.svg
+
+build $root/{{ verso }}: cairosvg $root/verso.svg
+

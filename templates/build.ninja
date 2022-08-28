@@ -1,0 +1,19 @@
+db = {{ db }}
+
+rule render
+  command = python {{ render_jinja_template }} --searchpath {{ templates_dir }} --template $template < $in > $out
+
+rule qrencode
+  command = qrencode -t SVG $content > $out
+
+rule pdfunite
+  command = pdfunite $in $out
+
+rule cairosvg
+  command = cairosvg --dpi 300 --output-width 3300 --output-height 2550 -o $out $in
+
+{% for path in subninja_paths %}subninja {{ path }}
+{% endfor %}
+
+build vouchers.pdf: pdfunite {% for path in voucher_pages %}{{path}} {% endfor %}
+
