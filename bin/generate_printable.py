@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
 import argparse
+import itertools
 import json
 import pathlib
 import sqlite3
+import string
 
 import jinja2
 
@@ -32,6 +34,21 @@ def last_valid(items):
             return item
 
 
+def build_voucher_template_dict(prefix, row):
+    if not row:
+        return {
+            f"{prefix}v": "",
+            f"{prefix}l": "",
+            f"{prefix}c": "empty.svg",
+        }
+
+    return {
+        f"{prefix}v": f"{row['value']}$",
+        f"{prefix}l": row["label"],
+        f"{prefix}c": row["qrcode"],
+    }
+
+
 parser = argparse.ArgumentParser(
     description="Generate the build system to extract vouchers and authtification pages from a database."
 )
@@ -48,10 +65,6 @@ templates_dir = root_dir / "templates" / "printables"
 
 subninja_paths = []
 
-# VOUCHERS_BUILD = """
-
-# """
-
 conn = sqlite3.connect(args.db)
 conn.row_factory = sqlite3.Row
 
@@ -62,10 +75,12 @@ env = jinja2.Environment(
 
 # Vouchers
 
+vouchers_per_page = 6
+
 voucher_pages = []
 
 res = conn.execute("SELECT * FROM vouchers").fetchall()
-for rows in group(res, 6, dict):
+for rows in group(res, vouchers_per_page, dict):
     # Create the folder from the vouchers page
 
     first, last = rows[0], rows[-1]
@@ -80,9 +95,15 @@ for rows in group(res, 6, dict):
 
     # Dump the JSON
 
+    data_dict = {}
+    for prefix, row in itertools.zip_longest(
+        string.ascii_lowercase[:vouchers_per_page], rows
+    ):
+        data_dict.update(build_voucher_template_dict(prefix, row))
+
     data = root / "data.json"
     with data.open("w") as fp:
-        json.dump({"d": list(pad(rows, 6, dict))}, fp, sort_keys=True, indent=4)
+        json.dump(data_dict, fp, sort_keys=True, indent=4)
 
     # Output PDFs
 
@@ -94,7 +115,13 @@ for rows in group(res, 6, dict):
     build = root / "ninja.build"
 
     env.get_template("vouchers/build.ninja").stream(
-        root=root, data=data.name, recto=recto.name, verso=verso.name, vouchers=rows
+        templatesdir=templates_dir / "vouchers",
+        assets=["empty.svg", "logo-clubpop.png", "logo-detour.jpg"],
+        root=root,
+        data=data.name,
+        recto=recto.name,
+        verso=verso.name,
+        vouchers=rows,
     ).dump(str(build))
 
     subninja_paths.append(build)

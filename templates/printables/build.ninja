@@ -9,8 +9,14 @@ rule qrencode
 rule pdfunite
   command = pdfunite $in $out
 
-rule cairosvg
-  command = cairosvg --dpi 300 --output-width 3300 --output-height 2550 -o $out $in
+rule cairosvg_portrait
+  command = cairosvg --dpi 300 --output-width 2480 --output-height 3508 -o $out $in
+
+rule cairosvg_landscape
+  command = cairosvg --dpi 300 --output-width 3508 --output-height 2480 -o $out $in
+
+rule symlink
+  command = ln -s $in $out
 
 {% for path in subninja_paths %}subninja {{ path }}
 {% endfor %}

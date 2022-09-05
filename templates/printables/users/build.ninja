@@ -6,5 +6,5 @@ build $root/{{ user.qrcode }}: qrencode
 build $root/page.svg: render $root/{{ data }} | $root/{{ user.qrcode }}
   template = users/page.svg
 
-build $root/{{ page }}: cairosvg $root/page.svg
+build $root/{{ page }}: cairosvg_portrait $root/page.svg
 
