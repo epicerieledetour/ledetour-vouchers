@@ -1,4 +1,5 @@
 black
+cairosvg
 fastapi[all]
 ninja
 pytest
