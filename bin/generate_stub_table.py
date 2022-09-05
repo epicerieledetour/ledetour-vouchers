@@ -11,7 +11,7 @@ parser = argparse.ArgumentParser(description="Number of shortuuids to generate")
 parser.add_argument(
     "--db",
     type=str,
-    default="/home/charles/src/github/epicerieledetour/ledetour-vouchers/demo/db.sqlite3",
+    default="ldtvouchers.sqlite3",
     help="DB to get the schema from",
 )
 parser.add_argument("table", type=str, help="Table to generate stub CVS for")
