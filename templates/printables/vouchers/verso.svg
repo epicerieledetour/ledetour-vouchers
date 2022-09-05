@@ -1,431 +1,478 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
 <svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:xlink="http://www.w3.org/1999/xlink"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="297mm"
+   height="210mm"
+   viewBox="0 0 297 210"
    version="1.1"
-   width="1056"
-   height="816"
-   viewBox="0 0 1056 816"
-   id="svg1029"
-   sodipodi:docname="verso.svg"
-   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
-   shape-rendering="crispEdges">
-  <metadata
-     id="metadata1035">
-    <rdf:RDF>
-      <cc:Work
-         rdf:about="">
-        <dc:format>image/svg+xml</dc:format>
-        <dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
-      </cc:Work>
-    </rdf:RDF>
-  </metadata>
-  <defs
-     id="defs1033">
-    <clipPath
-       id="cp1">
-      <path
-         inkscape:connector-curvature="0"
-         id="path952"
-         d="M 0,204 H 396 V 407.999 H 0 Z"
-         transform="matrix(1,0,0,-1,0,612)" />
-    </clipPath>
-    <clipPath
-       id="cp2">
-      <path
-         inkscape:connector-curvature="0"
-         id="path969"
-         d="M 396,204 H 792 V 407.999 H 396 Z"
-         transform="matrix(1,0,0,-1,0,612)" />
-    </clipPath>
-    <clipPath
-       id="cp3">
-      <path
-         inkscape:connector-curvature="0"
-         id="path1010"
-         d="M 0,612 H 792 V 0 H 0 Z"
-         transform="matrix(1,0,0,-1,0,612)" />
-    </clipPath>
-  </defs>
+   id="svg1086"
+   inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
+   sodipodi:docname="new_verso.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
   <sodipodi:namedview
+     id="namedview1088"
      pagecolor="#ffffff"
      bordercolor="#666666"
-     borderopacity="1"
-     objecttolerance="10"
-     gridtolerance="10"
-     guidetolerance="10"
-     inkscape:pageopacity="0"
+     borderopacity="1.0"
      inkscape:pageshadow="2"
-     inkscape:window-width="3840"
-     inkscape:window-height="2023"
-     id="namedview1031"
-     showgrid="true"
-     inkscape:zoom="4"
-     inkscape:cx="184.55447"
-     inkscape:cy="717.16572"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="false"
+     inkscape:document-units="mm"
+     showgrid="false"
+     showborder="true"
+     borderlayer="false"
+     inkscape:showpageshadow="true"
+     inkscape:lockguides="false"
+     inkscape:zoom="1.1663695"
+     inkscape:cx="561.14295"
+     inkscape:cy="388.38465"
+     inkscape:window-width="1920"
+     inkscape:window-height="1171"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
-     inkscape:current-layer="layer5"
-     showguides="true"
-     inkscape:guide-bbox="true"
-     inkscape:snap-global="true"
-     inkscape:snap-nodes="true"
-     inkscape:snap-page="true"
-     inkscape:snap-grids="false"
-     inkscape:snap-object-midpoints="true"
-     inkscape:snap-center="true"
-     inkscape:snap-text-baseline="true"
-     inkscape:snap-to-guides="true"
-     units="px"
-     inkscape:snap-bbox="false"
-     inkscape:pagecheckerboard="true">
+     inkscape:current-layer="layer2"
+     showguides="false"
+     inkscape:guide-bbox="true">
     <inkscape:grid
        type="xygrid"
-       id="grid2150"
-       originx="0"
-       originy="0"
-       units="in"
-       spacingx="9.6"
-       spacingy="9.6" />
+       id="grid1162"
+       units="mm"
+       originx="148.5"
+       originy="105"
+       dotted="false"
+       visible="true"
+       enabled="true"
+       snapvisiblegridlinesonly="true"
+       empspacing="10"
+       spacingx="1"
+       spacingy="1" />
     <sodipodi:guide
-       position="304.75129,464.52062"
+       position="8.5,195"
+       orientation="0,793.70079"
+       id="guide1185" />
+    <sodipodi:guide
+       position="288.5,195"
+       orientation="1122.5197,0"
+       id="guide1187" />
+    <sodipodi:guide
+       position="8.5,195"
+       orientation="-1122.5197,0"
+       id="guide1191" />
+    <sodipodi:guide
+       position="148.5,195"
        orientation="1,0"
-       id="guide2190"
-       inkscape:locked="false" />
+       id="guide1197" />
     <sodipodi:guide
-       position="469.51891,63.125001"
-       orientation="-0.99997933,0.0064295945"
-       id="guide2192"
-       inkscape:locked="false" />
+       position="8.5,135"
+       orientation="0,-1"
+       id="guide1209" />
     <sodipodi:guide
-       position="927.50001,607.06251"
-       orientation="0,1"
-       id="guide2194"
-       inkscape:locked="false" />
+       position="8.5,75"
+       orientation="0,-1"
+       id="guide1211" />
     <sodipodi:guide
-       position="927.50001,582.37501"
-       orientation="0,1"
-       id="guide2196"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="883.52992,251.37646"
-       orientation="0,1"
-       id="guide2198"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="699.82031,232.75781"
-       orientation="0,1"
-       id="guide2200"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="326.375,63.125001"
-       orientation="0,1"
-       id="guide2202"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="397.1875,38.375"
-       orientation="0,1"
-       id="guide2204"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="700.69922,457.05469"
-       orientation="1,0"
-       id="guide2206"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="764.44922,459.42187"
-       orientation="1,0"
-       id="guide2208"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="198.55664,538.89551"
-       orientation="0,1"
-       id="guide2226"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="263.76648,111.10327"
-       orientation="0,1"
-       id="guide2228"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="197.60742,335.63086"
-       orientation="0,1"
-       id="guide2230"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="197.79785,276.37207"
-       orientation="0,1"
-       id="guide2232"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="-35.708892,-14.495689"
-       orientation="0,1"
-       id="guide2234"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="197.46387,70.87207"
-       orientation="0,1"
-       id="guide2236"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="163.875,566.625"
-       orientation="1,0"
-       id="guide2238"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="231.58008,511.05469"
-       orientation="1,0"
-       id="guide2240"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="560.04492,510.55078"
-       orientation="1,0"
-       id="guide2242"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="627.7002,510.86426"
-       orientation="1,0"
-       id="guide2244"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="263.6571,397.38959"
-       orientation="1,0"
-       id="guide1018"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="123.5,655.5"
-       orientation="0,1"
-       id="guide1020"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="792.07105,679.01562"
-       orientation="1,0"
-       id="guide1022"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="263.6571,385.0957"
-       orientation="0,1"
-       id="guide1024"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="38.493125,632.99315"
-       orientation="0,1"
-       id="guide1032"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="43.641747,614.47579"
-       orientation="0,1"
-       id="guide1034"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="37.101009,636.15304"
-       orientation="1,0"
-       id="guide1036"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="215.00466,626.85016"
-       orientation="1,0"
-       id="guide1038"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="312.93895,639.93164"
-       orientation="1,0"
-       id="guide1040"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="490.55533,635.35754"
-       orientation="1,0"
-       id="guide1042"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="565.22139,626.67339"
-       orientation="1,0"
-       id="guide1044"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="743.01455,626.29774"
-       orientation="1,0"
-       id="guide1046"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="840.86045,629.01568"
-       orientation="1,0"
-       id="guide1048"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="1018.5652,628.64003"
-       orientation="1,0"
-       id="guide1050"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="725.49156,361.0664"
-       orientation="0,1"
-       id="guide1052"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="747.75,342.375"
-       orientation="0,1"
-       id="guide1054"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="714.79657,88.918678"
-       orientation="0,1"
-       id="guide1056"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="929.71612,618.90338"
-       orientation="0,1"
-       id="guide1144"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="126.04295,618.90338"
-       orientation="1,0"
-       id="guide1146"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="401.73727,618.90338"
-       orientation="1,0"
-       id="guide1148"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="654.10809,618.90338"
-       orientation="1,0"
-       id="guide1150"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="929.71612,618.90338"
-       orientation="1,0"
-       id="guide1152"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="929.71612,346.88962"
-       orientation="0,1"
-       id="guide1154"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="929.70294,75.06427"
-       orientation="0,1"
-       id="guide1156"
-       inkscape:locked="false" />
+       position="8.5,15"
+       orientation="0,-1"
+       id="guide1213" />
   </sodipodi:namedview>
+  <defs
+     id="defs1083" />
   <g
+     inkscape:label="Background"
      inkscape:groupmode="layer"
-     id="layer5"
-     inkscape:label="backgrounds"
+     id="layer1"
      style="display:inline">
-   <!--
-    <image
-       sodipodi:absref="/home/charles/src/github/epicerieledetour/ledetour-products/templates/verso.png"
-       xlink:href="verso.png"
-       style="display:inline"
+    <g
+       id="g25639"
+       inkscape:tile-cx="78.500002"
+       inkscape:tile-cy="45.000001"
+       inkscape:tile-w="140"
+       inkscape:tile-h="60.000002"
+       inkscape:tile-x0="8.5000002"
+       inkscape:tile-y0="15">
+      <image
+         width="14.999998"
+         height="14.999998"
+         preserveAspectRatio="none"
+         xlink:href="logo-clubpop.png"
+         id="image11200"
+         x="128.5"
+         y="20.000002" />
+      <image
+         width="15"
+         height="15"
+         preserveAspectRatio="none"
+         xlink:href="logo-detour.jpg"
+         id="image11549"
+         x="13.5"
+         y="20" />
+      <rect
+         style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-linecap:square;stroke-miterlimit:4;stroke-dasharray:0.1, 0.1;stroke-dashoffset:0;stroke-opacity:1"
+         id="rect2089"
+         width="60"
+         height="10"
+         x="13.5"
+         y="60.000004" />
+      <rect
+         style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-linecap:square;stroke-miterlimit:4;stroke-dasharray:0.1, 0.1;stroke-dashoffset:0;stroke-opacity:1"
+         id="rect2091"
+         width="60"
+         height="10"
+         x="83.5"
+         y="60.000004" />
+      <text
+         xml:space="preserve"
+         style="font-weight:bold;font-size:3px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';letter-spacing:0px;word-spacing:0px;fill:#c0c0c0;fill-opacity:1;stroke-width:0.264583"
+         x="20.031006"
+         y="66.299316"
+         id="text5489"><tspan
+           sodipodi:role="line"
+           id="tspan5487"
+           style="font-size:3px;fill:#c0c0c0;fill-opacity:1;stroke-width:0.264583"
+           x="20.031006"
+           y="66.299316">ENCAISSÉ PAR / REDEEMED BY</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-weight:bold;font-size:3px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';letter-spacing:0px;word-spacing:0px;fill:#c0c0c0;fill-opacity:1;stroke-width:0.264583"
+         x="89.320557"
+         y="66.299316"
+         id="text16519"><tspan
+           sodipodi:role="line"
+           id="tspan16517"
+           style="font-size:3px;fill:#c0c0c0;fill-opacity:1;stroke-width:0.264583"
+           x="89.320557"
+           y="66.299316">ENCAISSÉ LE / DATE REDEEMED</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-weight:bold;font-size:2.5px;line-height:1;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+         x="31.462158"
+         y="23.215576"
+         id="text44018"><tspan
+           sodipodi:role="line"
+           id="tspan44016"
+           style="font-size:2.5px;stroke-width:0.264583"
+           x="31.462158"
+           y="23.215576">Épicerie le Détour</tspan><tspan
+           sodipodi:role="line"
+           style="font-size:2.5px;stroke-width:0.264583"
+           x="31.462158"
+           y="25.715576"
+           id="tspan44020">1900 Le Ber</tspan><tspan
+           sodipodi:role="line"
+           style="font-size:2.5px;stroke-width:0.264583"
+           x="31.462158"
+           y="28.215578"
+           id="tspan44022">438-476-5471</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-weight:bold;font-size:2.5px;line-height:1;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+         x="31.460938"
+         y="31.811525"
+         id="text122049"><tspan
+           sodipodi:role="line"
+           id="tspan122047"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.5px;font-family:sans-serif;-inkscape-font-specification:sans-serif;stroke-width:0.264583"
+           x="31.460938"
+           y="31.811525">Mar-Mer 11h-19h</tspan><tspan
+           sodipodi:role="line"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.5px;font-family:sans-serif;-inkscape-font-specification:sans-serif;stroke-width:0.264583"
+           x="31.460938"
+           y="34.311527"
+           id="tspan122051">Jeu-Ven 11h-20h</tspan><tspan
+           sodipodi:role="line"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.5px;font-family:sans-serif;-inkscape-font-specification:sans-serif;stroke-width:0.264583"
+           x="31.460938"
+           y="36.811527"
+           id="tspan122053">Sam-Dim 8h-19h</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-weight:bold;font-size:2.5px;line-height:1;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';text-align:end;letter-spacing:0px;word-spacing:0px;text-anchor:end;stroke-width:0.264583"
+         x="73.664795"
+         y="31.719973"
+         id="text150697"><tspan
+           sodipodi:role="line"
+           id="tspan150691"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.5px;font-family:sans-serif;-inkscape-font-specification:sans-serif;text-align:end;text-anchor:end;stroke-width:0.264583"
+           x="73.664795"
+           y="31.719973">Tu-Wed 11am-7pm</tspan><tspan
+           sodipodi:role="line"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.5px;font-family:sans-serif;-inkscape-font-specification:sans-serif;text-align:end;text-anchor:end;stroke-width:0.264583"
+           x="73.664795"
+           y="34.219975"
+           id="tspan150693">Thu-Fri 11am-8pm</tspan><tspan
+           sodipodi:role="line"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.5px;font-family:sans-serif;-inkscape-font-specification:sans-serif;text-align:end;text-anchor:end;stroke-width:0.264583"
+           x="73.664795"
+           y="36.719975"
+           id="tspan150695">Sat-Sun 8am-7pm</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-weight:bold;font-size:2.5px;line-height:1;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';text-align:end;letter-spacing:0px;word-spacing:0px;text-anchor:end;stroke-width:0.264583"
+         x="125.53784"
+         y="23.215576"
+         id="text169767"><tspan
+           sodipodi:role="line"
+           style="font-size:2.5px;text-align:end;text-anchor:end;stroke-width:0.264583"
+           x="125.53784"
+           y="23.215576"
+           id="tspan169763">Épicerie Solidaire</tspan><tspan
+           sodipodi:role="line"
+           style="font-size:2.5px;text-align:end;text-anchor:end;stroke-width:0.264583"
+           x="125.53784"
+           y="25.715576"
+           id="tspan176577">1930 Grand Trunk</tspan><tspan
+           sodipodi:role="line"
+           style="font-size:2.5px;text-align:end;text-anchor:end;stroke-width:0.264583"
+           x="125.53784"
+           y="28.215578"
+           id="tspan169765">514-932-1091</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-weight:bold;font-size:2.5px;line-height:1;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+         x="91.489014"
+         y="31.811525"
+         id="text169775"><tspan
+           sodipodi:role="line"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.5px;font-family:sans-serif;-inkscape-font-specification:sans-serif;stroke-width:0.264583"
+           x="91.489014"
+           y="31.811525"
+           id="tspan188570">Mer 10h-16h</tspan><tspan
+           sodipodi:role="line"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.5px;font-family:sans-serif;-inkscape-font-specification:sans-serif;stroke-width:0.264583"
+           x="91.489014"
+           y="34.311527"
+           id="tspan188574">Jeu 10h-19h</tspan><tspan
+           sodipodi:role="line"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.5px;font-family:sans-serif;-inkscape-font-specification:sans-serif;stroke-width:0.264583"
+           x="91.489014"
+           y="36.811527"
+           id="tspan188576">Ven 10h-16h</tspan><tspan
+           sodipodi:role="line"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.5px;font-family:sans-serif;-inkscape-font-specification:sans-serif;stroke-width:0.264583"
+           x="91.489014"
+           y="39.311527"
+           id="tspan188578" /></text>
+      <text
+         xml:space="preserve"
+         style="font-weight:bold;font-size:2.5px;line-height:1;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';text-align:end;letter-spacing:0px;word-spacing:0px;text-anchor:end;stroke-width:0.264583"
+         x="126.66479"
+         y="31.719973"
+         id="text195514"><tspan
+           sodipodi:role="line"
+           id="tspan195508"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.5px;font-family:sans-serif;-inkscape-font-specification:sans-serif;text-align:end;text-anchor:end;stroke-width:0.264583"
+           x="126.66479"
+           y="31.719973">Wed 10am-4pm</tspan><tspan
+           sodipodi:role="line"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.5px;font-family:sans-serif;-inkscape-font-specification:sans-serif;text-align:end;text-anchor:end;stroke-width:0.264583"
+           x="126.66479"
+           y="34.219975"
+           id="tspan195510">Thu 10am-7pm</tspan><tspan
+           sodipodi:role="line"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.5px;font-family:sans-serif;-inkscape-font-specification:sans-serif;text-align:end;text-anchor:end;stroke-width:0.264583"
+           x="126.66479"
+           y="36.719975"
+           id="tspan195512">Fri 10am-4pm</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-weight:bold;font-size:2.5px;line-height:1;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+         x="13.43042"
+         y="44.840824"
+         id="text220341"><tspan
+           sodipodi:role="line"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.5px;font-family:sans-serif;-inkscape-font-specification:sans-serif;stroke-width:0.264583"
+           x="13.43042"
+           y="44.840824"
+           id="tspan226070">Doit être utilisé en totalité sur un même achat. Ne peut</tspan><tspan
+           sodipodi:role="line"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.5px;font-family:sans-serif;-inkscape-font-specification:sans-serif;stroke-width:0.264583"
+           x="13.43042"
+           y="47.340824"
+           id="tspan226072">être remplacé si perdu, volé ou utilisé sans votre</tspan><tspan
+           sodipodi:role="line"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.5px;font-family:sans-serif;-inkscape-font-specification:sans-serif;stroke-width:0.264583"
+           x="13.43042"
+           y="49.840824"
+           id="tspan226074">permission. Aucun échange en argent. Échange</tspan><tspan
+           sodipodi:role="line"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.5px;font-family:sans-serif;-inkscape-font-specification:sans-serif;stroke-width:0.264583"
+           x="13.43042"
+           y="52.340824"
+           id="tspan226076">seulement lors d'un retour d'article. Vente ou</tspan><tspan
+           sodipodi:role="line"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.5px;font-family:sans-serif;-inkscape-font-specification:sans-serif;stroke-width:0.264583"
+           x="13.43042"
+           y="54.840824"
+           id="tspan226078">reproduction interdite. Bon d'achat original seulement.</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-weight:bold;font-size:2.5px;line-height:1;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+         x="13.397461"
+         y="41.97559"
+         id="text245750"><tspan
+           sodipodi:role="line"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.5px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';stroke-width:0.264583"
+           x="13.397461"
+           y="41.97559"
+           id="tspan245748">CONDITIONS D'UTILISATION</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-weight:bold;font-size:2.5px;line-height:1;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+         x="143.49634"
+         y="44.811527"
+         id="text287380"><tspan
+           sodipodi:role="line"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.5px;font-family:sans-serif;-inkscape-font-specification:sans-serif;text-align:end;text-anchor:end;stroke-width:0.264583"
+           x="143.49634"
+           y="44.811527"
+           id="tspan287378">Full amount of voucher must be used at time of</tspan><tspan
+           sodipodi:role="line"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.5px;font-family:sans-serif;-inkscape-font-specification:sans-serif;text-align:end;text-anchor:end;stroke-width:0.264583"
+           x="143.49634"
+           y="47.311527"
+           id="tspan290600">purchase. No replacement if lost, stolen or used</tspan><tspan
+           sodipodi:role="line"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.5px;font-family:sans-serif;-inkscape-font-specification:sans-serif;text-align:end;text-anchor:end;stroke-width:0.264583"
+           x="143.49634"
+           y="49.811527"
+           id="tspan290602">without your permission. Not redeemable for cash.</tspan><tspan
+           sodipodi:role="line"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.5px;font-family:sans-serif;-inkscape-font-specification:sans-serif;text-align:end;text-anchor:end;stroke-width:0.264583"
+           x="143.49634"
+           y="52.311527"
+           id="tspan290604">Only exchanges accepted for returns. It is strictly</tspan><tspan
+           sodipodi:role="line"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.5px;font-family:sans-serif;-inkscape-font-specification:sans-serif;text-align:end;text-anchor:end;stroke-width:0.264583"
+           x="143.49634"
+           y="54.811527"
+           id="tspan290606">forbidden to sell or reproduce this voucher. Only</tspan><tspan
+           sodipodi:role="line"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.5px;font-family:sans-serif;-inkscape-font-specification:sans-serif;text-align:end;text-anchor:end;stroke-width:0.264583"
+           x="143.49634"
+           y="57.311527"
+           id="tspan290608">original vouchers will be accepted.</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-weight:bold;font-size:2.5px;line-height:1;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+         x="143.59766"
+         y="41.745609"
+         id="text287384"><tspan
+           sodipodi:role="line"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.5px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';text-align:end;text-anchor:end;stroke-width:0.264583"
+           x="143.59766"
+           y="41.745609"
+           id="tspan287382">TERMS OF USE</tspan></text>
+    </g>
+    <use
+       x="0"
        y="0"
+       inkscape:tiled-clone-of="#g25639"
+       xlink:href="#g25639"
+       transform="translate(0,60.000002)"
+       id="use25643" />
+    <use
        x="0"
-       id="image1017"
-       preserveAspectRatio="none"
-       height="272"
-       width="528" />
-    <image
-       sodipodi:absref="/home/charles/src/github/epicerieledetour/ledetour-products/templates/verso.png"
-       xlink:href="verso.png"
-       width="528"
-       height="272"
-       preserveAspectRatio="none"
-       id="image1022"
-       x="0"
-       y="272"
-       style="display:inline" />
-    <image
-       sodipodi:absref="/home/charles/src/github/epicerieledetour/ledetour-products/templates/verso.png"
-       xlink:href="verso.png"
-       style="display:inline"
-       y="544"
-       x="0"
-       id="image1024"
-       preserveAspectRatio="none"
-       height="272"
-       width="528" />
-    <image
-       sodipodi:absref="/home/charles/src/github/epicerieledetour/ledetour-products/templates/verso.png"
-       xlink:href="verso.png"
-       width="528"
-       height="272"
-       preserveAspectRatio="none"
-       id="image1026"
-       x="528"
-       y="544"
-       style="display:inline" />
-    <image
-       sodipodi:absref="/home/charles/src/github/epicerieledetour/ledetour-products/templates/verso.png"
-       xlink:href="verso.png"
-       style="display:inline"
-       y="272"
-       x="528"
-       id="image1028"
-       preserveAspectRatio="none"
-       height="272"
-       width="528" />
-    <image
-       sodipodi:absref="/home/charles/src/github/epicerieledetour/ledetour-products/templates/verso.png"
-       xlink:href="verso.png"
-       width="528"
-       height="272"
-       preserveAspectRatio="none"
-       id="image1030"
-       x="528"
        y="0"
-       style="display:inline" />
-   -->
+       inkscape:tiled-clone-of="#g25639"
+       xlink:href="#g25639"
+       transform="translate(0,120)"
+       id="use25645" />
+    <use
+       x="0"
+       y="0"
+       inkscape:tiled-clone-of="#g25639"
+       xlink:href="#g25639"
+       transform="translate(140)"
+       id="use25647" />
+    <use
+       x="0"
+       y="0"
+       inkscape:tiled-clone-of="#g25639"
+       xlink:href="#g25639"
+       transform="translate(140,60.000002)"
+       id="use25649" />
+    <use
+       x="0"
+       y="0"
+       inkscape:tiled-clone-of="#g25639"
+       xlink:href="#g25639"
+       transform="translate(140,120)"
+       id="use25651" />
   </g>
   <g
      inkscape:groupmode="layer"
-     id="layer4"
-     inkscape:label="cut_guides"
-     style="display:inline"
-     sodipodi:insensitive="true">
+     id="layer2"
+     inkscape:label="Cut marks">
     <path
-       style="display:inline;fill:none;stroke:#939598;stroke-width:1.33333325;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10"
-       inkscape:connector-curvature="0"
-       id="path1013"
-       d="M 0,272 H 29.333331"
-       stroke-miterlimit="10" />
+       style="fill:none;stroke:#c0c0c0;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 0.5,15.000001 7,0"
+       id="path26615"
+       sodipodi:nodetypes="cc" />
     <path
-       style="display:inline;fill:none;stroke:#939598;stroke-width:1.33333325;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10"
-       inkscape:connector-curvature="0"
-       id="path1015"
-       d="M 1026.6667,272 H 1056"
-       stroke-miterlimit="10" />
+       style="fill:none;stroke:#c0c0c0;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 0.5,75 h 7"
+       id="path26615-3"
+       sodipodi:nodetypes="cc" />
     <path
-       style="display:inline;fill:none;stroke:#939598;stroke-width:1.33333325;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10"
-       inkscape:connector-curvature="0"
-       id="path1017"
-       d="M 0,544 H 29.333331"
-       stroke-miterlimit="10" />
+       style="fill:none;stroke:#c0c0c0;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 0.5,135 h 7"
+       id="path26615-5"
+       sodipodi:nodetypes="cc" />
     <path
-       style="display:inline;fill:none;stroke:#939598;stroke-width:1.33333325;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10"
-       inkscape:connector-curvature="0"
-       id="path1019"
-       d="M 1026.6667,544 H 1056"
-       stroke-miterlimit="10" />
+       style="fill:none;stroke:#c0c0c0;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 0.5,195 h 7"
+       id="path26615-6"
+       sodipodi:nodetypes="cc" />
     <path
-       style="display:inline;fill:none;stroke:#939598;stroke-width:1.33333325;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10"
-       inkscape:connector-curvature="0"
-       id="path1021"
-       d="M 528,0 V 21.33333"
-       stroke-miterlimit="10" />
+       style="fill:none;stroke:#c0c0c0;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 8.5,1 0,13"
+       id="path26888"
+       sodipodi:nodetypes="cc" />
     <path
-       style="display:inline;fill:none;stroke:#939598;stroke-width:1.33333325;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10"
-       inkscape:connector-curvature="0"
-       id="path1023"
-       d="M 528,816 V 789.33334"
-       stroke-miterlimit="10" />
+       style="fill:none;stroke:#c0c0c0;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 148.5,1 V 14"
+       id="path27771"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;stroke:#c0c0c0;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 288.5,1 V 14"
+       id="path27771-3"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;stroke:#c0c0c0;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 8.5,196 v 13"
+       id="path27771-6"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;stroke:#c0c0c0;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 148.5,196 v 13"
+       id="path27771-7"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;stroke:#c0c0c0;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 288.5,196 v 13"
+       id="path27771-5"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;stroke:#c0c0c0;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 289.5,75 h 7"
+       id="path26615-2"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;stroke:#c0c0c0;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 289.5,135 h 7"
+       id="path26615-9"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;stroke:#c0c0c0;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 289.5,195 h 7"
+       id="path26615-1"
+       sodipodi:nodetypes="cc" />
   </g>
 </svg>
