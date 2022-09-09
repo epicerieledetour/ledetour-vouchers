@@ -228,7 +228,7 @@ def get_voucher_history(con: Connection, voucherid: str) -> dict:
     cur = con.cursor()
     cur.execute(
         """
-        SELECT history.date, users.name, vouchers.state
+        SELECT history.date, users.name, history.state
         FROM history
         INNER JOIN users ON history.userid = users.id
         INNER JOIN vouchers ON history.voucherid = vouchers.id
@@ -266,6 +266,7 @@ def _build_last_history_message(con: Connection, voucherid: str) -> Union[str, N
 
 
 def _history_text(data):
+    print(data)
     by = _HISTORY_MESSAGE[data["state"]]
     return "{by} {name} {date}".format(by=by, **data)
 

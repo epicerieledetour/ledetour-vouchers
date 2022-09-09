@@ -519,8 +519,8 @@ def test_vouchers_patch__cashier__cashedin_to_cashedin(
 
 def test_vouchers__history(voucher_spent):
     assert voucher_spent.history[0].startswith("Cashed-in by POS ")
-    assert voucher_spent.history[1].startswith("Cashed-in by DIST ")
-    assert voucher_spent.history[2].startswith("Cashed-in by ADMIN ")
+    assert voucher_spent.history[1].startswith("Distributed by DIST ")
+    assert voucher_spent.history[2].startswith("Registered by ADMIN ")
 
 
 def test_start(unauthenticated_client):
