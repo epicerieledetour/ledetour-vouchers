@@ -266,7 +266,6 @@ def _build_last_history_message(con: Connection, voucherid: str) -> Union[str, N
 
 
 def _history_text(data):
-    print(data)
     by = _HISTORY_MESSAGE[data["state"]]
     return "{by} {name} {date}".format(by=by, **data)
 
