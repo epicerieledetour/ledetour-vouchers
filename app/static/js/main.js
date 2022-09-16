@@ -60,7 +60,7 @@ async function setup_scanner() {
     }
 
     if (videoInputDevices.length > 0) {
-        await setVideoDevice(videoInputDevices[0].deviceId)
+        await setVideoDevice(videoInputDevices[videoInputDevices.length - 1].deviceId)
     }
 
     if (videoInputDevices.length > 1) {
