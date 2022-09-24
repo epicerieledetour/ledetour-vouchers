@@ -585,7 +585,8 @@ def build_next_actions(
 @api.get("/start", response_model=ActionResponse)
 async def start():
     return ActionResponse(
-        message_main=Message(text="Scan an authentification barcode", severity=0),
+        message_main=Message(text="Not authentified", severity=2),
+        message_detail=Message(text="Scan an authentification barcode", severity=0),
         next_actions=NextActions(scan=Action(url="/api/auth/{code}", verb="GET")),
     )
 

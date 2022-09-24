@@ -530,8 +530,8 @@ def test_start(unauthenticated_client):
     assert expected_action_response.dict() == {
         "user": None,
         "voucher": None,
-        "message_main": {"text": "Scan an authentification barcode", "severity": 0},
-        "message_detail": None,
+        "message_main": {"text": "Not authentified", "severity": 2},
+        "message_detail": {"text": "Scan an authentification barcode", "severity": 0},
         "next_actions": {
             "scan": {
                 "url": "/api/auth/{code}",
