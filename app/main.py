@@ -50,7 +50,7 @@ class VoucherPatch(BaseModel):
 
 
 class VoucherBase(BaseModel):
-    label: str
+    label: str  # TODO: remove, not needed anymore
     expiration_date: datetime.date  # TODO: handle expiration date
     value: int
     state: int  # TODO: use an enum

@@ -39,12 +39,14 @@ def build_voucher_template_dict(prefix, row):
         return {
             f"{prefix}v": "",
             f"{prefix}l": "",
+            f"{prefix}i": "",
             f"{prefix}c": "empty.svg",
         }
 
     return {
         f"{prefix}v": f"{row['value']}$",
         f"{prefix}l": row["label"],
+        f"{prefix}i": row["id"],
         f"{prefix}c": row["qrcode"],
     }
 
