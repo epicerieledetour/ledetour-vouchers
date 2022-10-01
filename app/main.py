@@ -128,7 +128,120 @@ history (
     userid TEXT NOT NULL,
     voucherid TEXT NOT NULL,
     state INTEGER NOT NULL
-)
+);
+
+CREATE TABLE IF NOT EXISTS
+states (
+	state	INTEGER,
+	label	TEXT NOT NULL UNIQUE,
+	PRIMARY KEY(state)
+);
+
+INSERT OR REPLACE INTO states
+VALUES
+    (0,'registered'),
+    (1,'distributed'),
+    (2,'cashedin'),
+    (3,'expired'),
+    (4,'deactivated');
+
+CREATE VIEW IF NOT EXISTS
+	v_history
+AS
+SELECT
+	history.date as date,
+	users.description as user,
+	history.voucherid as voucher,
+	states.label as state
+FROM history
+LEFT OUTER JOIN users ON history.userid = users.id
+LEFT OUTER JOIN states ON history.state = states.state;
+
+CREATE VIEW IF NOT EXISTS
+    v_history_last_state
+AS
+SELECT
+	MAX(history.date) as date,
+	history.voucherid as voucherid,
+	users.description as user,
+	states.label as state
+FROM
+	history
+LEFT OUTER JOIN users ON history.userid = users.id
+LEFT OUTER JOIN states ON history.state = states.state
+GROUP BY voucherid;
+
+CREATE VIEW IF NOT EXISTS
+    v_history_last_registered
+AS
+SELECT
+	MAX(history.date) as date,
+	history.voucherid as voucherid,
+	users.description as user
+FROM
+	history
+LEFT OUTER JOIN users
+WHERE
+	history.state = 0
+	AND history.userid = users.id
+GROUP BY voucherid;
+
+CREATE VIEW IF NOT EXISTS
+    v_history_last_distributed
+AS
+SELECT
+	MAX(history.date) as date,
+	history.voucherid as voucherid,
+	users.description as user
+FROM
+	history
+LEFT OUTER JOIN users
+WHERE
+	history.state = 1
+	AND history.userid = users.id
+GROUP BY voucherid;
+
+CREATE VIEW IF NOT EXISTS
+    v_history_last_cashedin
+AS
+SELECT
+	MAX(history.date) as date,
+	history.voucherid as voucherid,
+	users.description as user
+FROM
+	history
+LEFT OUTER JOIN users
+WHERE
+	history.state = 2
+	AND history.userid = users.id
+GROUP BY voucherid;
+
+CREATE VIEW IF NOT EXISTS
+    v_report
+AS
+SELECT
+	vouchers.expiration_date as expiration_date,
+	vouchers.id as voucher_id,
+	vouchers.value as value_in_dollars,
+	v_history_last_state.state as last_state,
+	v_history_last_state.date as last_state_date,
+	v_history_last_state.user as last_state_by,
+	v_history_last_registered.date as last_registered_date,
+	v_history_last_registered.user as last_registered_by,
+	v_history_last_distributed.date as last_distributed_date,
+	v_history_last_distributed.user as last_distributed_by,
+	v_history_last_cashedin.date as last_cashedin_date,
+	v_history_last_cashedin.user as last_cashedin_by
+FROM
+	vouchers
+LEFT OUTER JOIN
+    v_history_last_state ON vouchers.id = v_history_last_state.voucherid
+LEFT OUTER JOIN
+    v_history_last_registered ON vouchers.id = v_history_last_registered.voucherid
+LEFT OUTER JOIN
+    v_history_last_distributed ON vouchers.id = v_history_last_distributed.voucherid
+LEFT OUTER JOIN
+    v_history_last_cashedin ON vouchers.id = v_history_last_cashedin.voucherid;
 """
         )
 
