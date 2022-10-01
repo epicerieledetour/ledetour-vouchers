@@ -15,7 +15,7 @@ then
     exit 1
 fi
 
-_stamp=`date "+%F-%H%M%S"`
+_stamp=`TZ='America/Montreal' date "+%F-%H%M%S"`
 _dir=/tmp/ldt-vouchers/report_$_stamp
 
 _report=$_dir/vouchers-$_stamp-report.csv
