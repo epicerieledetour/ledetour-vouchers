@@ -31,6 +31,7 @@ curl \
     --ssl-reqd \
     --mail-from 'charles@epicerieledetour.org' \
     --mail-rcpt 'charles.fleche@gmail.com' \
+    --mail-rcpt 'info@epicerieledetour.org' \
     --user "charles@epicerieledetour.org:$LDTVOUCHERS_MAIL_PASSWORD" \
     -H "From: Charles Flèche <charles@epicerieledetour.org>" \
     -H "To: Charles Flèche <charles@epicerieledetour.org>" \
