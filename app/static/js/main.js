@@ -43,38 +43,15 @@ async function setup_scanner() {
     const codeReader = new ZXing.BrowserMultiFormatReader()
     codeReader.timeBetweenScansMillis = 3000
 
-    async function setVideoDevice(deviceId) {
-        const controls = await codeReader.decodeFromVideoDevice(deviceId, scanPreviewElem, async (result, err) => {
-            // TODO: handle error
-            if (result) {
-                await process_code(result.text)
-            }
-        })
-        return controls
-    }
-
-    const videoInputDevices = await codeReader.listVideoInputDevices();
-    if (videoInputDevices.length == 0) {
-        // TODO: show error message
-        return
-    }
-
-    if (videoInputDevices.length > 0) {
-        await setVideoDevice(videoInputDevices[videoInputDevices.length - 1].deviceId)
-    }
-
-    if (videoInputDevices.length > 1) {
-        const cameraSelectorElem = document.getElementById('camera-selector')
-        for (let i = 0; i < videoInputDevices.length; i++) {
-            const videoDevice = videoInputDevices[i]
-            const buttonElem = document.createElement("BUTTON");
-            buttonElem.textContent = videoDevice.label
-            buttonElem.addEventListener("click", async (el) => {
-                await setVideoDevice(videoDevice.deviceId)
-            }, false)
-            cameraSelectorElem.appendChild(buttonElem)
+    // passing a null deviceID forces the "environment" facingMode
+    // https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackConstraints/facingMode
+    // https://github.com/zxing-js/library/blob/master/src/browser/BrowserCodeReader.ts#L316
+    await codeReader.decodeFromVideoDevice(null, scanPreviewElem, async (result, err) => {
+        // TODO: handle error
+        if (result) {
+            await process_code(result.text)
         }
-    }
+    })
 }
 
 async function process_code(code) {
