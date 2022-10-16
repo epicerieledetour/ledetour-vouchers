@@ -262,6 +262,9 @@ def get_con() -> Connection:
         con.close()
 
 
+# Initialize database file
+next(get_con())
+
 # Dependency: oauth2_scheme
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
