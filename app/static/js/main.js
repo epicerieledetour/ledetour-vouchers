@@ -55,9 +55,6 @@ async function setup_scanner() {
 }
 
 async function process_code(code) {
-    // After a first successful scan the selected camera is expected to stay
-    // valid until the rest of the session, so the camera-selector can be hidden
-    document.getElementById("camera-selector").style.visibility = "hidden"
     await process_action(STATE.next_actions.scan, code)
 }
 
