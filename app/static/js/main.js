@@ -1,4 +1,5 @@
 STATE = null
+CODE_READER = null
 
 window.addEventListener('load', () => start(), false)
 window.addEventListener('load', () => setup_scanner(), false)
@@ -12,7 +13,7 @@ async function setup_scanner() {
     scanPreviewElem.addEventListener("click", () => {
         const url_code = window.location.hash.substring(1)
         if (url_code) {
-            process_code(url_code)
+            process_code(CODE_READER, controls, url_code)
         }
     })
 
@@ -40,22 +41,32 @@ async function setup_scanner() {
 
     // Barcode scanning setup
 
-    const codeReader = new ZXingBrowser.BrowserQRCodeReader()
-    codeReader.timeBetweenScansMillis = 3000
+    CODE_READER = new ZXingBrowser.BrowserQRCodeReader()
+    CODE_READER.timeBetweenScansMillis = 3000
 
     // passing a null deviceID forces the "environment" facingMode
     // https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackConstraints/facingMode
     // https://github.com/zxing-js/library/blob/master/src/browser/BrowserCodeReader.ts#L316
-    await codeReader.decodeFromVideoDevice(null, scanPreviewElem, async (result, err) => {
-        // TODO: handle error
-        if (result) {
-            await process_code(result.text)
-        }
-    })
+    const controls = await CODE_READER.decodeFromVideoDevice(null, scanPreviewElem, decode_callback)
 }
 
-async function process_code(code) {
+async function decode_callback(result, err, controls) {
+    // TODO: handle error
+    if (result) {
+        await process_code(CODE_READER, controls, result.text)
+    }
+}
+
+function asyncWait(delay) {
+    return new Promise(resolve => setTimeout(resolve, delay));
+}
+
+async function process_code(codeReader, controls, code) {
+    controls.stop()
     await process_action(STATE.next_actions.scan, code)
+    await asyncWait(3000)
+    const scanPreviewElem = document.getElementById('scan-preview')
+    await codeReader.decodeFromVideoDevice(null, scanPreviewElem, decode_callback)
 }
 
 async function process_button() {
