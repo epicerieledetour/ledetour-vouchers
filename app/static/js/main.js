@@ -40,7 +40,7 @@ async function setup_scanner() {
 
     // Barcode scanning setup
 
-    const codeReader = new ZXing.BrowserMultiFormatReader()
+    const codeReader = new ZXingBrowser.BrowserQRCodeReader()
     codeReader.timeBetweenScansMillis = 3000
 
     // passing a null deviceID forces the "environment" facingMode
