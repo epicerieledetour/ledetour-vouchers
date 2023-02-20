@@ -9,12 +9,12 @@ templatesdir = {{ templatesdir }}
 {% for asset in assets %}build $root/{{ asset }}: symlink $templatesdir/{{ asset }}
 {% endfor %}
 
-build $root/recto.svg: render $root/{{ data }} | {% for v in vouchers %}$root/{{ v.qrcode }} {% endfor %} {% for asset in assets %}$root/{{ asset }} {% endfor %}
+build $root/recto.svg: render $root/{{ data }} | $templatesdir/recto.svg {% for v in vouchers %}$root/{{ v.qrcode }} {% endfor %} {% for asset in assets %}$root/{{ asset }} {% endfor %}
   template = vouchers/recto.svg
 
 build $root/{{ recto }}: cairosvg_landscape $root/recto.svg
 
-build $root/verso.svg: render $root/{{ data }} | {% for asset in assets %}$root/{{ asset }} {% endfor %}
+build $root/verso.svg: render $root/{{ data }} | $templatesdir/verso.svg {% for asset in assets %}$root/{{ asset }} {% endfor %}
   template = vouchers/verso.svg
 
 build $root/{{ verso }}: cairosvg_landscape $root/verso.svg

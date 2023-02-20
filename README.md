@@ -8,6 +8,7 @@
 - jq
 - sqlite3
 - pdfunite
+- qrencode
 
 
 ### Run the server
@@ -29,8 +30,8 @@ python -m uvicorn app.main:app --reload --host 0.0.0.0 --ssl-keyfile ssl/ca.key 
 
 ```sh
 cd ssl
-openssl genrsa -des3 -out ca.key 2048
-openssl req -x509 -new -nodes -key ca.key -sha256 -days 1825 -out ca.pem
+openssl genrsa -des3 -out ssl/ca.key 2048
+openssl req -x509 -new -nodes -key ca.key -sha256 -days 1825 -out ssl/ca.pem
 ```
 
 ## WIP operations
