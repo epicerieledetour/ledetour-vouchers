@@ -7,6 +7,13 @@ import sys
 
 import shortuuid
 
+from app import utils
+
+_MAKE_ID_FUNC = {
+    "vouchers": utils.new_voucher_id_string,
+    "users": utils.new_user_id_string
+}
+
 parser = argparse.ArgumentParser(description="Number of shortuuids to generate")
 parser.add_argument(
     "--db",
@@ -28,9 +35,11 @@ column_names = [col[1] for col in info]
 w = csv.writer(sys.stdout, dialect="excel")
 w.writerow(column_names)
 
-for _ in range(args.count):
+make_id_func = _MAKE_ID_FUNC[args.table]
+
+for i in range(args.count):
     row = [""] * len(column_names)
-    row[column_names.index("id")] = shortuuid.uuid()
+    row[column_names.index("id")] = make_id_func(i+1)
     w.writerow(row)
 
 sys.stdout.flush

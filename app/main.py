@@ -1,13 +1,14 @@
 import datetime
 import os
 import pathlib
+import random
+import string
 
 from collections.abc import Callable
 from dataclasses import dataclass
 
 from typing import Dict, List, Union
 
-import shortuuid
 
 import sqlite3
 from sqlite3 import connect, Connection, Row
@@ -16,6 +17,8 @@ from fastapi import APIRouter, Body, Depends, FastAPI, HTTPException, status
 from fastapi.staticfiles import StaticFiles
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
+
+from . import utils
 
 DB_PATH = pathlib.Path(
     os.environ.get("LDTVOUCHERS_DB_PATH", "ldtvouchers.sqlite3")
@@ -318,11 +321,21 @@ def get_voucher(con: Connection, voucherid: str) -> dict:
     return ret
 
 
+def new_voucher_id(cur):  # TODO: type 
+    cur.execute(
+        """
+        SELECT COUNT(*) FROM vouchers
+        """
+    )
+    count, = cur.fetchone()
+    return utils.new_voucher_id_string(count+1)
+
+
 def new_voucher(con: Connection, user: User, voucher: VoucherBase) -> Voucher:
     values = voucher.dict()
-    values["id"] = shortuuid.uuid()  # TODO: check for uniqueness in DB
     with con:
         cur = con.cursor()
+        values["id"] = new_voucher_id(cur)
         cur.execute(
             """
             INSERT INTO history(date, userid, voucherid, state)
@@ -434,7 +447,7 @@ def get_user(con: Connection, userid: str) -> dict:
 
 def new_user(con: Connection, user: UserBase) -> dict:
     values = user.dict()
-    values["id"] = shortuuid.uuid()  # TODO: check for uniqueness in DB
+    values["id"] = utils.new_user_id_string() # TODO: check for uniqueness in DB
     with con:
         cur = con.cursor()
         cur.execute(

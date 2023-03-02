@@ -3,3 +3,4 @@ cairosvg
 fastapi[all]
 ninja
 pytest
+requests
