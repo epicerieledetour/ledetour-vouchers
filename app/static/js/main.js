@@ -125,8 +125,24 @@ function refresh() {
         user.textContent = STATE.user.description
     }
 
+    const scan = document.getElementById('scan')
+    set_hidden(scan, Boolean(STATE.voucher))
+
     const history = document.getElementById('history')
     set_visible(history, Boolean(STATE.voucher))
+
+    if (STATE.voucher) {
+        const voucher = STATE.voucher
+
+        const voucherTitle = document.getElementById("voucher-id")
+        voucherTitle.textContent = voucher.id
+
+        const voucherExpire = document.getElementById("voucher-expire")
+        voucherExpire.textContent = voucher.expiration_date
+
+        const voucherValue = document.getElementById("voucher-value")
+        voucherValue.textContent = voucher.value + " $"
+    }
 
     const voucher = document.getElementById('voucher')
     set_visible(voucher, Boolean(STATE.voucher))
@@ -159,6 +175,15 @@ function set_visible(el, visibility) {
     }
     else {
         el.classList.add("invisible")
+    }
+}
+
+function set_hidden(el, hidden) {
+    if (hidden) {
+      el.classList.add("hidden")
+    }
+    else {
+      el.classList.remove("hidden")
     }
 }
 
