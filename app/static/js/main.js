@@ -156,7 +156,7 @@ function refresh() {
     set_visible(detail, Boolean(STATE.message_detail))
 
     const action = document.getElementById('action')
-    action_button = STATE.next_actions.button
+    action_button = STATE.next_actions ? STATE.next_actions.button : null
     set_message(action, action_button ? action_button.message : null)
     set_visible(action, Boolean(action_button))
 }
