@@ -62,11 +62,16 @@ function asyncWait(delay) {
 }
 
 async function process_code(codeReader, controls, code) {
-    controls.stop()
     await process_action(STATE.next_actions.scan, code)
-    await asyncWait(3000)
-    const scanPreviewElem = document.getElementById('scan-preview')
-    await codeReader.decodeFromVideoDevice(null, scanPreviewElem, decode_callback)
+    if (STATE.voucher) {
+        controls.stop()
+        await asyncWait(5000)
+        const options = {}
+        options.method = "GET"
+        await query("/api/auth/" + STATE.user.id, options)
+        const scanPreviewElem = document.getElementById('scan-preview')
+        await codeReader.decodeFromVideoDevice(null, scanPreviewElem, decode_callback)
+    }
 }
 
 async function process_button() {
