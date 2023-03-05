@@ -42,7 +42,7 @@ async function setup_scanner() {
     // Barcode scanning setup
 
     CODE_READER = new ZXingBrowser.BrowserQRCodeReader()
-    CODE_READER.timeBetweenScansMillis = 3000
+    CODE_READER.timeBetweenScansMillis = 1000
 
     // passing a null deviceID forces the "environment" facingMode
     // https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackConstraints/facingMode
