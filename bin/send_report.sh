@@ -5,7 +5,7 @@ _db=$1
 
 if [ -z "$_db" ]
 then
-    echo "usage: dump_report PATH_TO_DB]"
+    echo "usage: send_report [PATH_TO_DB]"
     exit 1
 fi
 
@@ -30,12 +30,11 @@ curl \
     --url 'smtps://smtp.gmail.com:465' \
     --ssl-reqd \
     --mail-from 'charles@epicerieledetour.org' \
-    --mail-rcpt 'charles.fleche@gmail.com' \
-    --mail-rcpt 'info@epicerieledetour.org' \
+    --mail-rcpt 'bonsolidaire@actiongardien.ca' \
     --user "charles@epicerieledetour.org:$LDTVOUCHERS_MAIL_PASSWORD" \
     -H "From: Charles Flèche <charles@epicerieledetour.org>" \
-    -H "To: Charles Flèche <charles@epicerieledetour.org>" \
-    -H "Subject: [vouchers] Rapport au $_stamp" \
-    -F text="Bonjour Pointe-Saint-Charles, ci-joint le rapport automatique des bons d'achats au $_stamp." \
+    -H "To: Bon Solidaire <bonsolidaire@actiongardien.ca>" \
+    -H "Subject: [Rapport] Rapport au $_stamp" \
+    -F text="Bonjour l'équipe des Bons Solidaires, ci-joint à ce message automatique le rapport des Bons Solidaires au $_stamp." \
     -F attachment=@$_report \
     -F attachment=@$_history
