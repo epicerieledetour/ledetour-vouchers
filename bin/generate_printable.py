@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
+import datetime
 import itertools
 import json
 import pathlib
@@ -9,6 +10,7 @@ import string
 
 import jinja2
 
+_DATE_NOW = datetime.datetime.now().isoformat()
 
 def group(iterator, count, default_factory):
     group = []
@@ -93,7 +95,10 @@ for rows in group(res, vouchers_per_page, dict):
 
     # Add qrcode paths to the rows data
 
-    rows = [dict(qrcode=f"qrcode-{row['id']}.svg", **row) for row in rows]
+    rows = [dict(
+            date_now=_DATE_NOW,
+            qrcode=f"qrcode-{row['id']}.svg",
+            **row) for row in rows]
 
     # Dump the JSON
 
@@ -142,7 +147,11 @@ for user in res:
 
     # Add qrcode paths to the rows data
 
-    user = dict(qrcode="qrcode.svg", **user)
+    user = dict(
+        date_now=_DATE_NOW,
+        qrcode="qrcode.svg",
+        **user
+    )
 
     # Dump the JSON
 

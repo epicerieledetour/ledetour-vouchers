@@ -1,0 +1,6 @@
++ Try Browser QRCode reader
++ Stop scanning for 5 seconds after successful scan
++ Hide scan feedback after a successful scan
++ Restore scan feedback after successful scan
+
+- Show Voucher details when not scanning
