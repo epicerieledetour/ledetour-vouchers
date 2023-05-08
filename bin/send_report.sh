@@ -2,7 +2,6 @@
 
 _db=$1
 
-
 if [ -z "$_db" ]
 then
     echo "usage: send_report [PATH_TO_DB]"
@@ -16,10 +15,17 @@ then
 fi
 
 _stamp=`TZ='America/Montreal' date "+%F-%H%M%S"`
-_dir=/tmp/ldt-vouchers/report_$_stamp
+_dir=/var/www/ledetour-vouchers/reports
 
-_report=$_dir/vouchers-$_stamp-report.csv
-_history=$_dir/vouchers-$_stamp-history.csv
+_report_name=vouchers-$_stamp-report.csv
+_history_name=vouchers-$_stamp-history.csv
+
+_report=$_dir/$_report_name
+_history=$_dir/$_history_name
+
+_url_root=https://vouchers.epicerieledetour.org/reports
+_report_url=$_url_root/$_report_name
+_history_url=$_url_root/$_history_name
 
 mkdir -pv $_dir
 
@@ -35,6 +41,4 @@ curl \
     -H "From: Charles Flèche <charles@epicerieledetour.org>" \
     -H "To: Bon Solidaire <bonsolidaire@actiongardien.ca>" \
     -H "Subject: [Rapport] Rapport au $_stamp" \
-    -F text="Bonjour l'équipe des Bons Solidaires, ci-joint à ce message automatique le rapport des Bons Solidaires au $_stamp." \
-    -F attachment=@$_report \
-    -F attachment=@$_history
+    -F text="Bonjour l'équipe des Bons Solidaires, ci-joint à ce message automatique le rapport des Bons Solidaires au $_stamp:\n- Rapport: $_report_url\n- Historique: $_history_url"
