@@ -32,13 +32,21 @@ mkdir -pv $_dir
 sqlite3 -header -csv $_db "select * from v_report;" > $_report
 sqlite3 -header -csv $_db "select * from v_history;" > $_history
 
+_mail=/tmp/ledetour-vouchers-report-email.txt
+
+echo "From: Charles Flèche <charles@epicerieledetour.org>" > $_mail
+echo "To: Bon Solidaire <bonsolidaire@actiongardien.ca>" >> $_mail
+echo "Subject: Bons d'achats" >> $_mail
+echo >> $_mail
+echo "Bonjour l'équipe des Bons Solidaires," >> $_mail
+echo "ci-joint à ce message automatique le rapport des Bons Solidaires au $_stamp:" >> $_mail
+echo "- Rapport: $_report_url" >> $_mail
+echo "- Historique: $_history_url" >> $_mail
+
 curl \
     --url 'smtps://smtp.gmail.com:465' \
     --ssl-reqd \
     --mail-from 'charles@epicerieledetour.org' \
-    --mail-rcpt 'bonsolidaire@actiongardien.ca' \
+    --mail-rcpt 'charles.fleche@free.fr' \
     --user "charles@epicerieledetour.org:$LDTVOUCHERS_MAIL_PASSWORD" \
-    -H "From: Charles Flèche <charles@epicerieledetour.org>" \
-    -H "To: Bon Solidaire <bonsolidaire@actiongardien.ca>" \
-    -H "Subject: [Rapport] Rapport au $_stamp" \
-    -F text="Bonjour l'équipe des Bons Solidaires, ci-joint à ce message automatique le rapport des Bons Solidaires au $_stamp:\n- Rapport: $_report_url\n- Historique: $_history_url"
+    --upload-file $_mail
