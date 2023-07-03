@@ -1,6 +1,6 @@
 import uvicorn
 
-from app.corecli import parser
+from app.corecli import subparsers
 
 
 def serve(args):
@@ -9,9 +9,12 @@ def serve(args):
     )
 
 
-subs = parser.add_subparsers(title="server")
+parser = subparsers.add_parser("server")
 
-sub = subs.add_parser("serve")
-sub.add_argument("--host", default="0.0.0.0")
-sub.add_argument("--port", default=8000)
-sub.set_defaults(command=serve)
+subparsers = parser.add_subparsers()
+
+serve_parser = subparsers.add_parser("serve")
+
+serve_parser.add_argument("--host", default="0.0.0.0")
+serve_parser.add_argument("--port", default=8000)
+serve_parser.set_defaults(command=serve)
