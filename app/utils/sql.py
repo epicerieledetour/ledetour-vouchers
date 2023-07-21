@@ -6,7 +6,9 @@ from typing import Any, Dict, Tuple
 
 
 def get_connection(path: pathlib.Path) -> sqlite3.Connection:
-    return sqlite3.connect(path)
+    conn = sqlite3.connect(path)
+    conn.row_factory = sqlite3.Row
+    return conn
 
 
 class _KeysAsAttrsDict(dict):
