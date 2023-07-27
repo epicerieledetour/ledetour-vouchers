@@ -21,7 +21,12 @@ class UsersTestCase(unittest.TestCase):
         ]
         self.users = tuple(users_models.create_users(self.conn, self.bases))
 
-    def test_create(self):
+    def tearDown(self):
+        self.conn.close()
+
+    # Create
+
+    def test_create_users(self):
         self.assertEqual(len(self.users), 4)
 
         for base, user in zip(self.bases, self.users):
@@ -37,21 +42,23 @@ class UsersTestCase(unittest.TestCase):
             for user in self.users
         ]
 
-    def test_read_one(self):
+    # Read
+
+    def test_read_users__one(self):
         user_id = self.users[1].id
         users = tuple(users_models.read_users(self.conn, [user_id]))
 
         self.assertEqual(len(users), 1)
         self.assertEqual(users[0].id, user_id)
 
-    def test_read_several(self):
+    def test_read_users__several(self):
         user_ids = (self.users[1].id, self.users[3].id)
         users = tuple(users_models.read_users(self.conn, user_ids))
 
         self.assertEqual(len(users), 2)
         self.assertTupleEqual(tuple(user.id for user in users), user_ids)
 
-    def test_read_all_from_none(self):
+    def test_read_users__all_from_none(self):
         users = tuple(users_models.read_users(self.conn, None))
 
         expected_user_ids = tuple(user.id for user in self.users)
@@ -59,7 +66,7 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(len(users), 4)
         self.assertTupleEqual(tuple(user.id for user in users), expected_user_ids)
 
-    def test_read_all_from_empty_generator(self):
+    def test_read_users__all_from_empty_generator(self):
         users = tuple(users_models.read_users(self.conn, range(0)))
 
         expected_user_ids = tuple(user.id for user in self.users)
@@ -67,8 +74,23 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(len(users), 4)
         self.assertTupleEqual(tuple(user.id for user in users), expected_user_ids)
 
-    def test_update(self):
-        pass
+    # Update
+
+    def test_update_users(self):
+        users = (
+            self.users[1].copy(update={"label": "new_user1"}),
+            self.users[3].copy(update={"description": "new user3 description"}),
+        )
+
+        updated_users = tuple(users_models.update_users(self.conn, users))
+
+        expected_updated_users = tuple(
+            users_models.read_users(self.conn, (user.id for user in users))
+        )
+
+        self.assertTupleEqual(updated_users, users)
+        self.assertTupleEqual(expected_updated_users, users)
+
 
     def test_delete(self):
         pass

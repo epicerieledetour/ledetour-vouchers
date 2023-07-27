@@ -68,3 +68,30 @@ def read_users(conn: Connection, ids: Iterable[str] | None) -> Iterable[User]:
     res = conn.execute(query)
     for user in res:
         yield User(**user)
+
+
+def _diff_models(base: BaseModel, updated: BaseModel) -> dict:
+    base = base.dict()
+    updated = updated.dict()
+    return {k: updated[k] for k in base if k in updated and base[k] != updated[k]}
+
+
+def update_users(conn: Connection, updated_users: Iterable[User]) -> Iterable[User]:
+    def events():
+        diff_dicts = (
+            _diff_models(current, updated)
+            for (current, updated) in zip(current_users, updated_users)
+        )
+
+        for userid, diff_dict in zip(ids, diff_dicts):
+            for field, value in diff_dict.items():
+                yield app.events.models.UpdateEvent(
+                    elemid=userid, field=field, value=value
+                )
+
+    ids = tuple(user.id for user in updated_users)
+
+    with conn:
+        current_users = read_users(conn, ids)
+        app.events.models.append_events(conn, events())
+        return read_users(conn, ids)
