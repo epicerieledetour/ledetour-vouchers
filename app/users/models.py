@@ -20,7 +20,7 @@ class UserBase(BaseModel):
 
 class User(UserBase):
     id: str
-    deleted: bool | None
+    deleted: bool | None  # TODO: something is wrong, the sql queries expect a string
 
 
 def create_users(conn: Connection, users: Iterable[UserBase]) -> Iterable[User]:
@@ -83,9 +83,9 @@ def _diff_models(base: BaseModel, updated: BaseModel) -> dict:
     return {k: updated[k] for k in base if k in updated and base[k] != updated[k]}
 
 
-def update_users(conn: Connection, updated_users: Iterable[User]) -> Iterable[User]:
+def update_users(conn: Connection, updated_users: Iterable[User]) -> None:
     def events():
-        diff_dicts = (
+        diff_dicts = tuple(
             _diff_models(current, updated)
             for (current, updated) in zip(current_users, updated_users)
         )
@@ -96,10 +96,15 @@ def update_users(conn: Connection, updated_users: Iterable[User]) -> Iterable[Us
                     elemid=userid, field=field, value=value
                 )
 
+    updated_users = tuple(updated_users)
     ids = tuple(user.id for user in updated_users)
 
     with conn:
         current_users = read_users(conn, ids)
         events = tuple(events())
         app.events.models.append_events(conn, events)
-        return read_users(conn, ids)
+
+
+def delete_users(conn: Connection, users: Iterable[User]) -> None:
+    users = (user.copy(update={"deleted": "1"}) for user in users)
+    update_users(conn, users)

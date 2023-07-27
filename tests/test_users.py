@@ -11,6 +11,7 @@ from app.users import models as users_models
 class UsersTestCase(unittest.TestCase):
     def setUp(self):
         self.conn = app.utils.sql.get_connection(":memory:")
+
         app.db.init(self.conn)
 
         self.bases = [
@@ -86,13 +87,12 @@ class UsersTestCase(unittest.TestCase):
             self.users[3].copy(update={"description": "new user3 description"}),
         )
 
-        updated_users = tuple(users_models.update_users(self.conn, users))
+        users_models.update_users(self.conn, users)
 
         expected_updated_users = tuple(
             users_models.read_users(self.conn, (user.id for user in users))
         )
 
-        self.assertTupleEqual(updated_users, users)
         self.assertTupleEqual(expected_updated_users, users)
 
     def test_update_users__invalid_user_fails(self):
@@ -103,5 +103,19 @@ class UsersTestCase(unittest.TestCase):
 
     # Delete
 
-    def test_delete(self):
-        pass
+    def test_delete_users(self):
+        users = (self.users[1], self.users[3])
+
+        users_models.delete_users(self.conn, users)
+
+        ids = tuple(user.id for user in users_models.read_users(self.conn, None))
+
+        expected_ids = (self.users[0].id, self.users[2].id)
+
+        self.assertTupleEqual(ids, expected_ids)
+
+    def test_delete_users__invalid_user_fails(self):
+        invalid_user = users_models.User(id="unknown", label="No label")
+
+        with self.assertRaises(ValueError):
+            users_models.delete_users(self.conn, [invalid_user])

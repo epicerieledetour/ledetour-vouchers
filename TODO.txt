@@ -1,6 +1,3 @@
-+ Try Browser QRCode reader
-+ Stop scanning for 5 seconds after successful scan
-+ Hide scan feedback after a successful scan
-+ Restore scan feedback after successful scan
+# TODO
 
-- Show Voucher details when not scanning
+- [] "Undelete an entity"
