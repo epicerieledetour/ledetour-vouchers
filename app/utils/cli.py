@@ -1,10 +1,6 @@
-import shortuuid
-
 from app.corecli.cli import subparsers
 
-
-def makeid(prefix: str) -> str:
-    return f"{prefix}_{shortuuid.uuid()}"
+from . import makeid
 
 
 def _id(args):

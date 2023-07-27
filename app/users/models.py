@@ -46,8 +46,25 @@ def create_users(conn: Connection, users: Iterable[UserBase]) -> Iterable[User]:
     return read_users(conn, ids)
 
 
-def read_users(conn: Connection, ids: Iterable[str]) -> Iterable[User]:
-    query = _SQLS.read.format(ids_tuple=tuple(ids))
+def _make_ids_string_usable_in_where_id_in_clause(
+    ids: Iterable[str] | None,
+) -> str | None:
+    if not ids:
+        return None
+
+    ids_tuple = tuple(ids)
+
+    if not ids_tuple:
+        return None
+
+    ids_tuple = (f"'{id_str}'" for id_str in ids_tuple)
+    print(type(ids_tuple))
+    return ", ".join(ids_tuple)
+
+
+def read_users(conn: Connection, ids: Iterable[str] | None) -> Iterable[User]:
+    ids_string = _make_ids_string_usable_in_where_id_in_clause(ids)
+    query = _SQLS.read.format(ids_string=ids_string) if ids_string else _SQLS.list
     res = conn.execute(query)
     for user in res:
         yield User(**user)
