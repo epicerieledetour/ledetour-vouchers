@@ -58,7 +58,7 @@ def _make_ids_string_usable_in_where_id_in_clause(
         return None
 
     ids_tuple = (f"'{id_str}'" for id_str in ids_tuple)
-    print(type(ids_tuple))
+
     return ", ".join(ids_tuple)
 
 
