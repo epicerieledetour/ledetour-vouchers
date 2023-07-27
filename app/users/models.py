@@ -48,26 +48,33 @@ def create_users(conn: Connection, users: Iterable[UserBase]) -> Iterable[User]:
 
 def _make_ids_string_usable_in_where_id_in_clause(
     ids: Iterable[str] | None,
-) -> str | None:
+) -> tuple[tuple[str], str | None]:
     if not ids:
-        return None
+        return tuple(), None
 
     ids_tuple = tuple(ids)
 
     if not ids_tuple:
-        return None
+        return tuple(), None
 
-    ids_tuple = (f"'{id_str}'" for id_str in ids_tuple)
+    id_strings = (f"'{id_str}'" for id_str in ids_tuple)
 
-    return ", ".join(ids_tuple)
+    return ids_tuple, ", ".join(id_strings)
 
 
 def read_users(conn: Connection, ids: Iterable[str] | None) -> Iterable[User]:
-    ids_string = _make_ids_string_usable_in_where_id_in_clause(ids)
+    # TODO: perf, lot of buffering and traversals here
+    ids, ids_string = _make_ids_string_usable_in_where_id_in_clause(ids)
     query = _SQLS.read.format(ids_string=ids_string) if ids_string else _SQLS.list
     res = conn.execute(query)
-    for user in res:
-        yield User(**user)
+    users = tuple(User(**user) for user in res)
+
+    diff_ids = set(ids) - {user.id for user in users}
+
+    if diff_ids:
+        raise ValueError(f"Trying to fetch unknown ids: {', '.join(diff_ids)}")
+
+    return users
 
 
 def _diff_models(base: BaseModel, updated: BaseModel) -> dict:
@@ -93,5 +100,6 @@ def update_users(conn: Connection, updated_users: Iterable[User]) -> Iterable[Us
 
     with conn:
         current_users = read_users(conn, ids)
-        app.events.models.append_events(conn, events())
+        events = tuple(events())
+        app.events.models.append_events(conn, events)
         return read_users(conn, ids)

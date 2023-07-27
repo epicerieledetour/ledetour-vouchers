@@ -35,7 +35,7 @@ class UsersTestCase(unittest.TestCase):
             # See https://stackoverflow.com/questions/20050913/python-unittests-assertdictcontainssubset-recommended-alternative
             self.assertEqual(user.dict(), user.dict() | base.dict())
 
-            self.assert_(user.id)
+            self.assertTrue(user.id)
 
         expected_events = [
             (events_models.CreateEvent(user.id), events_models.StatusOK())
@@ -74,6 +74,10 @@ class UsersTestCase(unittest.TestCase):
         self.assertEqual(len(users), 4)
         self.assertTupleEqual(tuple(user.id for user in users), expected_user_ids)
 
+    def test_read_users__raise_if_unknown_id(self):
+        with self.assertRaises(ValueError):
+            users_models.read_users(self.conn, [self.users[0].id, "unknown_id"])
+
     # Update
 
     def test_update_users(self):
@@ -91,9 +95,13 @@ class UsersTestCase(unittest.TestCase):
         self.assertTupleEqual(updated_users, users)
         self.assertTupleEqual(expected_updated_users, users)
 
+    def test_update_users__invalid_user_fails(self):
+        invalid_user = users_models.User(id="unknown", label="No label")
+
+        with self.assertRaises(ValueError):
+            users_models.update_users(self.conn, [invalid_user])
+
+    # Delete
 
     def test_delete(self):
         pass
-
-    def tearDown(self):
-        self.conn.close()
