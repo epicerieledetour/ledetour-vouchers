@@ -148,7 +148,31 @@ class UsersCliTestCase(unittest.TestCase):
     # Update
 
     def test_update(self):
-        self.assertTrue(False)
+        label = "theLabel"
+        description = "The description"
+
+        ids = _ret_lines(self.run_cli("users", "create", "--label", label))
+        id = ids[0]
+
+        self.run_cli("users", "update", id, "--description", description)
+
+        lines = self.run_cli("users", "read", id).stdout
+        user = users_models.User(**json.loads(lines.decode()))
+
+        self.assertEqual(user.label, label)
+        self.assertEqual(user.description, description)
+
+    def test_update__no_args_silently_succeeds(self):
+        ids = _ret_lines(self.run_cli("users", "create"))
+        id = ids[0]
+
+        self.run_cli("users", "update", id)
+
+        lines = self.run_cli("users", "read", id).stdout
+        user = users_models.User(**json.loads(lines.decode()))
+
+        self.assertIsNone(user.label)
+        self.assertIsNone(user.description)
 
     # Delete
 

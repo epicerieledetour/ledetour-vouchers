@@ -64,11 +64,6 @@ def _make_ids_string_usable_in_where_id_in_clause(
     return ids_tuple, ", ".join(id_strings)
 
 
-"user_Eu8tMfHgGpw3uLHJiNBBfK"
-"user_6eP6VAJ9UwAWwk9QuprjJS"
-"user_9B44qwE9ZMpXa3QEJQq4N4"
-
-
 def read_users(conn: Connection, ids: Iterable[str] | None = None) -> Iterable[User]:
     # TODO: perf, lot of buffering and traversals here
     ids, ids_string = _make_ids_string_usable_in_where_id_in_clause(ids)
@@ -99,11 +94,15 @@ def update_users(conn: Connection, updated_users: Iterable[User]) -> None:
 
         for userid, diff_dict in zip(ids, diff_dicts):
             for field, value in diff_dict.items():
-                yield app.events.models.UpdateEvent(
-                    elemid=userid, field=field, value=value
-                )
+                if value is not None:
+                    yield app.events.models.UpdateEvent(
+                        elemid=userid, field=field, value=value
+                    )
 
     updated_users = tuple(updated_users)
+    for user in updated_users:
+        print(user.json())
+
     ids = tuple(user.id for user in updated_users)
 
     with conn:
