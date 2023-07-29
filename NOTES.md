@@ -12,3 +12,6 @@
 ** Simpler UI with /api/scan and /api/undo ?
 ** Single CLI
 
+
+* How can I handle different data types in an Entity-Attribute-Value design (e.g. single table with multiple columns or multiple tables per data type)?
+** https://stackoverflow.com/questions/18105644/how-can-i-handle-different-data-types-in-an-entity-attribute-value-design-e-g

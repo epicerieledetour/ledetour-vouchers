@@ -3,7 +3,7 @@ import sys
 from collections.abc import Iterable
 from sqlite3 import Connection
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 import app.events.models
 import app.utils
@@ -14,8 +14,10 @@ _SQLS = app.utils.sql.get_module_queries(sys.modules[__name__])
 
 
 class UserBase(BaseModel):
-    label: str
-    description: str | None
+    label: str | None = Field(description="A short user name, ie. LDT")
+    description: str | None = Field(
+        description="A longer, explicit user description, ie. 'Le Détour Cashier #1'"
+    )
 
 
 class User(UserBase):
@@ -62,7 +64,12 @@ def _make_ids_string_usable_in_where_id_in_clause(
     return ids_tuple, ", ".join(id_strings)
 
 
-def read_users(conn: Connection, ids: Iterable[str] | None) -> Iterable[User]:
+"user_Eu8tMfHgGpw3uLHJiNBBfK"
+"user_6eP6VAJ9UwAWwk9QuprjJS"
+"user_9B44qwE9ZMpXa3QEJQq4N4"
+
+
+def read_users(conn: Connection, ids: Iterable[str] | None = None) -> Iterable[User]:
     # TODO: perf, lot of buffering and traversals here
     ids, ids_string = _make_ids_string_usable_in_where_id_in_clause(ids)
     query = _SQLS.read.format(ids_string=ids_string) if ids_string else _SQLS.list

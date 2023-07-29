@@ -1,3 +1,36 @@
 # TODO
 
-- [] "Undelete an entity"
+## Refactoring
+
+- [ ] Replace app.utils.sql.get_connection(args.db) by args.conn
+- [ ] User.id default factory https://docs.pydantic.dev/latest/usage/fields/
+ 
+## Core
+
+- [ ] "Undelete an entity"
+
+## Doc
+
+- [ ] Architecture documentation
+
+## Cli
+
+- [ ] Display users history
+
+## QA
+
+- [ ] tox
+- [ ] tests
+- [ ] Tests on GitHub
+- [ ] Build and store wheels on GitHub ?
+- [ ] flag unused imports
+- [ ] pylints (or equivalent)
+- [ ] tox checks
+- [ ] static analysis (mypy)
+- [ ] code coverage
+- [ ] publish code coverage on GitHub
+
+## Devenv
+
+- [ ] Reorder import statements
+- [ ] Semantic releases
