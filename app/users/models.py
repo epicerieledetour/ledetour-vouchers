@@ -100,8 +100,6 @@ def update_users(conn: Connection, updated_users: Iterable[User]) -> None:
                     )
 
     updated_users = tuple(updated_users)
-    for user in updated_users:
-        print(user.json())
 
     ids = tuple(user.id for user in updated_users)
 

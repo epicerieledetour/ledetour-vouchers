@@ -177,4 +177,14 @@ class UsersCliTestCase(unittest.TestCase):
     # Delete
 
     def test_delete(self):
-        self.assertTrue(False)
+        ids = []
+        for _ in range(3):
+            ids.extend(_ret_lines(self.run_cli("users", "create")))
+
+        self.run_cli("users", "delete", ids[0], ids[2])
+
+        lines = self.run_cli("users", "list").stdout.decode()
+
+        self.assertNotIn(ids[0], lines)
+        self.assertIn(ids[1], lines)
+        self.assertNotIn(ids[2], lines)

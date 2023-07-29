@@ -18,6 +18,10 @@ _PYDANTIC_TO_ARGPARSE_TYPES = {"integer": int, "string": str}
 # Utils
 
 
+def _add_ids_argument(parser) -> None:
+    parser.add_argument("ids", nargs="+", help="User IDs to read")
+
+
 def _add_arguments_model_arguments(model: BaseModel, parser) -> None:
     for name, info in model.schema()["properties"].items():
         kwargs = {}
@@ -103,6 +107,13 @@ def _update_user(args: argparse.Namespace, user: models.User) -> None:
     models.update_users(conn, [user])
 
 
+def _delete_users(args: argparse.Namespace) -> None:
+    conn = app.utils.sql.get_connection(args.db)
+    with conn:
+        users = models.read_users(conn, args.ids)
+        models.delete_users(conn, users)
+
+
 # Parsers definition
 
 parser = subparsers.add_parser("users")
@@ -118,7 +129,7 @@ create_parser.set_defaults(command=_create_user)
 # Read
 
 read_parser = subparsers.add_parser("read")
-read_parser.add_argument("ids", nargs="+", help="User IDs to read")
+_add_ids_argument(read_parser)
 read_parser.set_defaults(command=_read_users)
 
 # List
@@ -132,3 +143,9 @@ update_parser = subparsers.add_parser("update")
 update_parser.add_argument("id", help="User ID")
 _add_arguments_model_arguments(models.User, update_parser)
 update_parser.set_defaults(command=_update_user)
+
+# Delete
+
+delete_parser = subparsers.add_parser("delete")
+_add_ids_argument(delete_parser)
+delete_parser.set_defaults(command=_delete_users)
