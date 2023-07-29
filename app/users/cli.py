@@ -23,8 +23,8 @@ def _add_ids_argument(parser) -> None:
     parser.add_argument("ids", nargs="+", help="User IDs to read")
 
 
-def _add_arguments_model_arguments(model: BaseModel, parser) -> None:
-    for name, info in model.schema()["properties"].items():
+def _add_arguments_model_arguments(model_class: BaseModel, parser) -> None:
+    for name, info in model_class.schema()["properties"].items():
         kwargs = {}
 
         description = info.get("description")
@@ -38,12 +38,12 @@ def _add_arguments_model_arguments(model: BaseModel, parser) -> None:
         parser.add_argument(f"--{name}", **kwargs)
 
 
-def _build_user_from_args(model: BaseModel, args: argparse.Namespace) -> models.User:
+def _build_model_from_args(model_class, args: argparse.Namespace) -> models.User:
     fields = {}
-    for name in model.schema()["properties"]:
+    for name in model_class.schema()["properties"]:
         if hasattr(args, name):
             fields[name] = getattr(args, name)
-    return model(**fields)
+    return model_class(**fields)
 
 
 def _get_argument(func, name, *args, **kwargs):
@@ -63,13 +63,16 @@ def _conn(func):
     return wrap
 
 
-def _user(func):
-    @wraps(func)
-    def wrap(parser_args, *args, **kwargs):
-        user = _build_user_from_args(models.User, parser_args)
-        return func(parser_args, *args, user=user, **kwargs)
+def _model(model_class, argname: str):
+    def decorator(func):
+        @wraps(func)
+        def wrap(parser_args, *args, **kwargs):
+            user = _build_model_from_args(model_class, parser_args)
+            return func(parser_args, *args, user=user, **kwargs)
 
-    return wrap
+        return wrap
+
+    return decorator
 
 
 def _print_json(func):
@@ -84,14 +87,11 @@ def _print_json(func):
 
 
 @_conn
-def _create_user(args: argparse.Namespace, conn: sqlite3.Connection) -> models.User:
-    fields = {}
-    for name in models.UserBase.schema()["properties"]:
-        if hasattr(args, name):
-            fields[name] = getattr(args, name)
-
-    users = models.create_users(conn, [models.UserBase(**fields)])
-    for user in users:
+@_model(models.UserBase, "user")
+def _create_user(
+    args: argparse.Namespace, conn: sqlite3.Connection, user: models.UserBase
+) -> models.User:
+    for user in models.create_users(conn, [user]):
         print(user.id)
 
 
@@ -115,7 +115,7 @@ def _list_users(
 
 
 @_conn
-@_user
+@_model(models.User, "user")
 def _update_user(
     args: argparse.Namespace, conn: sqlite3.Connection, user: models.User
 ) -> None:
@@ -132,7 +132,6 @@ def _delete_users(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
 # Parsers definition
 
 parser = subparsers.add_parser("users")
-
 subparsers = parser.add_subparsers()
 
 # Create
