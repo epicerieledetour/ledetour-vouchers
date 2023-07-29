@@ -1,4 +1,5 @@
 import argparse
+import sqlite3
 import sys
 
 from collections.abc import Iterable
@@ -53,6 +54,15 @@ def _get_argument(func, name, *args, **kwargs):
 # Decorators
 
 
+def _conn(func):
+    @wraps(func)
+    def wrap(parser_args, *args, **kwargs):
+        conn = conn = app.utils.sql.get_connection(parser_args.db)
+        return func(parser_args, *args, conn=conn, **kwargs)
+
+    return wrap
+
+
 def _user(func):
     @wraps(func)
     def wrap(parser_args, *args, **kwargs):
@@ -73,9 +83,8 @@ def _print_json(func):
 # Command implementations
 
 
-def _create_user(args: argparse.Namespace) -> models.User:
-    conn = app.utils.sql.get_connection(args.db)
-
+@_conn
+def _create_user(args: argparse.Namespace, conn: sqlite3.Connection) -> models.User:
     fields = {}
     for name in models.UserBase.schema()["properties"]:
         if hasattr(args, name):
@@ -86,29 +95,35 @@ def _create_user(args: argparse.Namespace) -> models.User:
         print(user.id)
 
 
+@_conn
 @_print_json
-def _read_users(args: argparse.Namespace) -> Iterable[models.User]:
-    conn = app.utils.sql.get_connection(args.db)
+def _read_users(
+    args: argparse.Namespace, conn: sqlite3.Connection
+) -> Iterable[models.User]:
     try:
         yield from models.read_users(conn, args.ids)
     except ValueError as err:
         sys.exit(err)
 
 
+@_conn
 @_print_json
-def _list_users(args: argparse.Namespace) -> Iterable[models.User]:
-    conn = app.utils.sql.get_connection(args.db)
+def _list_users(
+    args: argparse.Namespace, conn: sqlite3.Connection
+) -> Iterable[models.User]:
     yield from models.read_users(conn)
 
 
+@_conn
 @_user
-def _update_user(args: argparse.Namespace, user: models.User) -> None:
-    conn = app.utils.sql.get_connection(args.db)
+def _update_user(
+    args: argparse.Namespace, conn: sqlite3.Connection, user: models.User
+) -> None:
     models.update_users(conn, [user])
 
 
-def _delete_users(args: argparse.Namespace) -> None:
-    conn = app.utils.sql.get_connection(args.db)
+@_conn
+def _delete_users(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
     with conn:
         users = models.read_users(conn, args.ids)
         models.delete_users(conn, users)
