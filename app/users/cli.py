@@ -1,4 +1,5 @@
 import argparse
+import sys
 
 from collections.abc import Iterable
 
@@ -35,15 +36,18 @@ def _print_json(func):
 
 
 @_print_json
-def _read_users(args: argparse.Namespace) -> models.User:
+def _read_users(args: argparse.Namespace) -> Iterable[models.User]:
     conn = app.utils.sql.get_connection(args.db)
-    return models.read_users(conn, args.ids)
+    try:
+        yield from models.read_users(conn, args.ids)
+    except ValueError as err:
+        sys.exit(err)
 
 
 @_print_json
-def _list_users(args: argparse.Namespace) -> models.User:
+def _list_users(args: argparse.Namespace) -> Iterable[models.User]:
     conn = app.utils.sql.get_connection(args.db)
-    return models.read_users(conn)
+    yield from models.read_users(conn)
 
 
 parser = subparsers.add_parser("users")
