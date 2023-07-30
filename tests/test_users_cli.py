@@ -188,3 +188,8 @@ class UsersCliTestCase(unittest.TestCase):
         self.assertNotIn(ids[0], lines)
         self.assertIn(ids[1], lines)
         self.assertNotIn(ids[2], lines)
+
+    # History
+
+    def test_history(self):
+        self.assertTrue(False)
