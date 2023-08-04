@@ -1,4 +1,54 @@
 # TODO
+=======
+- Create vouchers
+- Assign distribute vouchers
+- Activate / deactivate automated report
+- No cancel scan when no more vouchers to scan
+- ID != Access Token (for users and vouchers)
+- Template pour ingestion
+- No baked status in vouchers, just events
+- Users:
+  - ID
+  - Short Name (STW, LDT, ...)
+  - Label (Share The Warmth)
+  - Token
+- Emission
+  - ID
+  - Label
+  - Expiration date
+- Voucher
+  - ID
+  - emissionid
+  - index_in_emission
+  - token
+  - value
+- UserRights:
+  - userid
+  - rightid
+- Rights:
+  - id
+  - label
+- History ?
+- Ingest template:
+  - voucherid (no access token lke 0001-ABCDE)
+  - value
+  - user (choice of distributed user in form label-id like "Le Détour - ID 0001")
+
+- SCAN: POST /api/vouchers/[token] (does not create resources)
+
+- Publish
+
+- NEXT RELEASE:
+  - Cleaner code
+  - Better reports
+  - Keep track of previous emissions
+  - Simpler to make a new emission
+  - Allow users to "scan" vouchers by ID
+
++ Try Browser QRCode reader
++ Stop scanning for 5 seconds after successful scan
++ Hide scan feedback after a successful scan
++ Restore scan feedback after successful scan
 
 ## Refactoring
 
