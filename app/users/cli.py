@@ -124,7 +124,6 @@ def _update_user(
 
 
 @_conn
-@_print_json
 def _delete_users(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
     with conn:
         users = models.read_users(conn, args.ids)
