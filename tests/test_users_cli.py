@@ -26,7 +26,9 @@ class UsersCliTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.root_path = pathlib.Path(
-            tempfile.mkdtemp(prefix=f"test-{datetime.datetime.now().isoformat()}")
+            tempfile.mkdtemp(
+                prefix=f"ldt-vouchers-test-{datetime.datetime.now().isoformat()}"
+            )
         )
 
     @classmethod
