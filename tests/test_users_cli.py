@@ -194,4 +194,32 @@ class UsersCliTestCase(unittest.TestCase):
     # History
 
     def test_history(self):
-        self.assertTrue(False)
+        ids = _ret_lines(self.run_cli("users", "create"))
+        ids.extend(_ret_lines(self.run_cli("users", "create")))
+
+        id0, id1 = ids
+
+        self.run_cli("users", "update", "--label", "label_mistake", id1)
+        self.run_cli(
+            "users", "update", "--label", "user0", "--description", "desc0", id0
+        )
+        self.run_cli(
+            "users", "update", "--label", "user1", "--description", "desc1", id1
+        )
+
+        lines = _ret_lines(self.run_cli("users", "history", id1))
+
+        expected = (
+            (events_models._EVENT_CREATE, None, None),
+            (events_models._EVENT_UPDATE, "label", None),
+            (events_models._EVENT_UPDATE, "description", None),
+            (events_models._EVENT_UPDATE, "deleted", "0"),
+            (events_models._EVENT_UPDATE, "label", "label_mistake"),
+            (events_models._EVENT_UPDATE, "label", "user1"),
+            (events_models._EVENT_UPDATE, "description", "desc1"),
+        )
+        for line, (commandid, field, value) in zip(lines, expected):
+            data = json.loads(line)
+            self.assertEqual(data["commandid"], commandid)
+            self.assertEqual(data["field"], field)
+            self.assertEqual(data["value"], value)

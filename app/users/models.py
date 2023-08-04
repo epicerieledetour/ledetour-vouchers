@@ -113,5 +113,13 @@ def update_users(conn: Connection, updated_users: Iterable[User]) -> None:
 
 
 def delete_users(conn: Connection, users: Iterable[User]) -> None:
+    # TODO: pass ids, not User
     users = (user.copy(update={"deleted": "1"}) for user in users)
     update_users(conn, users)
+
+
+def history_users(conn: Connection, ids: Iterable[str] | None = None) -> None:
+    ids, ids_string = _make_ids_string_usable_in_where_id_in_clause(ids)
+    query = app.events.models._SQLS.history.format(ids_string=ids_string)
+    res = conn.execute(query)
+    return (app.events.models.Event(**event) for event in res)

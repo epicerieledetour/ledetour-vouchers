@@ -106,6 +106,7 @@ def _read_users(
         sys.exit(err)
 
 
+# TODO ids decorator
 @_conn
 @_print_json
 def _list_users(
@@ -123,10 +124,17 @@ def _update_user(
 
 
 @_conn
+@_print_json
 def _delete_users(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
     with conn:
         users = models.read_users(conn, args.ids)
         models.delete_users(conn, users)
+
+
+@_conn
+@_print_json
+def _history_user(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
+    return models.history_users(conn, args.ids)
 
 
 # Parsers definition
@@ -163,3 +171,9 @@ update_parser.set_defaults(command=_update_user)
 delete_parser = subparsers.add_parser("delete")
 _add_ids_argument(delete_parser)
 delete_parser.set_defaults(command=_delete_users)
+
+# History
+
+history_parser = subparsers.add_parser("history")
+_add_ids_argument(history_parser)
+history_parser.set_defaults(command=_history_user)
