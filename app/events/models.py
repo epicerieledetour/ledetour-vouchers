@@ -30,8 +30,8 @@ _STATUS_INVALID_COMMAND = "status_invalid_command"
 class _EventBase(BaseModel):
     commandid: str
     elemid: str  # TODO: rename this attribute to entityid, to respect EAV naming convention
-    field: str | None  # TODO: rename this attribute to attributeid, to respect EAV naming convention
-    value: Any | None
+    field: str | None = None  # TODO: rename this attribute to attributeid, to respect EAV naming convention
+    value: Any | None = None
 
 
 class CreateEvent(_EventBase):
