@@ -9,14 +9,12 @@ from app.utils.sql import _KeysAsAttrsDict  # TODO: make _KeyAsAttrDict public
 
 
 def build_crud(
-    BaseModel: type[BaseModel],
-    EntityModel: type[BaseModel],
+    Base: type[BaseModel],
+    Entity: type[BaseModel],
     id_prefix: str,
     sqls: _KeysAsAttrsDict,
 ):
-    def create(
-        conn: Connection, entities: Iterable[BaseModel]
-    ) -> Iterable[EntityModel]:
+    def create(conn: Connection, entities: Iterable[Base]) -> Iterable[Entity]:
         def events():
             for entity, entityid in zip(entities, ids):
                 # Creation event
@@ -39,12 +37,12 @@ def build_crud(
         app.events.models.append_events(conn, events())
         return read(conn, ids)
 
-    def read(conn: Connection, ids: Iterable[str] | None = None) -> BaseModel:
+    def read(conn: Connection, ids: Iterable[str] | None = None) -> Base:
         # TODO: perf, lot of buffering and traversals here
         ids, ids_string = _make_ids_string_usable_in_where_id_in_clause(ids)
         query = sqls.read.format(ids_string=ids_string) if ids_string else sqls.list
         res = conn.execute(query)
-        entities = tuple(EntityModel(**entity_data) for entity_data in res)
+        entities = tuple(Entity(**entity_data) for entity_data in res)
 
         diff_ids = set(ids) - {entity.id for entity in entities}
 
@@ -53,7 +51,7 @@ def build_crud(
 
         return entities
 
-    def update(conn: Connection, updated_entities: Iterable[EntityModel]) -> None:
+    def update(conn: Connection, updated_entities: Iterable[Entity]) -> None:
         def events():
             diff_dicts = tuple(
                 _diff_models(current, updated)
@@ -76,7 +74,7 @@ def build_crud(
             events = tuple(events())
             app.events.models.append_events(conn, events)
 
-    def delete(conn: Connection, entities: Iterable[EntityModel]) -> None:
+    def delete(conn: Connection, entities: Iterable[Entity]) -> None:
         # TODO: pass ids, not EntityModel
         users = (entity.copy(update={"deleted": "1"}) for entity in entities)
         update(conn, users)
