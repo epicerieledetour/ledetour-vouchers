@@ -155,7 +155,7 @@ def add_crud(subparsers, Base: type[BaseModel], Entity: type[BaseModel], models)
     @_conn
     @_print_json
     def _history(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
-        return models.history_users(conn, args.ids)
+        return models.history(conn, args.ids)
 
     parser = subparsers.add_parser("history")
     _add_ids_argument(parser)
