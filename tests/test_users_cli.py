@@ -1,72 +1,13 @@
-import datetime
 import json
-import os
-import pathlib
 import subprocess
-import sqlite3
-import sys
-import tempfile
-import unittest
-
-import app.db
-import app.utils.sql
 
 from app.events import models as events_models
 from app.users import models as users_models
 
-
-def _ret_lines(process: subprocess.CompletedProcess) -> list[str]:
-    lines = process.stdout.decode().split("\n")
-    return lines[:-1]
+from .utils import _ret_lines, TestCase
 
 
-class UsersCliTestCase(unittest.TestCase):
-    root_path = None
-
-    @classmethod
-    def setUpClass(cls):
-        cls.root_path = pathlib.Path(
-            tempfile.mkdtemp(
-                prefix=f"ldt-vouchers-test-{datetime.datetime.now().isoformat()}"
-            )
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        try:
-            cls.root_path.rmdir()
-        except OSError:
-            """Root folder is not deleted so we can inspect the output
-            files in case of test failure"""
-
-    def setUp(self):
-        self.path = (
-            self.root_path / f"{self.__class__.__name__}.{self._testMethodName}.sqlite3"
-        )
-
-        try:
-            # os.remove(self.path)
-            pass
-        except FileNotFoundError:
-            pass
-
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-
-        self.run_cli("db", "init")
-
-    def tearDown(self):
-        if self._outcome.success:
-            # self.path.unlink()
-            pass
-
-    def run_cli(self, *args):
-        return subprocess.run(
-            [sys.executable, "-Xfrozen_modules=off", "-m", "app", "--db", self.path]
-            + list(args),
-            check=True,
-            capture_output=True,
-        )
-
+class UsersCliTestCase(TestCase):
     # Create
 
     def test_create__empty(self):
