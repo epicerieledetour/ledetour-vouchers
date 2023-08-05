@@ -54,7 +54,9 @@
 
 - [ ] Replace app.utils.sql.get_connection(args.db) by args.conn
 - [ ] User.id default factory https://docs.pydantic.dev/latest/usage/fields/
- 
+- [ ] Create empty user should add event for empty (None) fields
+
+
 ## Core
 
 - [ ] "Undelete an entity"
@@ -65,7 +67,12 @@
 
 ## Cli
 
-- [ ] Display users history
+- [X] Display users history
+
+## Front End
+
+- [ ] https://app#usertoken (to scan vouchers as an already identified user)
+- [ ] Enter voucher to scan by hand
 
 ## QA
 
@@ -84,3 +91,22 @@
 
 - [ ] Reorder import statements
 - [ ] Semantic releases
+
+## Emission
+
+- [ ] app emission export emissionid path
+- [ ] app emission import emissionid path
+- [ ] app emission list
+- [ ] app emission read emissionids...
+- [ ] app emission update emissionid --field=value...
+- [ ] app emission delete emissionids...
+- [ ] app emission info
+
+## Events
+
+- [ ] add userid to event
+
+## Vouchers
+
+- [ ] app --userid userid voucher scan voucherid
+- [ ] app --userid userid voucher scan --undo voucherid
