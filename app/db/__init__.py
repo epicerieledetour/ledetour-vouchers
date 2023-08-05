@@ -4,7 +4,7 @@ import app
 
 from app.utils import sql
 
-from sqlite3 import Connection
+from sqlite3 import Connection, OperationalError
 
 
 def init(conn: Connection) -> None:
@@ -12,5 +12,8 @@ def init(conn: Connection) -> None:
         for module in app.modules:
             sqls = sql.get_module_queries(module)
             if hasattr(sqls, "init"):
-                logging.debug(f"Executing {module.__name__} init.sql")
-                conn.executescript(sqls.init)
+                try:
+                    conn.executescript(sqls.init)
+                except OperationalError:
+                    logging.fatal(f"SQL error in {module.__name__} init.sql")
+                    raise
