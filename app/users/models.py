@@ -27,3 +27,9 @@ class User(UserBase):
 create_users, read_users, update_users, delete_users, history_users = build_crud(
     UserBase, User, "user", _SQLS
 )
+
+create = create_users
+read = read_users
+update = update_users
+delete = delete_users
+history = history_users
