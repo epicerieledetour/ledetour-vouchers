@@ -1,12 +1,21 @@
 import logging
 
-logging.getLogger().setLevel(logging.DEBUG)
-
 from . import corecli
 from . import db
+from . import emissions
 from . import events
 from . import serve
 from . import users
 from . import utils
 
-modules = [corecli, db, events, serve, users, utils]
+modules = [
+    corecli,
+    # db and events need to be registered before the other modules
+    # as they define the elems view
+    db,
+    events,
+    emissions,
+    serve,
+    users,
+    utils,
+]

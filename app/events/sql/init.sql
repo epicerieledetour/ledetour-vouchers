@@ -28,6 +28,7 @@ events (
     statusid TEXT NOT NULL
 );
 
+-- TODO: extract this table to a elems module
 CREATE VIEW IF NOT EXISTS
 elems -- TODO: rename this entities
 AS
