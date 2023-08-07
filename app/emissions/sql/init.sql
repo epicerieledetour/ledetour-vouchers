@@ -8,5 +8,6 @@ SELECT
     MAX(distinct case when field = 'deleted' then value end) as deleted,
     MAX(distinct case when field = 'expiration_utc' then value end) as expiration_utc
 FROM elems
+WHERE elemid LIKE 'emission_%'
 GROUP BY elemid
 ORDER BY expiration_utc

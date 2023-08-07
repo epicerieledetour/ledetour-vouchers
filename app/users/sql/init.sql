@@ -7,5 +7,6 @@ SELECT
     MAX(distinct case when field = 'description' then value end) as description,
     MAX(distinct case when field = 'deleted' then value end) as deleted
 FROM elems
+WHERE elemid LIKE 'user_%'
 GROUP BY elemid
 ORDER BY label
