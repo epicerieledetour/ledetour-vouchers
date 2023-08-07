@@ -1,3 +1,4 @@
+import csv
 import json
 import subprocess
 
@@ -183,3 +184,23 @@ class EmissionsCliTestCase(TestCase):
             self.assertEqual(data["commandid"], commandid)
             self.assertEqual(data["field"], field)
             self.assertEqual(data["value"], value)
+
+    # Import / export
+
+    def test_export__empty(self):
+        csvpath = self.testdir / "export.csv"
+
+        ids = _ret_lines(self.run_cli("emissions", "create"))
+        id = ids[0]
+
+        self.run_cli("emissions", "export", id, str(csvpath))
+
+        with csvpath.open("r") as fp:
+            reader = csv.DictReader(fp)
+
+            # TODO: warn before updating ongoing distribution, add start_date
+
+            self.assertListEqual(
+                reader.fieldnames,
+                ["voucher_index", "voucher_value_CAD", "distributor_label"],
+            )

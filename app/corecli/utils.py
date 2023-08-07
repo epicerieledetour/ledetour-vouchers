@@ -15,6 +15,7 @@ _PYDANTIC_TO_ARGPARSE_TYPES = {"integer": int, "string": str}
 # Utils
 
 
+# TODO: make public
 def _add_ids_argument(parser) -> None:
     parser.add_argument("ids", nargs="+", help="User IDs to read")
 
@@ -56,6 +57,7 @@ def _get_argument(func, name, *args, **kwargs):
 # Decorators
 
 
+# TODO: make public
 def _conn(func):
     @wraps(func)
     def wrap(parser_args, *args, **kwargs):
