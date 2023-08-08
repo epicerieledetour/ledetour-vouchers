@@ -17,7 +17,11 @@ _PYDANTIC_TO_ARGPARSE_TYPES = {"integer": int, "string": str}
 
 # TODO: make public
 def _add_ids_argument(parser) -> None:
-    parser.add_argument("ids", nargs="+", help="User IDs to read")
+    parser.add_argument("ids", nargs="+", help="One or more entity ID")
+
+
+def _add_id_argument(parser) -> None:
+    parser.add_argument("id", help="The entity ID")
 
 
 def _add_arguments_model_arguments(Model: type[BaseModel], parser) -> None:

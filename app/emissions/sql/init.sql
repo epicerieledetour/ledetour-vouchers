@@ -10,4 +10,13 @@ SELECT
 FROM elems
 WHERE elemid LIKE 'emission_%'
 GROUP BY elemid
-ORDER BY expiration_utc
+ORDER BY expiration_utc;
+
+-- TODO: Maybe there is a way to model insersion / removal of
+-- vouchers in this tableas events and make this table a view ?
+CREATE TABLE IF NOT EXISTS
+emission_contents (
+    emissionid TEXT NOT NULL,
+    voucherid TEXT NOT NULL,
+    sortnumber INT
+);

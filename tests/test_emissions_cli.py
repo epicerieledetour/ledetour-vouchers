@@ -204,3 +204,58 @@ class EmissionsCliTestCase(TestCase):
                 reader.fieldnames,
                 ["voucher_index", "voucher_value_CAD", "distributor_label"],
             )
+
+    def test_import__all_new(self):
+        importpath = self.testdir / "import.csv"
+        exportpath = self.testdir / "export.csv"
+
+        content = """voucher_index,voucher_value_CAD,distributor_label
+1,20,Dist1
+2,30,Dist2
+4,30,Dist1"""
+
+        importpath.write_text(content)
+
+        ids = _ret_lines(self.run_cli("emissions", "create"))
+        id = ids[0]
+
+        self.run_cli("users", "create", "--label", "Dist1")
+        self.run_cli("users", "create", "--label", "Dist2")
+
+        self.run_cli("emissions", "import", id, str(importpath))
+
+        self.run_cli("emissions", "export", id, str(exportpath))
+
+        with exportpath.open("r") as fp:
+            reader = csv.DictReader(fp)
+
+            self.assertDictEqual(
+                next(reader),
+                {
+                    "voucher_index": "1",
+                    "voucher_value_CAD": "20",
+                    "distributor_label": "Dist1",
+                },
+            )
+            self.assertDictEqual(
+                next(reader),
+                {
+                    "voucher_index": "2",
+                    "voucher_value_CAD": "30",
+                    "distributor_label": "Dist2",
+                },
+            )
+                        self.assertDictEqual(
+                next(reader),
+                {
+                    "voucher_index": "4",
+                    "voucher_value_CAD": "30",
+                    "distributor_label": "Dist1",
+                },
+            )
+
+    def test_import__update_and_new(self):
+        pass
+
+    def test_import__fail_and_rollback_if_some_indexes_are_duplicated(self):
+        pass

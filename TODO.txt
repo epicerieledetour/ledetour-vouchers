@@ -111,3 +111,7 @@
 
 - [ ] app --userid userid voucher scan voucherid
 - [ ] app --userid userid voucher scan --undo voucherid
+
+## Users
+
+- [ ] add user status / acl: distributor / cashier

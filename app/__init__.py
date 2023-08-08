@@ -7,6 +7,7 @@ from . import events
 from . import serve
 from . import users
 from . import utils
+from . import vouchers
 
 modules = [
     corecli,
@@ -18,4 +19,5 @@ modules = [
     serve,
     users,
     utils,
+    vouchers,
 ]
