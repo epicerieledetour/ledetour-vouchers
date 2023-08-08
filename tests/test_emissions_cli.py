@@ -257,5 +257,10 @@ class EmissionsCliTestCase(TestCase):
     def test_import__update_and_new(self):
         pass
 
-    def test_import__fail_and_rollback_if_some_indexes_are_duplicated(self):
+    def test_import__fail_and_rollback(self):
+        # _if_some_indexes_are_duplicated
+        # if an user does not exist
+        # if emissionid does not exist
         pass
+
+    

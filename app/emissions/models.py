@@ -102,9 +102,10 @@ def import_csv(conn: sqlite3.Connection, emissionid: str, fd) -> None:
         cur_contents_by_sortnumber = dict(
             (content.sortnumber, content) for content in _read_content(conn, emissionid)
         )
-        # cur_users_by_label = dict(
-        #     (user.label, user) for user in users_models.read(conn)
-        # )
+        cur_users_by_label = dict(
+            (user.label, user) for user in users_models.read(conn)
+        )
+        import 
 
         # TODO: Make a single bundle for all these events
 
@@ -118,13 +119,21 @@ def import_csv(conn: sqlite3.Connection, emissionid: str, fd) -> None:
                         vouchers_models.Voucher(
                             id=content.voucherid,
                             value_CAD=int(csvrow["voucher_value_CAD"]),
-                            status=vouchers_models.STATUS_DISTRIBUTED,
                         )
                     ],
                 )
+                vouchers_models.update(
+                    conn,
+                    [
+                        vouchers_models.Voucher(
+                            id=content.voucherid,
+                            status=vouchers_models.STATUS_DISTRIBUTED,
+                        )
+                    ],
+                    userid=cur_users_by_label[csvrow["distributor_label"]].id,
+                )
 
                 #### Next TODO
-                # Add userid in events
                 # Extend query to get the last user who set the status to `distributed`
                 # SELECT *, sortnumber as voucher_sortnumber, value_CAD as voucher_value_CAD
                 # FROM emission_contents
@@ -142,10 +151,19 @@ def import_csv(conn: sqlite3.Connection, emissionid: str, fd) -> None:
                     [
                         vouchers_models.VoucherBase(
                             value_CAD=int(csvrow["voucher_value_CAD"]),
-                            status=vouchers_models.STATUS_DISTRIBUTED,
                         )
                     ],
                 )[0]
+                vouchers_models.update(
+                    conn,
+                    [
+                        vouchers_models.Voucher(
+                            id=new_voucher.id,
+                            status=vouchers_models.STATUS_DISTRIBUTED,
+                        )
+                    ],
+                    userid=cur_users_by_label[csvrow["distributor_label"]].id,
+                )
                 _add_content(
                     conn,
                     [

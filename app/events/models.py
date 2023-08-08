@@ -28,6 +28,7 @@ _STATUS_INVALID_COMMAND = "status_invalid_command"
 
 
 class _EventBase(BaseModel):
+    userid: str | None
     commandid: str
     elemid: str  # TODO: rename this attribute to entityid, to respect EAV naming convention
     field: str | None = None  # TODO: rename this attribute to attributeid, to respect EAV naming convention
@@ -35,14 +36,18 @@ class _EventBase(BaseModel):
 
 
 class CreateEvent(_EventBase):
-    def __init__(self, elemid: str) -> None:
-        super().__init__(commandid=_EVENT_CREATE, elemid=elemid)
+    def __init__(self, userid: str, elemid: str) -> None:
+        super().__init__(userid=userid, commandid=_EVENT_CREATE, elemid=elemid)
 
 
 class UpdateEvent(_EventBase):
-    def __init__(self, elemid: str, field: str, value: str) -> None:
+    def __init__(self, userid: str, elemid: str, field: str, value: str) -> None:
         super().__init__(
-            commandid=_EVENT_UPDATE, elemid=elemid, field=field, value=value
+            userid=userid,
+            commandid=_EVENT_UPDATE,
+            elemid=elemid,
+            field=field,
+            value=value,
         )
 
 

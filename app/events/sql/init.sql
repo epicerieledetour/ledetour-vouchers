@@ -21,6 +21,7 @@ events (
     id TEXT NOT NULL PRIMARY KEY,
     bundleid TEXT,
     timestamp_utc TEXT NOT NULL,
+    userid TEXT,
     commandid TEXT NOT NULL,
     elemid TEXT NOT NULL,
     field TEXT,

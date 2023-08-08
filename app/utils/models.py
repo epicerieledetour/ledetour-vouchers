@@ -14,13 +14,15 @@ def build_crud(
     id_prefix: str,
     sqls: _KeysAsAttrsDict,
 ):
-    def create(conn: Connection, entities: Iterable[Base]) -> Iterable[Entity]:
+    def create(
+        conn: Connection, entities: Iterable[Base], userid: str = None
+    ) -> Iterable[Entity]:
         def events():
             for entity, entityid in zip(entities, ids):
                 # Creation event
 
                 # TODO: rename elemid to entityid
-                yield app.events.models.CreateEvent(elemid=entityid)
+                yield app.events.models.CreateEvent(userid=userid, elemid=entityid)
 
                 # Attribute setting events
 
@@ -29,7 +31,7 @@ def build_crud(
 
                 for field, value in data.items():
                     yield app.events.models.UpdateEvent(
-                        elemid=entityid, field=field, value=value
+                        userid=userid, elemid=entityid, field=field, value=value
                     )
 
         ids = [app.utils.makeid(id_prefix) for _ in entities]
@@ -51,7 +53,9 @@ def build_crud(
 
         return entities
 
-    def update(conn: Connection, updated_entities: Iterable[Entity]) -> None:
+    def update(
+        conn: Connection, updated_entities: Iterable[Entity], userid: str = None
+    ) -> None:
         def events():
             diff_dicts = tuple(
                 _diff_models(current, updated)
@@ -60,9 +64,9 @@ def build_crud(
 
             for entityid, diff_dict in zip(ids, diff_dicts):
                 for field, value in diff_dict.items():
-                    if value is not None:
+                    if field != "id" and value is not None:
                         yield app.events.models.UpdateEvent(
-                            elemid=entityid, field=field, value=value
+                            userid=userid, elemid=entityid, field=field, value=value
                         )
 
         updated_entities = tuple(updated_entities)
@@ -108,6 +112,9 @@ def _make_ids_string_usable_in_where_id_in_clause(
 
 
 def _diff_models(base: BaseModel, updated: BaseModel) -> dict:
-    base = base.dict()
-    updated = updated.dict()
-    return {k: updated[k] for k in base if k in updated and base[k] != updated[k]}
+    # TODO: actually implements a diff
+    return updated.dict()
+
+    # base = base.dict()
+    # updated = updated.dict()
+    # return {k: updated[k] for k in base if k in updated and base[k] != updated[k]}
