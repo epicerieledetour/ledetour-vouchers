@@ -33,12 +33,6 @@ class Voucher(VoucherBase):
     # TODO: use pattern validator voucher_*
     id: str
     deleted: bool | None = None
-    created_by: str | None
-    created_utc: datetime.datetime | None
-    distributed_by: str | None
-    distributed_utc: datetime.datetime | None
-    cashedin_by: str | None
-    cashedin_by: datetime.datetime
 
 
 create, read, update, delete, history = build_crud(
