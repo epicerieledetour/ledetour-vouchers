@@ -254,6 +254,54 @@ class EmissionsCliTestCase(TestCase):
                 },
             )
 
+    def test_import__idempotency_when_importing(self):
+        importpath = self.testdir / "import.csv"
+        exportpath = self.testdir / "export.csv"
+
+        content = """voucher_sortnumber,voucher_value_CAD,distributor_label
+1,20,Dist1
+2,30,Dist2
+4,30,Dist1"""
+
+        importpath.write_text(content)
+
+        ids = _ret_lines(self.run_cli("emissions", "create"))
+        id = ids[0]
+
+        self.run_cli("users", "create", "--label", "Dist1")
+        self.run_cli("users", "create", "--label", "Dist2")
+
+        self.run_cli("emissions", "import", id, str(importpath))
+        self.run_cli("emissions", "import", id, str(importpath))
+
+        self.run_cli("emissions", "export", id, str(exportpath))
+
+        with exportpath.open("r") as fp:
+            exported_rows = list(csv.DictReader(fp))
+
+        expected_rows = [
+            {
+                "voucher_sortnumber": "1",
+                "voucher_value_CAD": "20",
+                "distributor_label": "Dist1",
+            },
+            {
+                "voucher_sortnumber": "2",
+                "voucher_value_CAD": "30",
+                "distributor_label": "Dist2",
+            },
+            {
+                "voucher_sortnumber": "4",
+                "voucher_value_CAD": "30",
+                "distributor_label": "Dist1",
+            },
+        ]
+
+        self.assertEqual(len(exported_rows), len(expected_rows))
+
+        for exported, expected in zip(exported_rows, expected_rows):
+            self.assertDictEqual(exported, expected)
+
     def test_import__update_and_new(self):
         pass
 

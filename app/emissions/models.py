@@ -112,8 +112,9 @@ def import_csv(conn: sqlite3.Connection, emissionid: str, fd) -> None:
         # TODO: Make a single bundle for all these events
 
         for csvrow in reader:
-            if csvrow["voucher_sortnumber"] in cur_contents_by_sortnumber:
-                content = cur_sortnumbers.pop(csvrow["voucher_sortnumber"])
+            sortnumber = int(csvrow["voucher_sortnumber"])
+            if sortnumber in cur_contents_by_sortnumber:
+                content = cur_contents_by_sortnumber.pop(sortnumber)
 
                 vouchers_models.update(
                     conn,
@@ -159,7 +160,7 @@ def import_csv(conn: sqlite3.Connection, emissionid: str, fd) -> None:
                     [
                         _Content(
                             emissionid=emissionid,
-                            sortnumber=csvrow["voucher_sortnumber"],
+                            sortnumber=sortnumber,
                             voucherid=new_voucher.id,
                         )
                     ],
