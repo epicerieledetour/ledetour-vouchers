@@ -302,20 +302,72 @@ class EmissionsCliTestCase(TestCase):
         for exported, expected in zip(exported_rows, expected_rows):
             self.assertDictEqual(exported, expected)
 
-    def test_import__update_and_new(self):
-        pass
+    def test_import__update_and_new_removed(self):
+        firstimportpath = self.testdir / "import1.csv"
+        secondimportpath = self.testdir / "import2.csv"
+        exportpath = self.testdir / "export.csv"
+
+        first_import_content = """voucher_sortnumber,voucher_value_CAD,distributor_label
+1,1,Dist1
+2,20,Dist2
+4,40,Dist1"""
+
+        firstimportpath.write_text(first_import_content)
+
+        second_import_content = """voucher_sortnumber,voucher_value_CAD,distributor_label
+1,10,Dist1
+2,20,Dist1
+3,30,Dist2
+5,50,Dist2"""
+
+        secondimportpath.write_text(second_import_content)
+
+        ids = _ret_lines(self.run_cli("emissions", "create"))
+        id = ids[0]
+
+        self.run_cli("users", "create", "--label", "Dist1")
+        self.run_cli("users", "create", "--label", "Dist2")
+
+        self.run_cli("emissions", "import", id, str(firstimportpath))
+        self.run_cli("emissions", "import", id, str(secondimportpath))
+
+        self.run_cli("emissions", "export", id, str(exportpath))
+
+        with exportpath.open("r") as fp:
+            exported_rows = list(csv.DictReader(fp))
+
+        expected_rows = [
+            {
+                "voucher_sortnumber": "1",
+                "voucher_value_CAD": "10",
+                "distributor_label": "Dist1",
+            },
+            {
+                "voucher_sortnumber": "2",
+                "voucher_value_CAD": "20",
+                "distributor_label": "Dist1",
+            },
+            {
+                "voucher_sortnumber": "3",
+                "voucher_value_CAD": "30",
+                "distributor_label": "Dist2",
+            },
+            {
+                "voucher_sortnumber": "5",
+                "voucher_value_CAD": "50",
+                "distributor_label": "Dist2",
+            },
+        ]
+
+        self.assertEqual(len(exported_rows), len(expected_rows))
+
+        for exported, expected in zip(exported_rows, expected_rows):
+            self.assertDictEqual(exported, expected)
 
     def test_import__fail_and_rollback(self):
         # _if_some_indexes_are_duplicated
         # if an user does not exist
         # if emissionid does not exist
-        pass
-
-    def test_import_redistributed(self):
-        # Test if distributed by A,then redistributed by B
-        pass
-
-    def test_import_and_reimport_should_not_duplicate_vouchers(self):
         pass
 
     def test_complicated(self):

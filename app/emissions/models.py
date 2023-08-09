@@ -166,11 +166,21 @@ def import_csv(conn: sqlite3.Connection, emissionid: str, fd) -> None:
                     ],
                 )
 
-        # remove remaining cur_sortnumbers and delete vouchers
+        # TODO: also delete vouchers
+        if cur_contents_by_sortnumber:
+            _remove_content(conn, emissionid, cur_contents_by_sortnumber.keys())
 
 
 def _add_content(conn: sqlite3.Connection, contents: Iterable[_Content]) -> None:
     conn.executemany(_SQLS.contents_add, (content.dict() for content in contents))
+
+
+def _remove_content(
+    conn: sqlite3.Connection, emissionid: str, sortnumbers: Iterable[int]
+) -> None:
+    sortnumbers_string = ", ".join(str(sortnumber) for sortnumber in sortnumbers)
+    query = _SQLS.contents_remove.format(sortnumbers_string=sortnumbers_string)
+    conn.execute(query, {"emissionid": emissionid})
 
 
 def _read_content(conn: sqlite3.Connection, emissionid: str) -> Iterable[_Content]:

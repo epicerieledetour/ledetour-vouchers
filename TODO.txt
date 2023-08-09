@@ -94,24 +94,24 @@
 
 ## Emission
 
-- [ ] app emission export emissionid path
-- [ ] app emission import emissionid path
+- [X] app emission export emissionid path
+- [X] app emission import emissionid path
 - [X] app emission create
 - [X] app emission list
 - [X] app emission read emissionids...
 - [X] app emission update emissionid --field=value...
 - [X] app emission delete emissionids...
-- [ ] app emission info
+- [ ] app emission info (list vouchers + sortnumber + expiration date for an emissionid)
 
 ## Events
 
-- [ ] add userid to event
+- [X] add userid to event
+
+## Users
+
+- [ ] add user status / acl: distributor / cashier
 
 ## Vouchers
 
 - [ ] app --userid userid voucher scan voucherid
 - [ ] app --userid userid voucher scan --undo voucherid
-
-## Users
-
-- [ ] add user status / acl: distributor / cashier
