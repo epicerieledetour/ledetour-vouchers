@@ -83,13 +83,16 @@ create, read, update, delete, history = build_crud(
 )
 
 
-def export_csv(conn: sqlite3.Connection, ids: Iterable[str], fd) -> None:
+def export_csv(conn: sqlite3.Connection, emissionid: str, fd) -> None:
     writer = csv.DictWriter(
         fd,
         # TODO: extract magic strings
-        fieldnames=["voucher_index", "voucher_value_CAD", "distributor_label"],
+        fieldnames=["voucher_sortnumber", "voucher_value_CAD", "distributor_label"],
     )
     writer.writeheader()
+    rows = conn.execute(_SQLS.contents_export, {"emissionid": emissionid}).fetchall()
+    rows = ({**row} for row in rows)
+    writer.writerows(rows)
 
 
 # TODO: make str an actual ID type (cf typing.NewType)
@@ -105,7 +108,6 @@ def import_csv(conn: sqlite3.Connection, emissionid: str, fd) -> None:
         cur_users_by_label = dict(
             (user.label, user) for user in users_models.read(conn)
         )
-        import 
 
         # TODO: Make a single bundle for all these events
 
@@ -133,19 +135,7 @@ def import_csv(conn: sqlite3.Connection, emissionid: str, fd) -> None:
                     userid=cur_users_by_label[csvrow["distributor_label"]].id,
                 )
 
-                #### Next TODO
-                # Extend query to get the last user who set the status to `distributed`
-                # SELECT *, sortnumber as voucher_sortnumber, value_CAD as voucher_value_CAD
-                # FROM emission_contents
-                # JOIN vouchers ON emission_contents.voucherid = vouchers.id
-                # WHERE emissionid = 'emission_AKMPKvpPjjy5yb3e7P4h8P'
-                ####
-
-                # TODO: Find distributor and emit event in their name to distribute voucher
-
             else:
-                # create new voucher
-                # register new voucher at index
                 new_voucher = vouchers_models.create(
                     conn,
                     [

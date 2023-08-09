@@ -263,4 +263,14 @@ class EmissionsCliTestCase(TestCase):
         # if emissionid does not exist
         pass
 
-    
+    def test_import_redistributed(self):
+        # Test if distributed by A,then redistributed by B
+        pass
+
+
+    def test_complicated(self):
+        # Distributed by A
+        # Re distributed by B
+        # Scanned by C
+        # Cancelled scan by C
+        # Scanned by D
