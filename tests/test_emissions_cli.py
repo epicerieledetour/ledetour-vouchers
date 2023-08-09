@@ -209,7 +209,7 @@ class EmissionsCliTestCase(TestCase):
         importpath = self.testdir / "import.csv"
         exportpath = self.testdir / "export.csv"
 
-        content = """voucher_index,voucher_value_CAD,distributor_label
+        content = """voucher_sortnumber,voucher_value_CAD,distributor_label
 1,20,Dist1
 2,30,Dist2
 4,30,Dist1"""
@@ -232,7 +232,7 @@ class EmissionsCliTestCase(TestCase):
             self.assertDictEqual(
                 next(reader),
                 {
-                    "voucher_index": "1",
+                    "voucher_sortnumber": "1",
                     "voucher_value_CAD": "20",
                     "distributor_label": "Dist1",
                 },
@@ -240,15 +240,15 @@ class EmissionsCliTestCase(TestCase):
             self.assertDictEqual(
                 next(reader),
                 {
-                    "voucher_index": "2",
+                    "voucher_sortnumber": "2",
                     "voucher_value_CAD": "30",
                     "distributor_label": "Dist2",
                 },
             )
-                        self.assertDictEqual(
+            self.assertDictEqual(
                 next(reader),
                 {
-                    "voucher_index": "4",
+                    "voucher_sortnumber": "4",
                     "voucher_value_CAD": "30",
                     "distributor_label": "Dist1",
                 },
@@ -267,6 +267,8 @@ class EmissionsCliTestCase(TestCase):
         # Test if distributed by A,then redistributed by B
         pass
 
+    def test_import_and_reimport_should_not_duplicate_vouchers(self):
+        pass
 
     def test_complicated(self):
         # Distributed by A
@@ -274,3 +276,4 @@ class EmissionsCliTestCase(TestCase):
         # Scanned by C
         # Cancelled scan by C
         # Scanned by D
+        pass
