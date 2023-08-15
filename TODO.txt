@@ -115,3 +115,14 @@
 
 - [ ] app --userid userid voucher scan voucherid
 - [ ] app --userid userid voucher scan --undo voucherid
+
+
+Cases:
+  Valid
+    
+- Unknown token
+- Unauth'ed
+- Auth but no scan ACL
+- 
+
+tokenid, userid, voucherid, request
