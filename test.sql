@@ -21,30 +21,18 @@ CREATE TABLE vouchers (
     FOREIGN KEY(cashedin_by) REFERENCES users(userid)
 );
 
-CREATE TABLE actions (
-    actionid INTEGER PRIMARY KEY,
-    timestamp_utc DATETIME DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
-    req_usertoken TEXT,
-    req_vouchertoken TEXT,
-    request TEXT NOT NULL,
-    response TEXT,
-
-    FOREIGN KEY(req_usertoken) REFERENCES tokens(token),
-    FOREIGN KEY(req_vouchertoken) REFERENCES tokens(token)
-);
-
 CREATE TABLE levels (
     levelid TEXT PRIMARY KEY
 );
-
 INSERT INTO levels (levelid)
 VALUES
     ("ok"),
     ("warning"),
     ("error");
 
-CREATE TABLE statuses (
-    statusid TEXT PRIMARY KEY,
+
+CREATE TABLE responses (
+    responseid TEXT PRIMARY KEY,
     httpcode INTEGER NOT NULL,
     levelid TEXT NOT NULL,
     set_cashin INTEGER,
@@ -53,7 +41,7 @@ CREATE TABLE statuses (
 
     FOREIGN KEY(levelid) REFERENCES levels(levelid)
 );
-INSERT INTO statuses (statusid, httpcode, levelid, set_cashin, can_undo, description)
+INSERT INTO responses (responseid, httpcode, levelid, set_cashin, can_undo, description)
 VALUES
     (
         "error_voucher_unauthentified", 401, "error", NULL, NULL,
@@ -93,11 +81,21 @@ VALUES
     )
 ;
 
-CREATE TABLE responses (
-    responseid INTEGER PRIMARY KEY,
-    statusid TEXT NOT NULL,
+CREATE TABLE actions (
+    actionid INTEGER PRIMARY KEY,
+    timestamp_utc DATETIME DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+    req_usertoken TEXT,
+    req_vouchertoken TEXT,
+    userid INTEGER,
+    voucherid INTEGER,
+    request TEXT NOT NULL,
+    responseid TEXT,
 
-    FOREIGN KEY(statusid) REFERENCES statuses(statusid)
+    FOREIGN KEY(req_usertoken) REFERENCES tokens(token),
+    FOREIGN KEY(req_vouchertoken) REFERENCES tokens(token),
+    FOREIGN KEY(userid) REFERENCES users(userid),
+    FOREIGN KEY(voucherid) REFERENCES vouchers(voucherid),
+    FOREIGN KEY(responseid) REFERENCES responses(responseid)
 );
 
 CREATE TABLE tokens (
@@ -132,15 +130,18 @@ BEGIN
         );
 END;
 
--- CREATE TRIGGER update_voucher_on_action
--- INSERT ON actions
--- BEGIN
---     UPDATE vouchers
---         SET
---             cashedin_by = new.userid,
---             cashedin_utc = new.timestamp_utc
---         WHERE voucherid = new.voucherid;
--- END;
+--CREATE TRIGGER update_voucher_on_action
+--INSERT ON actions
+--BEGIN
+--    UPDATE vouchers
+--    SET
+--    cashedin_by = new.userid,
+--    cashedin_utc = new.timestamp_utc
+--    FROM vouchers v
+--    JOIN actions a ON a.actionid = new.actionid
+--    JOIN responses r ON r.responseid = a.responseid
+--    WHERE voucherid = new.voucherid;
+--END;
 
 CREATE VIEW dectree AS
 SELECT
@@ -182,28 +183,40 @@ LEFT JOIN vouchers v ON tkv.tablename = 'vouchers' AND tkv.idintable = v.voucher
 LEFT JOIN emissions e ON v.emissionid = e.emissionid;
 -- LEFT JOIN vouchers ON tokens.tablename = 'vouchers' AND tokens.idintable = vouchers.voucherid;
 
--- CREATE TRIGGER compute_action_response
--- AFTER INSERT ON actions
--- BEGIN
---     UPDATE actions
---     -- SET response = 'default_action'
---     SET response =
---     -- printf("alwayssame-%d", new.actionid)
---     printf("dectre-%d", dtactionid)
---     -- CASE
---     --     WHEN voucherid != NULL THEN "usr"
---     --     WHEN voucherid == NULL THEN "vch"
---     -- END
---     FROM (SELECT actionid as dtactionid FROM dectree WHERE actionid = new.actionid)
---     WHERE actionid = new.actionid;
---     -- CASE
---     --     WHEN voucherid IS NULL THEN "for_userauth"
---     --     WHEN voucherid IS NOT NULL THEN "for_voucher"
---     -- END;
---     -- LEFT JOIN tokens ON actions.token = tokens.token
---     -- LEFT JOIN users ON tokens.tablename = 'users' AND tokens.idintable = users.userid
---     -- LEFT JOIN vouchers ON tokens.tablename = 'vouchers' AND tokens.idintable = vouchers.voucherid;
--- END;
+CREATE TRIGGER compute_action_response
+AFTER INSERT ON actions
+BEGIN
+    UPDATE actions
+    SET
+        userid = COALESCE(a.userid, u.userid),
+	voucherid = COALESCE(a.voucherid, v.voucherid),
+        responseid =
+    CASE
+        WHEN actions.req_vouchertoken IS NOT NULL
+        THEN  -- Voucher scan
+            CASE
+                WHEN u.userid IS NULL THEN "error_voucher_unauthentified"  -- 401
+                WHEN v.voucherid IS NULL THEN "error_voucher_invalid_token"  -- 404
+                WHEN actions.timestamp_utc > expiration_utc THEN "error_voucher_expired"  -- 403
+                WHEN cashedin_by IS NULL THEN "ok_voucher_cashedin"  -- 200
+                WHEN cashedin_by != u.userid THEN "error_voucher_cashedin_by_another_user" -- 403
+                WHEN cashedin_utc < date('now','-15 min') THEN "warning_voucher_cannot_undo_cashedin" -- 200
+                ELSE "warning_voucher_can_undo_cashedin"  -- 200
+            END
+        ELSE  -- Auth scan
+            CASE
+                WHEN u.userid IS NULL THEN "error_user_invalid_token"  -- Tested
+                ELSE "ok_user_authentified"  -- Tested
+            END
+    END
+    FROM actions a
+        LEFT JOIN tokens tku ON a.req_usertoken = tku.token
+        LEFT JOIN users u ON tku.tablename = 'users' AND tku.idintable = u.userid
+        LEFT JOIN tokens tkv ON a.req_vouchertoken = tkv.token
+        LEFT JOIN vouchers v ON tkv.tablename = 'vouchers' AND tkv.idintable = v.voucherid
+        LEFT JOIN emissions e ON v.emissionid = e.emissionid	
+    WHERE actions.actionid = new.actionid;
+END;
 
 INSERT INTO emissions (expiration_utc)
 VALUES
@@ -266,6 +279,7 @@ VALUES ("tokusr_cashier", "scan");
 
 -- Selects
 
+SELECT * FROM responses;
 SELECT * FROM users;
 SELECT * FROM emissions;
 SELECT * FROM vouchers;
@@ -276,9 +290,9 @@ SELECT * FROM dectree;
 
 
 -- TODO
--- Trigger to create a response row
--- Trigger to set voucher status
--- Continue tests
--- Add undo
--- Add set
--- Write decision tree in doc
+-- + Trigger to create a response row
+-- - Trigger to set voucher status
+-- - Continue tests
+-- - Add undo
+-- - Add set
+-- - Write decision tree in doc
