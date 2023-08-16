@@ -83,7 +83,7 @@ VALUES
 
 CREATE TABLE actions (
     actionid INTEGER PRIMARY KEY,
-    timestamp_utc DATETIME DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+    timestamp_utc DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     req_usertoken TEXT,
     req_vouchertoken TEXT,
     userid INTEGER,
@@ -130,18 +130,28 @@ BEGIN
         );
 END;
 
---CREATE TRIGGER update_voucher_on_action
---INSERT ON actions
---BEGIN
---    UPDATE vouchers
---    SET
---    cashedin_by = new.userid,
---    cashedin_utc = new.timestamp_utc
---    FROM vouchers v
---    JOIN actions a ON a.actionid = new.actionid
---    JOIN responses r ON r.responseid = a.responseid
---    WHERE voucherid = new.voucherid;
---END;
+CREATE TRIGGER update_voucher_on_action
+AFTER UPDATE OF responseid ON actions
+BEGIN
+    UPDATE vouchers
+    SET
+      cashedin_by =
+        CASE
+	    WHEN set_cashin IS NULL THEN v.cashedin_by
+	    WHEN set_cashin = 0 THEN NULL
+	    WHEN set_cashin = 1 THEN new.userid
+       END,
+      cashedin_utc =
+        CASE
+	    WHEN set_cashin IS NULL THEN v.cashedin_utc
+	    WHEN set_cashin = 0 THEN NULL
+	    WHEN set_cashin = 1 THEN new.timestamp_utc
+       END
+    FROM vouchers v
+    JOIN actions a ON a.actionid = new.actionid
+    JOIN responses r ON r.responseid = a.responseid
+    WHERE vouchers.voucherid = new.voucherid;
+END;
 
 CREATE VIEW dectree AS
 SELECT
@@ -197,10 +207,10 @@ BEGIN
             CASE
                 WHEN u.userid IS NULL THEN "error_voucher_unauthentified"  -- 401
                 WHEN v.voucherid IS NULL THEN "error_voucher_invalid_token"  -- 404
-                WHEN actions.timestamp_utc > expiration_utc THEN "error_voucher_expired"  -- 403
-                WHEN cashedin_by IS NULL THEN "ok_voucher_cashedin"  -- 200
-                WHEN cashedin_by != u.userid THEN "error_voucher_cashedin_by_another_user" -- 403
-                WHEN cashedin_utc < date('now','-15 min') THEN "warning_voucher_cannot_undo_cashedin" -- 200
+                WHEN a.timestamp_utc > expiration_utc THEN "error_voucher_expired"  -- 403
+                WHEN v.cashedin_by IS NULL THEN "ok_voucher_cashedin"  -- 200
+                WHEN v.cashedin_by != u.userid THEN "error_voucher_cashedin_by_another_user" -- 403
+                WHEN v.cashedin_utc < datetime(a.timestamp_utc, '-15 minute') THEN "warning_voucher_cannot_undo_cashedin" -- 200
                 ELSE "warning_voucher_can_undo_cashedin"  -- 200
             END
         ELSE  -- Auth scan
@@ -247,8 +257,9 @@ VALUES ("tokusr_cashier", "tokvch_invalid", "scan");
 
 -- error_voucher_expired
 INSERT INTO actions (req_usertoken, req_vouchertoken, timestamp_utc, request)
-VALUES ("tokusr_cashier", "tokvch_1", date('now', '+4 month'), "scan");
-
+--VALUES ("tokusr_cashier", "tokvch_1", date('now', '+4 month'), "scan");
+VALUES ("tokusr_cashier", "tokvch_1", datetime('now', '+4 month'), "scan");
+--strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
 -- ok_voucher_cashedin
 INSERT INTO actions (req_usertoken, req_vouchertoken, request)
 VALUES ("tokusr_cashier", "tokvch_1", "scan");
@@ -258,23 +269,23 @@ INSERT INTO actions (req_usertoken, req_vouchertoken, request)
 VALUES ("tokusr_cashier2", "tokvch_1", "scan");
 
 -- ok_voucher_cannot_undo_cashedin
-INSERT INTO actions (req_usertoken, req_vouchertoken, timestamp_utc, request)
-VALUES ("tokusr_cashier", "tokvch_1", date('now', '+ 30min'), "scan");
+--INSERT INTO actions (req_usertoken, req_vouchertoken, timestamp_utc, request)
+--VALUES ("tokusr_cashier", "tokvch_1", datetime('now', '+30 minute'), "scan");
 
 -- ok_voucher_can_undo_cashedin
-INSERT INTO actions (req_usertoken, req_vouchertoken, timestamp_utc, request)
-VALUES ("tokusr_cashier", "tokvch_1", date('now', '+ 1min'), "scan");
+--INSERT INTO actions (req_usertoken, req_vouchertoken, timestamp_utc, request)
+--VALUES ("tokusr_cashier", "tokvch_1", date('now', '+ 1min'), "scan");
 
 
 -- User
 
 -- error_user_invalid_token
-INSERT INTO actions (req_usertoken, request)
-VALUES ("tokusr_invalid", "scan");
+--INSERT INTO actions (req_usertoken, request)
+--VALUES ("tokusr_invalid", "scan");
 
 -- ok_user_authentified
-INSERT INTO actions (req_usertoken, request)
-VALUES ("tokusr_cashier", "scan");
+--INSERT INTO actions (req_usertoken, request)
+--VALUES ("tokusr_cashier", "scan");
 
 
 -- Selects
@@ -285,7 +296,7 @@ SELECT * FROM emissions;
 SELECT * FROM vouchers;
 SELECT * FROM tokens;
 SELECT * FROM actions;
-SELECT * FROM dectree;
+--SELECT * FROM dectree;
 
 
 
