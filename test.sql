@@ -15,7 +15,8 @@ CREATE TABLE vouchers (
     emissionid INTEGER NOT NULL,
     sortnumber INTEGER NOT NULL,
     cashedin_by INTEGER,
-    cashedin_utc TEXT,
+    cashedin_utc DATETIME,
+    undo_expiration_utc DATETIME,
 
     FOREIGN KEY(emissionid) REFERENCES emissions(emissionid),
     FOREIGN KEY(cashedin_by) REFERENCES users(userid)
@@ -36,47 +37,48 @@ CREATE TABLE responses (
     httpcode INTEGER NOT NULL,
     levelid TEXT NOT NULL,
     set_cashin INTEGER,
+    undo_timeout_datefunc_modifier TEXT,  -- Modifier like "+5 minute" used in date functions, see https://www.sqlite.org/lang_datefunc.html
     can_undo INTEGER,
     description TEXT,
 
     FOREIGN KEY(levelid) REFERENCES levels(levelid)
 );
-INSERT INTO responses (responseid, httpcode, levelid, set_cashin, can_undo, description)
+INSERT INTO responses (responseid, httpcode, levelid, set_cashin, undo_timeout_datefunc_modifier, can_undo, description)
 VALUES
     (
-        "error_voucher_unauthentified", 401, "error", NULL, NULL,
+        "error_voucher_unauthentified", 401, "error", NULL, NULL, NULL,
         "Invalid user authorization"
     ),
     (
-        "error_voucher_invalid_token", 404, "error", NULL, NULL,
+        "error_voucher_invalid_token", 404, "error", NULL, NULL, NULL,
         "Invalid voucher"
     ),
     (
-        "error_voucher_expired", 403, "error", NULL, NULL,
+        "error_voucher_expired", 403, "error", NULL, NULL, NULL,
         "Voucher has expired"
     ),
     (
-        "ok_voucher_cashedin", 200, "ok", 1, 1,
+        "ok_voucher_cashedin", 200, "ok", 1, "+5 minute", 1,
         "Voucher cashedin"
     ),
     (
-        "error_voucher_cashedin_by_another_user", 403, "error", NULL, NULL,
+        "error_voucher_cashedin_by_another_user", 403, "error", NULL, NULL, NULL,
         "Voucher has already cashedin by another user"
     ),
     (
-        "warning_voucher_cannot_undo_cashedin", 200, "warning", NULL, NULL,
+        "warning_voucher_cannot_undo_cashedin", 200, "warning", NULL, NULL, NULL,
         "Voucher has already been cashed by the user but too long ago so it can't be undone"
     ),
     (
-        "warning_voucher_can_undo_cashedin", 200, "warning", NULL, 1,
+        "warning_voucher_can_undo_cashedin", 200, "warning", NULL, 1, NULL,
         "Voucher has already been cashed in by the user but recently enough so they can still undo"
     ),
     (
-        "error_user_invalid_token", 401, "error", NULL, NULL,
+        "error_user_invalid_token", 401, "error", NULL, NULL, NULL,
         "User auth token can not be found"
     ),
     (
-        "ok_user_authentified", 200, "error", NULL, NULL,
+        "ok_user_authentified", 200, "error", NULL, NULL, NULL,
         "User has been authentified"
     )
 ;
@@ -135,21 +137,27 @@ AFTER UPDATE OF responseid ON actions
 BEGIN
     UPDATE vouchers
     SET
-      cashedin_by =
-        CASE
-	    WHEN set_cashin IS NULL THEN v.cashedin_by
-	    WHEN set_cashin = 0 THEN NULL
-	    WHEN set_cashin = 1 THEN new.userid
-       END,
-      cashedin_utc =
-        CASE
-	    WHEN set_cashin IS NULL THEN v.cashedin_utc
-	    WHEN set_cashin = 0 THEN NULL
-	    WHEN set_cashin = 1 THEN new.timestamp_utc
-       END
+        cashedin_by =
+            CASE
+                WHEN r.set_cashin IS NULL THEN vouchers.cashedin_by
+                WHEN r.set_cashin = 0 THEN NULL
+                WHEN r.set_cashin = 1 THEN new.userid
+            END,
+        cashedin_utc =
+            CASE
+                WHEN r.set_cashin IS NULL THEN vouchers.cashedin_utc
+                WHEN r.set_cashin = 0 THEN NULL
+                WHEN r.set_cashin = 1 THEN new.timestamp_utc
+            END,
+        undo_expiration_utc =
+            CASE
+                WHEN r.set_cashin IS NULL THEN vouchers.undo_expiration_utc
+                WHEN r.set_cashin = 0 THEN NULL
+                WHEN r.set_cashin = 1 THEN datetime(a.timestamp_utc, r.undo_timeout_datefunc_modifier)
+            END
     FROM vouchers v
-    JOIN actions a ON a.actionid = new.actionid
-    JOIN responses r ON r.responseid = a.responseid
+    LEFT JOIN actions a ON a.actionid = new.actionid
+    LEFT JOIN responses r ON r.responseid = a.responseid
     WHERE vouchers.voucherid = new.voucherid;
 END;
 
@@ -175,7 +183,7 @@ SELECT
                 WHEN timestamp_utc > expiration_utc THEN "error_voucher_expired"  -- 403
                 WHEN cashedin_by IS NULL THEN "ok_voucher_cashedin"  -- 200
                 WHEN cashedin_by != userid THEN "error_voucher_cashedin_by_another_user" -- 403
-                WHEN cashedin_utc < date('now','-15 min') THEN "warning_voucher_cannot_undo_cashedin" -- 200
+                WHEN timestamp_utc > v.undo_expiration_utc THEN "warning_voucher_cannot_undo_cashedin" -- 200
                 ELSE "warning_voucher_can_undo_cashedin"  -- 200
             END
         ELSE  -- Auth scan
@@ -210,7 +218,7 @@ BEGIN
                 WHEN a.timestamp_utc > expiration_utc THEN "error_voucher_expired"  -- 403
                 WHEN v.cashedin_by IS NULL THEN "ok_voucher_cashedin"  -- 200
                 WHEN v.cashedin_by != u.userid THEN "error_voucher_cashedin_by_another_user" -- 403
-                WHEN v.cashedin_utc < datetime(a.timestamp_utc, '-15 minute') THEN "warning_voucher_cannot_undo_cashedin" -- 200
+                WHEN a.timestamp_utc > v.undo_expiration_utc THEN "warning_voucher_cannot_undo_cashedin" -- 200
                 ELSE "warning_voucher_can_undo_cashedin"  -- 200
             END
         ELSE  -- Auth scan
@@ -241,8 +249,9 @@ VALUES
 
 INSERT INTO vouchers (emissionid, sortnumber)
 VALUES
-    (1, 1),
-    (2, 1);
+    (1, 1)
+  ,(2, 1)
+;
 
 
 -- Voucher
@@ -269,23 +278,22 @@ INSERT INTO actions (req_usertoken, req_vouchertoken, request)
 VALUES ("tokusr_cashier2", "tokvch_1", "scan");
 
 -- ok_voucher_cannot_undo_cashedin
---INSERT INTO actions (req_usertoken, req_vouchertoken, timestamp_utc, request)
---VALUES ("tokusr_cashier", "tokvch_1", datetime('now', '+30 minute'), "scan");
+INSERT INTO actions (req_usertoken, req_vouchertoken, timestamp_utc, request)
+VALUES ("tokusr_cashier", "tokvch_1", datetime('now', '+6 minute'), "scan");
 
 -- ok_voucher_can_undo_cashedin
---INSERT INTO actions (req_usertoken, req_vouchertoken, timestamp_utc, request)
---VALUES ("tokusr_cashier", "tokvch_1", date('now', '+ 1min'), "scan");
-
+INSERT INTO actions (req_usertoken, req_vouchertoken, timestamp_utc, request)
+VALUES ("tokusr_cashier", "tokvch_1", datetime('now', '+1 minute'), "scan");
 
 -- User
 
 -- error_user_invalid_token
---INSERT INTO actions (req_usertoken, request)
---VALUES ("tokusr_invalid", "scan");
+INSERT INTO actions (req_usertoken, request)
+VALUES ("tokusr_invalid", "scan");
 
 -- ok_user_authentified
---INSERT INTO actions (req_usertoken, request)
---VALUES ("tokusr_cashier", "scan");
+INSERT INTO actions (req_usertoken, request)
+VALUES ("tokusr_cashier", "scan");
 
 
 -- Selects
@@ -302,8 +310,9 @@ SELECT * FROM actions;
 
 -- TODO
 -- + Trigger to create a response row
--- - Trigger to set voucher status
--- - Continue tests
+-- + Trigger to set voucher status
+-- + Continue tests
+-- + Data driven undo_expiration_utc
 -- - Add undo
 -- - Add set
 -- - Write decision tree in doc
