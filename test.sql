@@ -161,46 +161,6 @@ BEGIN
     WHERE vouchers.voucherid = new.voucherid;
 END;
 
-CREATE VIEW dectree AS
-SELECT
-    actionid,
-    req_usertoken,
-    req_vouchertoken,
-    request,
-    '',
-    userid,
-    voucherid,
-    expiration_utc,
-    timestamp_utc,
-    expiration_utc > timestamp_utc,
-    '',
-    CASE
-        WHEN req_vouchertoken IS NOT NULL
-        THEN  -- Voucher scan
-            CASE
-                WHEN userid IS NULL THEN "error_voucher_unauthentified"  -- 401
-                WHEN voucherid IS NULL THEN "error_voucher_invalid_token"  -- 404
-                WHEN timestamp_utc > expiration_utc THEN "error_voucher_expired"  -- 403
-                WHEN cashedin_by IS NULL THEN "ok_voucher_cashedin"  -- 200
-                WHEN cashedin_by != userid THEN "error_voucher_cashedin_by_another_user" -- 403
-                WHEN timestamp_utc > v.undo_expiration_utc THEN "warning_voucher_cannot_undo_cashedin" -- 200
-                ELSE "warning_voucher_can_undo_cashedin"  -- 200
-            END
-        ELSE  -- Auth scan
-            CASE
-                WHEN userid IS NULL THEN "error_user_invalid_token"  -- Tested
-                ELSE "ok_user_authentified"  -- Tested
-            END
-    END
-    AS response
-FROM actions a
-LEFT JOIN tokens tku ON a.req_usertoken = tku.token
-LEFT JOIN users u ON tku.tablename = 'users' AND tku.idintable = u.userid
-LEFT JOIN tokens tkv ON a.req_vouchertoken = tkv.token
-LEFT JOIN vouchers v ON tkv.tablename = 'vouchers' AND tkv.idintable = v.voucherid
-LEFT JOIN emissions e ON v.emissionid = e.emissionid;
--- LEFT JOIN vouchers ON tokens.tablename = 'vouchers' AND tokens.idintable = vouchers.voucherid;
-
 CREATE TRIGGER compute_action_response
 AFTER INSERT ON actions
 BEGIN
@@ -210,21 +170,28 @@ BEGIN
 	voucherid = COALESCE(a.voucherid, v.voucherid),
         responseid =
     CASE
-        WHEN actions.req_vouchertoken IS NOT NULL
+        WHEN actions.req_vouchertoken IS NOT NULL  -- Q1
         THEN  -- Voucher scan
             CASE
-                WHEN u.userid IS NULL THEN "error_voucher_unauthentified"  -- 401
-                WHEN v.voucherid IS NULL THEN "error_voucher_invalid_token"  -- 404
-                WHEN a.timestamp_utc > expiration_utc THEN "error_voucher_expired"  -- 403
-                WHEN v.cashedin_by IS NULL THEN "ok_voucher_cashedin"  -- 200
-                WHEN v.cashedin_by != u.userid THEN "error_voucher_cashedin_by_another_user" -- 403
-                WHEN a.timestamp_utc > v.undo_expiration_utc THEN "warning_voucher_cannot_undo_cashedin" -- 200
-                ELSE "warning_voucher_can_undo_cashedin"  -- 200
+                WHEN u.userid IS NULL  -- Q3
+                    THEN "error_voucher_unauthentified"
+                WHEN v.voucherid IS NULL  -- Q4
+                    THEN "error_voucher_invalid_token"
+                WHEN a.timestamp_utc > expiration_utc  -- Q5
+                    THEN "error_voucher_expired"
+                WHEN v.cashedin_by IS NULL  -- Q6
+                    THEN "ok_voucher_cashedin"
+                WHEN v.cashedin_by != u.userid  -- Q7
+                    THEN "error_voucher_cashedin_by_another_user"
+                WHEN a.timestamp_utc > v.undo_expiration_utc  -- Q8
+                    THEN "warning_voucher_cannot_undo_cashedin"
+                    ELSE "warning_voucher_can_undo_cashedin"
             END
         ELSE  -- Auth scan
             CASE
-                WHEN u.userid IS NULL THEN "error_user_invalid_token"  -- Tested
-                ELSE "ok_user_authentified"  -- Tested
+                WHEN u.userid IS NULL  -- Q2
+                    THEN "error_user_invalid_token"
+                    ELSE "ok_user_authentified"
             END
     END
     FROM actions a
@@ -249,9 +216,8 @@ VALUES
 
 INSERT INTO vouchers (emissionid, sortnumber)
 VALUES
-    (1, 1)
-  ,(2, 1)
-;
+    (1, 1),
+    (2, 1);
 
 
 -- Voucher
@@ -313,6 +279,7 @@ SELECT * FROM actions;
 -- + Trigger to set voucher status
 -- + Continue tests
 -- + Data driven undo_expiration_utc
+-- + Dec tree doc
+-- - User can cashin ACL
 -- - Add undo
 -- - Add set
--- - Write decision tree in doc
