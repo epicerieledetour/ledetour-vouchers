@@ -30,7 +30,12 @@ flowchart TD
     Q5{Q5: Is voucher expired ?}
     Q5Y[error_voucher_expired]:::error
     Q5 -- Yes --> Q5Y
-    Q5 -- No --> Q6
+    Q5 -- No --> Q9
+
+    Q9{Q9: Can user cashin ?}
+    Q9N[ok_voucher_info]:::ok
+    Q9 -- No --> Q9N
+    Q9 -- Yes --> Q6
 
     Q6{Q6: Has voucher already been cashedin ?}
     Q6N[ok_voucher_cashedin]:::ok

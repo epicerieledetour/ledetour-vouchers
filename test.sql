@@ -7,7 +7,8 @@ CREATE TABLE emissions (
 
 CREATE TABLE users (
     userid INTEGER PRIMARY KEY,
-    label TEXT NOT NULL
+    label TEXT NOT NULL,
+    can_cashin BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE vouchers (
@@ -78,8 +79,13 @@ VALUES
         "User auth token can not be found"
     ),
     (
-        "ok_user_authentified", 200, "error", NULL, NULL, NULL,
+        "ok_user_authentified", 200, "ok", NULL, NULL, NULL,
         "User has been authentified"
+    ),
+
+    (
+        "ok_voucher_info", 200, "ok", NULL, NULL, NULL,
+        "User read the voucher without changing its state"
     )
 ;
 
@@ -179,6 +185,8 @@ BEGIN
                     THEN "error_voucher_invalid_token"
                 WHEN a.timestamp_utc > expiration_utc  -- Q5
                     THEN "error_voucher_expired"
+		WHEN NOT u.can_cashin  -- Q9
+                    THEN "ok_voucher_info"
                 WHEN v.cashedin_by IS NULL  -- Q6
                     THEN "ok_voucher_cashedin"
                 WHEN v.cashedin_by != u.userid  -- Q7
@@ -208,56 +216,64 @@ VALUES
     (date('now', '+3 month')),
     (date('now', '-3 month'));
 
-INSERT INTO users (label)
+INSERT INTO users (label, can_cashin)
 VALUES
-    ("ADMIN"),
-    ("cashier"),
-    ("cashier2");
+    ("dist", FALSE),
+    ("cashier", TRUE),
+    ("cashier2", TRUE);
 
 INSERT INTO vouchers (emissionid, sortnumber)
 VALUES
     (1, 1),
+    (1, 2),
     (2, 1);
 
 
 -- Voucher
 
--- error_voucher_unauthentified
+-- 1: error_voucher_unauthentified
 INSERT INTO actions (req_vouchertoken, request)
 VALUES ("tokvch_2", "scan");
 
--- error_voucher_invalid_token
+-- 2: error_voucher_invalid_token
 INSERT INTO actions (req_usertoken, req_vouchertoken, request)
 VALUES ("tokusr_cashier", "tokvch_invalid", "scan");
 
--- error_voucher_expired
+-- 3: error_voucher_expired
 INSERT INTO actions (req_usertoken, req_vouchertoken, timestamp_utc, request)
---VALUES ("tokusr_cashier", "tokvch_1", date('now', '+4 month'), "scan");
 VALUES ("tokusr_cashier", "tokvch_1", datetime('now', '+4 month'), "scan");
---strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
--- ok_voucher_cashedin
+
+-- 4: ok_voucher_info on a voucher that has not been cashedin by an user with no can_cashin right
+INSERT INTO actions (req_usertoken, req_vouchertoken, request)
+VALUES ("tokusr_dist", "tokvch_2", "scan");
+
+-- 5: ok_voucher_cashedin
 INSERT INTO actions (req_usertoken, req_vouchertoken, request)
 VALUES ("tokusr_cashier", "tokvch_1", "scan");
 
--- error_voucher_cashedin_by_another_user
+-- 6: ok_voucher_info on a voucher that has been cashedin by an user with no can_cashin right
+INSERT INTO actions (req_usertoken, req_vouchertoken, request)
+VALUES ("tokusr_dist", "tokvch_1", "scan");
+
+-- 7: error_voucher_cashedin_by_another_user
 INSERT INTO actions (req_usertoken, req_vouchertoken, request)
 VALUES ("tokusr_cashier2", "tokvch_1", "scan");
 
--- ok_voucher_cannot_undo_cashedin
+-- 8: ok_voucher_cannot_undo_cashedin
 INSERT INTO actions (req_usertoken, req_vouchertoken, timestamp_utc, request)
 VALUES ("tokusr_cashier", "tokvch_1", datetime('now', '+6 minute'), "scan");
 
--- ok_voucher_can_undo_cashedin
+-- 9: ok_voucher_can_undo_cashedin
 INSERT INTO actions (req_usertoken, req_vouchertoken, timestamp_utc, request)
 VALUES ("tokusr_cashier", "tokvch_1", datetime('now', '+1 minute'), "scan");
 
 -- User
 
--- error_user_invalid_token
+-- 10: error_user_invalid_token
 INSERT INTO actions (req_usertoken, request)
 VALUES ("tokusr_invalid", "scan");
 
--- ok_user_authentified
+-- 11: ok_user_authentified
 INSERT INTO actions (req_usertoken, request)
 VALUES ("tokusr_cashier", "scan");
 
@@ -280,6 +296,8 @@ SELECT * FROM actions;
 -- + Continue tests
 -- + Data driven undo_expiration_utc
 -- + Dec tree doc
--- - User can cashin ACL
+-- + User can cashin ACL
 -- - Add undo
 -- - Add set
+-- - Add scan by voucherid
+
