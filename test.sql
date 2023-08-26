@@ -192,9 +192,17 @@ BEGIN
                 WHEN v.cashedin_by != u.userid  -- Q7
                     THEN "error_voucher_cashedin_by_another_user"
                 WHEN a.timestamp_utc > v.undo_expiration_utc  -- Q8
-                    THEN "warning_voucher_cannot_undo_cashedin"
-                    ELSE "warning_voucher_can_undo_cashedin"
-            END
+                    THEN
+		        CASE
+			    WHEN a.request = 'scan'  -- Q11
+			    THEN "warning_voucher_cannot_undo_cashedin" 
+			END
+		    ELSE
+		        CASE
+			    WHEN a.request = 'scan'  -- Q12
+			    THEN "warning_voucher_can_undo_cashedin"
+			END
+	    END
         ELSE  -- Auth scan
             CASE
                 WHEN u.userid IS NULL  -- Q2
@@ -298,9 +306,9 @@ SELECT * FROM actions;
 -- + Dec tree doc
 -- + User can cashin ACL
 -- - Add undo
---   - Q10 scan
---   - Q11 scan
---   - Q12 scan
+--   + Q10 scan
+--   + Q11 scan
+--   + Q12 scan
 --   - Q10 undo
 --   - Q11 undo
 --   - Q12 undo
