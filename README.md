@@ -39,8 +39,12 @@ flowchart TD
 
     Q6{Q6: Has voucher already been cashedin ?}
     Q6N[ok_voucher_cashedin]:::ok
-    Q6 -- No --> Q6N
+    Q6 -- No --> Q10
     Q6 -- Yes --> Q7
+
+    Q10{Q10: Action}
+    Q10 -- scan --> Q6N
+    Q10 -- undo --> Q7
 
     Q7{Q7: Has voucher been cashed by another user ?}
     Q7Y[error_voucher_cashedin_by_another_user]:::error
@@ -50,8 +54,19 @@ flowchart TD
     Q8{Q8: Is it still possible to undo cashing the voucher in ?}
     Q8N[warning_voucher_cannot_undo_cashedin]:::warning
     Q8Y[warning_voucher_can_undo_cashedin]:::warning
-    Q8 -- No --> Q8N
-    Q8 -- Yes --> Q8Y
+    Q8 -- No --> Q11
+    Q8 -- Yes --> Q12
+
+    Q11{Q11: Action}
+    Q11U[error_voucher_cannot_undo_cashedin]:::error
+    Q11 -- scan --> Q8N
+    Q11 -- undo --> Q11U
+
+    Q12{Q12: Action}
+    Q12U[ok_voucher_undo]:::ok
+    Q12 -- scan --> Q8Y
+    Q12 -- undo --> Q12U
+
 
     classDef ok stroke:#0f0
     classDef warning stroke:#ffa500
