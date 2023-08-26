@@ -1,0 +1,58 @@
+responseid                              httpcode  levelid  set_cashin  undo_timeout_datefunc_modifier  can_undo  description                                                 
+--------------------------------------  --------  -------  ----------  ------------------------------  --------  ------------------------------------------------------------
+error_voucher_unauthentified            401       error                                                          Invalid user authorization                                  
+
+error_voucher_invalid_token             404       error                                                          Invalid voucher                                             
+
+error_voucher_expired                   403       error                                                          Voucher has expired                                         
+
+ok_voucher_cashedin                     200       ok       1           +5 minute                       1         Voucher cashedin                                            
+
+error_voucher_cashedin_by_another_user  403       error                                                          Voucher has already cashedin by another user                
+
+warning_voucher_cannot_undo_cashedin    200       warning                                                        Voucher has already been cashed by the user but too long ago
+                                                                                                                  so it can't be undone                                      
+
+warning_voucher_can_undo_cashedin       200       warning              1                                         Voucher has already been cashed in by the user but recently 
+                                                                                                                 enough so they can still undo                               
+
+error_user_invalid_token                401       error                                                          User auth token can not be found                            
+
+ok_user_authentified                    200       ok                                                             User has been authentified                                  
+
+ok_voucher_info                         200       ok                                                             User read the voucher without changing its state            
+userid  label     can_cashin
+------  --------  ----------
+1       dist      0         
+2       cashier   1         
+3       cashier2  1         
+emissionid  expiration_utc
+----------  --------------
+1           2023-11-26    
+2           2023-05-26    
+voucherid  emissionid  sortnumber  cashedin_by  cashedin_utc         undo_expiration_utc
+---------  ----------  ----------  -----------  -------------------  -------------------
+1          1           1           2            2023-08-26 22:38:08  2023-08-26 22:43:08
+2          1           2                                                                
+3          2           1                                                                
+token            tablename  idintable
+---------------  ---------  ---------
+tokusr_dist      users      1        
+tokusr_cashier   users      2        
+tokusr_cashier2  users      3        
+tokvch_1         vouchers   1        
+tokvch_2         vouchers   2        
+tokvch_3         vouchers   3        
+actionid  timestamp_utc        req_usertoken    req_vouchertoken  userid  voucherid  request  responseid                            
+--------  -------------------  ---------------  ----------------  ------  ---------  -------  --------------------------------------
+1         2023-08-26 22:38:08                   tokvch_2                  2          scan     error_voucher_unauthentified          
+2         2023-08-26 22:38:08  tokusr_cashier   tokvch_invalid    2                  scan     error_voucher_invalid_token           
+3         2023-12-26 22:38:08  tokusr_cashier   tokvch_1          2       1          scan     error_voucher_expired                 
+4         2023-08-26 22:38:08  tokusr_dist      tokvch_2          1       2          scan     ok_voucher_info                       
+5         2023-08-26 22:38:08  tokusr_cashier   tokvch_1          2       1          scan     ok_voucher_cashedin                   
+6         2023-08-26 22:38:08  tokusr_dist      tokvch_1          1       1          scan     ok_voucher_info                       
+7         2023-08-26 22:38:08  tokusr_cashier2  tokvch_1          3       1          scan     error_voucher_cashedin_by_another_user
+8         2023-08-26 22:44:08  tokusr_cashier   tokvch_1          2       1          scan     warning_voucher_cannot_undo_cashedin  
+9         2023-08-26 22:39:08  tokusr_cashier   tokvch_1          2       1          scan     warning_voucher_can_undo_cashedin     
+10        2023-08-26 22:38:08  tokusr_invalid                                        scan     error_user_invalid_token              
+11        2023-08-26 22:38:08  tokusr_cashier                     2                  scan     ok_user_authentified                  
