@@ -89,6 +89,10 @@ VALUES
     (
 	"error_voucher_cannot_undo_cashedin", 403, "error", NULL, NULL, NULL,
 	"It is not possible to undo a cashedin voucher anymore"
+    ),
+    (
+	"error_system_unexpected_request", 500, "error", NULL, NULL, NULL,
+	"Unexpected request led to an internal error"
     )
 ;
 
@@ -201,6 +205,7 @@ BEGIN
 			        THEN "warning_voucher_cannot_undo_cashedin"
 			    WHEN a.request = 'undo'
 				THEN "error_voucher_cannot_undo_cashedin"
+			    ELSE "error_system_unexpected_request"
 			END
 		    ELSE
 		        CASE
@@ -280,17 +285,21 @@ VALUES ("tokusr_cashier", "tokvch_1", datetime('now', '+6 minute'), "scan");
 INSERT INTO actions (req_usertoken, req_vouchertoken, timestamp_utc, request)
 VALUES ("tokusr_cashier", "tokvch_1", datetime('now', '+6 minute'), "undo");
 
--- 10: warning_voucher_can_undo_cashedin
+-- 10: error_system_unexpected_request
+INSERT INTO actions (req_usertoken, req_vouchertoken, timestamp_utc, request)
+VALUES ("tokusr_cashier", "tokvch_1", datetime('now', '+6 minute'), "other_action");
+
+-- 11: warning_voucher_can_undo_cashedin
 INSERT INTO actions (req_usertoken, req_vouchertoken, timestamp_utc, request)
 VALUES ("tokusr_cashier", "tokvch_1", datetime('now', '+1 minute'), "scan");
 
 -- User
 
--- 11: error_user_invalid_token
+-- 12: error_user_invalid_token
 INSERT INTO actions (req_usertoken, request)
 VALUES ("tokusr_invalid", "scan");
 
--- 12: ok_user_authentified
+-- 13: ok_user_authentified
 INSERT INTO actions (req_usertoken, request)
 VALUES ("tokusr_cashier", "scan");
 
@@ -320,7 +329,7 @@ SELECT * FROM actions;
 --   + Q12 scan
 --   + Q10 undo
 --   + Q11 undo
---   - Q11 error if not scan / undo
+--   + Q11 error if not scan / undo
 --   - Q12 undo
 --   - Q12 error if not scan / undo
 -- - Add set
