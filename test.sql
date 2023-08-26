@@ -187,7 +187,7 @@ BEGIN
                     THEN "error_voucher_expired"
 		WHEN NOT u.can_cashin  -- Q9
                     THEN "ok_voucher_info"
-                WHEN v.cashedin_by IS NULL  -- Q6
+                WHEN v.cashedin_by IS NULL AND a.request = 'scan'  -- Q6 No + Q10
                     THEN "ok_voucher_cashedin"
                 WHEN v.cashedin_by != u.userid  -- Q7
                     THEN "error_voucher_cashedin_by_another_user"
