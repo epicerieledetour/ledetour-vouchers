@@ -298,6 +298,12 @@ SELECT * FROM actions;
 -- + Dec tree doc
 -- + User can cashin ACL
 -- - Add undo
+--   - Q10 scan
+--   - Q11 scan
+--   - Q12 scan
+--   - Q10 undo
+--   - Q11 undo
+--   - Q12 undo
 -- - Add set
 -- - Add scan by voucherid
 
