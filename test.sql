@@ -93,8 +93,27 @@ VALUES
     (
 	"error_system_unexpected_request", 500, "error", NULL, NULL, NULL,
 	"Unexpected request led to an internal error"
+    ),
+    (
+	"ok_voucher_undo", 200, "ok", NULL, NULL, NULL,
+	"A voucher previously cashedin has been undone"
     )
+
 ;
+
+
+
+
+
+Q10 -> undo should error
+
+
+
+
+
+
+
+
 
 CREATE TABLE actions (
     actionid INTEGER PRIMARY KEY,
@@ -210,7 +229,10 @@ BEGIN
 		    ELSE
 		        CASE
 			    WHEN a.request = 'scan'  -- Q12
-			    THEN "warning_voucher_can_undo_cashedin"
+			        THEN "warning_voucher_can_undo_cashedin"
+			    WHEN a.request = 'undo'
+				THEN "ok_voucher_undo"
+			    ELSE "error_system_unexpected_request"
 			END
 	    END
         ELSE  -- Auth scan
@@ -330,8 +352,11 @@ SELECT * FROM actions;
 --   + Q10 undo
 --   + Q11 undo
 --   + Q11 error if not scan / undo
---   - Q12 undo
+--   + Q12 undo
 --   - Q12 error if not scan / undo
 -- - Add set
+--   - Branch scan / undo top of the chart
+--   - Move error_system_unknown_request top of the flow
+--   - Implement set
 -- - Add scan by voucherid
 
