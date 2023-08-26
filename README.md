@@ -42,7 +42,7 @@ flowchart TD
     Q6 -- No --> Q10
     Q6 -- Yes --> Q7
 
-    Q10{Q10: Action}
+    Q10{Q10: Request}
     Q10 -- scan --> Q6N
     Q10 -- undo --> Q7
 
@@ -57,12 +57,12 @@ flowchart TD
     Q8 -- No --> Q11
     Q8 -- Yes --> Q12
 
-    Q11{Q11: Action}
+    Q11{Q11: Request}
     Q11U[error_voucher_cannot_undo_cashedin]:::error
     Q11 -- scan --> Q8N
     Q11 -- undo --> Q11U
 
-    Q12{Q12: Action}
+    Q12{Q12: Request}
     Q12U[ok_voucher_undo]:::ok
     Q12 -- scan --> Q8Y
     Q12 -- undo --> Q12U
