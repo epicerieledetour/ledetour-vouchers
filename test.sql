@@ -82,10 +82,13 @@ VALUES
         "ok_user_authentified", 200, "ok", NULL, NULL, NULL,
         "User has been authentified"
     ),
-
     (
         "ok_voucher_info", 200, "ok", NULL, NULL, NULL,
         "User read the voucher without changing its state"
+    ),
+    (
+	"error_voucher_cannot_undo_cashedin", 403, "error", NULL, NULL, NULL,
+	"It is not possible to undo a cashedin voucher anymore"
     )
 ;
 
@@ -195,7 +198,9 @@ BEGIN
                     THEN
 		        CASE
 			    WHEN a.request = 'scan'  -- Q11
-			    THEN "warning_voucher_cannot_undo_cashedin" 
+			        THEN "warning_voucher_cannot_undo_cashedin"
+			    WHEN a.request = 'undo'
+				THEN "error_voucher_cannot_undo_cashedin"
 			END
 		    ELSE
 		        CASE
@@ -267,21 +272,25 @@ VALUES ("tokusr_dist", "tokvch_1", "scan");
 INSERT INTO actions (req_usertoken, req_vouchertoken, request)
 VALUES ("tokusr_cashier2", "tokvch_1", "scan");
 
--- 8: ok_voucher_cannot_undo_cashedin
+-- 8: warning_voucher_cannot_undo_cashedin
 INSERT INTO actions (req_usertoken, req_vouchertoken, timestamp_utc, request)
 VALUES ("tokusr_cashier", "tokvch_1", datetime('now', '+6 minute'), "scan");
 
--- 9: ok_voucher_can_undo_cashedin
+-- 9: error_voucher_cannot_undo_cashedin
+INSERT INTO actions (req_usertoken, req_vouchertoken, timestamp_utc, request)
+VALUES ("tokusr_cashier", "tokvch_1", datetime('now', '+6 minute'), "undo");
+
+-- 10: warning_voucher_can_undo_cashedin
 INSERT INTO actions (req_usertoken, req_vouchertoken, timestamp_utc, request)
 VALUES ("tokusr_cashier", "tokvch_1", datetime('now', '+1 minute'), "scan");
 
 -- User
 
--- 10: error_user_invalid_token
+-- 11: error_user_invalid_token
 INSERT INTO actions (req_usertoken, request)
 VALUES ("tokusr_invalid", "scan");
 
--- 11: ok_user_authentified
+-- 12: ok_user_authentified
 INSERT INTO actions (req_usertoken, request)
 VALUES ("tokusr_cashier", "scan");
 
@@ -309,9 +318,11 @@ SELECT * FROM actions;
 --   + Q10 scan
 --   + Q11 scan
 --   + Q12 scan
---   - Q10 undo
---   - Q11 undo
+--   + Q10 undo
+--   + Q11 undo
+--   - Q11 error if not scan / undo
 --   - Q12 undo
+--   - Q12 error if not scan / undo
 -- - Add set
 -- - Add scan by voucherid
 
