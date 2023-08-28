@@ -51,7 +51,7 @@ VALUES
         "Invalid user authorization"
     ),
     (
-        "error_voucher_invalid_token", 404, "error", NULL, NULL, NULL,
+        "error_voucher_invalid", 404, "error", NULL, NULL, NULL,
         "Invalid voucher"
     ),
     (
@@ -206,7 +206,7 @@ BEGIN
                     WHEN u.userid IS NULL  -- Q3
                         THEN "error_voucher_unauthentified"
                     WHEN v.voucherid IS NULL  -- Q4
-                        THEN "error_voucher_invalid_token"
+                        THEN "error_voucher_invalid"
                     WHEN a.timestamp_utc > expiration_utc  -- Q5
                         THEN "error_voucher_expired"
                     WHEN NOT u.can_cashin  -- Q9
@@ -271,7 +271,7 @@ VALUES
 INSERT INTO actions (req_vouchertoken, request)
 VALUES ("tokvch_2", "scan");
 
--- 2: error_voucher_invalid_token
+-- 2: error_voucher_invalid
 INSERT INTO actions (req_usertoken, req_vouchertoken, request)
 VALUES ("tokusr_cashier", "tokvch_invalid", "scan");
 
@@ -367,6 +367,6 @@ SELECT * FROM actions;
 --   + Move error_system_unknown_request top of the flow
 --   + Implement set
 -- - Add scan by voucherid
---   -- error_voucher_invalid_token -> error_voucher_invalid
---   -- error_voucher_user_needs_voucher_token
+--   + error_voucher_invalid -> error_voucher_invalid
+--   - error_voucher_user_needs_voucher_token
 
