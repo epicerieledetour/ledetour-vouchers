@@ -367,4 +367,6 @@ SELECT * FROM actions;
 --   + Move error_system_unknown_request top of the flow
 --   + Implement set
 -- - Add scan by voucherid
+--   -- error_voucher_invalid_token -> error_voucher_invalid
+--   -- error_voucher_user_needs_voucher_token
 

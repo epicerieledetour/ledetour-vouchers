@@ -25,10 +25,15 @@ flowchart TD
     Q3{Q3: Is user valid ?}
     Q3N[error_voucher_unauthentified]:::error
     Q3 -- No --> Q3N
-    Q3 -- Yes --> Q4
+    Q3 -- Yes --> Q14
+
+    Q14{Q14: Is a voucher token joined to the request if the user needs one ?}
+    Q14N[error_voucher_user_needs_voucher_token]:::error
+    Q14 -- No --> Q14N
+    Q14 -- Yes --> Q4
 
     Q4{Q4: Is voucher valid ?}
-    Q4N[error_voucher_invalid_token]:::error
+    Q4N[error_voucher_invalid]:::error
     Q4 -- No --> Q4N
     Q4 -- Yes --> Q5
 
