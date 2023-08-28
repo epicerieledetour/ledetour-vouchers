@@ -95,7 +95,7 @@ VALUES
 	"Unexpected request led to an internal error"
     ),
     (
-	"ok_voucher_undo", 200, "ok", NULL, NULL, NULL,
+	"ok_voucher_undo", 200, "ok", 0, NULL, NULL,
 	"A voucher previously cashedin has been undone"
     ),
     (
@@ -316,13 +316,20 @@ VALUES ("tokusr_cashier", "tokvch_1", datetime('now', '+6 minute'), "other_actio
 INSERT INTO actions (req_usertoken, req_vouchertoken, timestamp_utc, request)
 VALUES ("tokusr_cashier", "tokvch_1", datetime('now', '+1 minute'), "scan");
 
+-- 13-14: ok_voucher_undo
+INSERT INTO actions (req_usertoken, req_vouchertoken, request)
+VALUES ("tokusr_cashier", "tokvch_2", "scan");
+INSERT INTO actions (req_usertoken, req_vouchertoken, request)
+VALUES ("tokusr_cashier", "tokvch_2", "undo");
+
+
 -- User
 
--- 13: error_user_invalid_token
+-- 15: error_user_invalid_token
 INSERT INTO actions (req_usertoken, request)
 VALUES ("tokusr_invalid", "scan");
 
--- 14: ok_user_authentified
+-- 16: ok_user_authentified
 INSERT INTO actions (req_usertoken, request)
 VALUES ("tokusr_cashier", "scan");
 
