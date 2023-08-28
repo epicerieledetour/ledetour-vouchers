@@ -201,6 +201,8 @@ BEGIN
 
             ELSE  -- Voucher scan
                 CASE
+                    WHEN a.request NOT IN ('undo', 'scan')  -- Q13
+                        THEN "error_system_unexpected_request"
                     WHEN u.userid IS NULL  -- Q3
                         THEN "error_voucher_unauthentified"
                     WHEN v.voucherid IS NULL  -- Q4
@@ -226,7 +228,6 @@ BEGIN
                                     THEN "warning_voucher_cannot_undo_cashedin"
                                 WHEN a.request = 'undo'
                                     THEN "error_voucher_cannot_undo_cashedin"
-                                ELSE "error_system_unexpected_request"
                             END
 		            ELSE
 		                CASE
@@ -234,7 +235,6 @@ BEGIN
 			                    THEN "warning_voucher_can_undo_cashedin"
 			                WHEN a.request = 'undo'
 				                THEN "ok_voucher_undo"
-			                ELSE "error_system_unexpected_request"
 			            END
 	            END
     END
@@ -353,7 +353,7 @@ SELECT * FROM actions;
 -- + Data driven undo_expiration_utc
 -- + Dec tree doc
 -- + User can cashin ACL
--- - Add undo
+-- + Add undo
 --   + Q10 scan
 --   + Q11 scan
 --   + Q12 scan
@@ -361,10 +361,10 @@ SELECT * FROM actions;
 --   + Q11 undo
 --   + Q11 error if not scan / undo
 --   + Q12 undo
---   - Q12 error if not scan / undo
--- - Add set
---   - Branch scan / undo top of the chart
---   - Move error_system_unknown_request top of the flow
---   - Implement set
+--   + Q12 error if not scan / undo
+-- + Add set
+--   + Branch scan / undo top of the chart
+--   + Move error_system_unknown_request top of the flow
+--   + Implement set
 -- - Add scan by voucherid
 
