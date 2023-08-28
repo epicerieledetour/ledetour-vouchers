@@ -5,7 +5,12 @@
 ```mermaid
 flowchart TD
     S(Start)
-    S --> Q1
+    S --> Q13
+
+    Q13{Q13: Is request verb valid ?}
+    Q13N[error_system_unexpected_request]:::error
+    Q13 -- other verb --> Q13N
+    Q13 -- scan / undo --> Q1
 
     Q1{Q1: Has voucherid ?}
     Q1 -- No --> Q2
@@ -43,8 +48,9 @@ flowchart TD
     Q6 -- Yes --> Q7
 
     Q10{Q10: Action}
+    Q10U[error_voucher_cannot_undo_not_cashedin]:::error
     Q10 -- scan --> Q6N
-    Q10 -- undo --> Q7
+    Q10 -- undo --> Q10U
 
     Q7{Q7: Has voucher been cashed by another user ?}
     Q7Y[error_voucher_cashedin_by_another_user]:::error
@@ -61,15 +67,11 @@ flowchart TD
     Q11U[error_voucher_cannot_undo_cashedin]:::error
     Q11 -- scan --> Q8N
     Q11 -- undo --> Q11U
-    Q11 -- any other action --> Unexpected
 
     Q12{Q12: Action}
     Q12U[ok_voucher_undo]:::ok
     Q12 -- scan --> Q8Y
     Q12 -- undo --> Q12U
-    Q12 -- any other action --> Unexpected
-
-    Unexpected[error_system_unexpected_request]:::error
 
     classDef ok stroke:#0f0
     classDef warning stroke:#ffa500
