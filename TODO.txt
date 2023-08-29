@@ -73,6 +73,11 @@
 
 - [ ] https://app#usertoken (to scan vouchers as an already identified user)
 - [ ] Enter voucher to scan by hand
+- [ ] Color background
+
+## HTTP API
+
+- [ ] Rate Limiting https://sysopstechnix.com/protect-web-servers-from-ddos-attacks-using-fail2ban/
 
 ## QA
 
@@ -109,20 +114,28 @@
 
 ## Users
 
-- [ ] add user status / acl: distributor / cashier
+- [ ] create user
+- [ ] read user
+- [ ] update user
+- [ ] delete
 
 ## Vouchers
 
-- [ ] app --userid userid voucher scan voucherid
-- [ ] app --userid userid voucher scan --undo voucherid
+- [ ] Add actions.origin (cli, httpapi, sql)
+- [ ] app --user userid voucher scan voucherid
+- [ ] app --user userid voucher undo voucherid
+- [ ] httpapi scan
+- [ ] httpapi undo
 
+# TODO NEXT
 
-Cases:
-  Valid
-    
-- Unknown token
-- Unauth'ed
-- Auth but no scan ACL
-- 
+- Test what I have
+  - Tox
+  - initdb
+  - test with big sql script to test triggers
+  - coverage
+- Cli user
+- Cli emissions
+- Cli vouchers
+- HttpApi vouchers
 
-tokenid, userid, voucherid, request
