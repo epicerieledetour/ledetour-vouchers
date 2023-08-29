@@ -154,8 +154,7 @@ BEGIN
     INSERT INTO tokens
     VALUES
         (
-            -- printf("user_%s", lower(hex(randomblob(8)))),
-            printf("tokusr_%s", new.label),
+            USERID(new.label),
             "users",
             new.userid
         );
@@ -168,8 +167,7 @@ BEGIN
     INSERT INTO tokens
     VALUES
         (
-            -- printf("vchr_%s", lower(hex(randomblob(8)))),
-            printf("tokvch_%s", new.voucherid),
+            VOUCHERID(new.voucherid),
             "vouchers",
             new.voucherid
         );
