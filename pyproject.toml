@@ -1,0 +1,44 @@
+[project]
+name = "ldtvouchers"
+version = "2.0.0"
+description = "Épicerie Le Détour vouchers"
+authors = [
+    {name = "Charles Flèche", email = "charles.fleche@free.fr"}
+]
+readme = "README.md"
+requires-python = ">=3.11"
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Environment :: Console",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3 :: Only",
+    "Environment :: Web Environment"
+]
+dependencies = [
+    "fastapi"
+]
+
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = [
+    "fastapi",
+    "setuptools"
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.coverage.run]
+branch = true
+relative_files = true
+
+[tool.coverage.report]
+fail_under = 100
+show_missing = true
+
+[tool.coverage.paths]
+source = [
+    "src/ldtvouchers",
+    "*/.tox/*/lib/python*/site-packages/ldtvouchers"
+]

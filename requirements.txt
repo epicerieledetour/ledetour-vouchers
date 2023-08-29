@@ -1,6 +1,9 @@
 black
-cairosvg
-fastapi[all]
-ninja
-pytest
-requests
+coverage
+#cairosvg
+#fastapi[all]
+#ninja
+#pytest
+#requests
+mypy
+tox

@@ -1,9 +1,17 @@
 {
-    "editor.formatOnSave": true,
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.fixAll": true,
+            "source.organizeImports": true
+        }
+    },
     "python.formatting.provider": "black",
-    "python.testing.pytestArgs": [
-        "tests"
+    "python.testing.unittestEnabled": true,
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        "tests",
+        "discover"
     ],
-    "python.testing.pytestEnabled": true,
-    "python.testing.unittestEnabled": false,
 }
