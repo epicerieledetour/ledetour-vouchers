@@ -130,12 +130,10 @@
 # TODO NEXT
 
 - Test what I have
-  - Tox
   - initdb
   - test with big sql script to test triggers
-  - coverage
+  - create_function
 - Cli user
 - Cli emissions
 - Cli vouchers
 - HttpApi vouchers
-
