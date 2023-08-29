@@ -109,6 +109,14 @@ VALUES
     )
 ;
 
+CREATE TABLE requests (
+    requestid TEXT NOT NULL PRIMARY KEY
+);
+INSERT INTO requests (requestid)
+VALUES
+    ("scan"),
+    ("undo");
+
 CREATE TABLE actions (
     actionid INTEGER PRIMARY KEY,
     timestamp_utc DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -116,13 +124,14 @@ CREATE TABLE actions (
     req_vouchertoken TEXT,
     userid INTEGER,
     voucherid INTEGER,
-    request TEXT NOT NULL,
+    requestid TEXT NOT NULL,
     responseid TEXT,
 
     FOREIGN KEY(req_usertoken) REFERENCES tokens(token),
     FOREIGN KEY(req_vouchertoken) REFERENCES tokens(token),
     FOREIGN KEY(userid) REFERENCES users(userid),
     FOREIGN KEY(voucherid) REFERENCES vouchers(voucherid),
+    FOREIGN KEY(requestid) REFERENCES requests(requestid),
     FOREIGN KEY(responseid) REFERENCES responses(responseid)
 );
 
@@ -206,7 +215,7 @@ BEGIN
 
             ELSE  -- Voucher scan
                 CASE
-                    WHEN a.request NOT IN ('undo', 'scan')  -- Q13
+                    WHEN a.requestid NOT IN (SELECT requestid FROM requests)  -- Q13
                         THEN "error_system_unexpected_request"
                     WHEN u.userid IS NULL  -- Q3
                         THEN "error_voucher_unauthentified"
@@ -221,9 +230,9 @@ BEGIN
                     WHEN v.cashedin_by IS NULL  -- Q6
                         THEN
                             CASE  -- Q10
-                                WHEN a.request = 'scan'
+                                WHEN a.requestid = 'scan'
                                     THEN "ok_voucher_cashedin"
-                                WHEN a.request = 'undo'
+                                WHEN a.requestid = 'undo'
                                     THEN "error_voucher_cannot_undo_not_cashedin"
                             END
                     WHEN v.cashedin_by != u.userid  -- Q7
@@ -231,16 +240,16 @@ BEGIN
                     WHEN a.timestamp_utc > v.undo_expiration_utc  -- Q8
                         THEN
                             CASE
-                                WHEN a.request = 'scan'  -- Q11
+                                WHEN a.requestid = 'scan'  -- Q11
                                     THEN "warning_voucher_cannot_undo_cashedin"
-                                WHEN a.request = 'undo'
+                                WHEN a.requestid = 'undo'
                                     THEN "error_voucher_cannot_undo_cashedin"
                             END
 		            ELSE
 		                CASE
-			                WHEN a.request = 'scan'  -- Q12
+			                WHEN a.requestid = 'scan'  -- Q12
 			                    THEN "warning_voucher_can_undo_cashedin"
-			                WHEN a.request = 'undo'
+			                WHEN a.requestid = 'undo'
 				                THEN "ok_voucher_undo"
 			            END
 	            END
@@ -280,78 +289,78 @@ VALUES
 -- Voucher
 
 -- 1: error_voucher_unauthentified
-INSERT INTO actions (req_vouchertoken, request)
+INSERT INTO actions (req_vouchertoken, requestid)
 VALUES ("tokvch_2", "scan");
 
 -- 2: error_voucher_user_needs_voucher_token
-INSERT INTO actions (req_usertoken, voucherid, request)
+INSERT INTO actions (req_usertoken, voucherid, requestid)
 VALUES ("tokusr_cashier", 4, "scan");
 
 -- 3: ok_voucher_cashedin
 -- User can cash in using a voucherid directly, without a voucher token
-INSERT INTO actions (req_usertoken, voucherid, request)
+INSERT INTO actions (req_usertoken, voucherid, requestid)
 VALUES ("tokusr_cashier2", 5, "scan"); 
 
 -- 4: error_voucher_invalid
-INSERT INTO actions (req_usertoken, req_vouchertoken, request)
+INSERT INTO actions (req_usertoken, req_vouchertoken, requestid)
 VALUES ("tokusr_cashier", "tokvch_invalid", "scan");
 
 -- 5: error_voucher_expired
-INSERT INTO actions (req_usertoken, req_vouchertoken, timestamp_utc, request)
+INSERT INTO actions (req_usertoken, req_vouchertoken, timestamp_utc, requestid)
 VALUES ("tokusr_cashier", "tokvch_1", datetime('now', '+4 month'), "scan");
 
 -- 6: ok_voucher_info on a voucher that has not been cashedin by an user with no can_cashin right
-INSERT INTO actions (req_usertoken, req_vouchertoken, request)
+INSERT INTO actions (req_usertoken, req_vouchertoken, requestid)
 VALUES ("tokusr_dist", "tokvch_2", "scan");
 
 -- 7: ok_voucher_cashedin
-INSERT INTO actions (req_usertoken, req_vouchertoken, request)
+INSERT INTO actions (req_usertoken, req_vouchertoken, requestid)
 VALUES ("tokusr_cashier", "tokvch_1", "scan");
 
 -- 8: error_voucher_cannot_undo_not_cashedin
 -- A voucher cannot been undone if not cashedin first
-INSERT INTO actions (req_usertoken, req_vouchertoken, request)
+INSERT INTO actions (req_usertoken, req_vouchertoken, requestid)
 VALUES ("tokusr_cashier", "tokvch_2", "undo");
 
 -- 9: ok_voucher_info on a voucher that has been cashedin by an user with no can_cashin right
-INSERT INTO actions (req_usertoken, req_vouchertoken, request)
+INSERT INTO actions (req_usertoken, req_vouchertoken, requestid)
 VALUES ("tokusr_dist", "tokvch_1", "scan");
 
 -- 10: error_voucher_cashedin_by_another_user
-INSERT INTO actions (req_usertoken, req_vouchertoken, request)
+INSERT INTO actions (req_usertoken, req_vouchertoken, requestid)
 VALUES ("tokusr_cashier2", "tokvch_1", "scan");
 
 -- 11: warning_voucher_cannot_undo_cashedin
-INSERT INTO actions (req_usertoken, req_vouchertoken, timestamp_utc, request)
+INSERT INTO actions (req_usertoken, req_vouchertoken, timestamp_utc, requestid)
 VALUES ("tokusr_cashier", "tokvch_1", datetime('now', '+6 minute'), "scan");
 
 -- 12: error_voucher_cannot_undo_cashedin
-INSERT INTO actions (req_usertoken, req_vouchertoken, timestamp_utc, request)
+INSERT INTO actions (req_usertoken, req_vouchertoken, timestamp_utc, requestid)
 VALUES ("tokusr_cashier", "tokvch_1", datetime('now', '+6 minute'), "undo");
 
 -- 13: error_system_unexpected_request
-INSERT INTO actions (req_usertoken, req_vouchertoken, timestamp_utc, request)
+INSERT INTO actions (req_usertoken, req_vouchertoken, timestamp_utc, requestid)
 VALUES ("tokusr_cashier", "tokvch_1", datetime('now', '+6 minute'), "other_action");
 
 -- 14: warning_voucher_can_undo_cashedin
-INSERT INTO actions (req_usertoken, req_vouchertoken, timestamp_utc, request)
+INSERT INTO actions (req_usertoken, req_vouchertoken, timestamp_utc, requestid)
 VALUES ("tokusr_cashier", "tokvch_1", datetime('now', '+1 minute'), "scan");
 
 -- 15-16: ok_voucher_cashedin / ok_voucher_undo
-INSERT INTO actions (req_usertoken, req_vouchertoken, request)
+INSERT INTO actions (req_usertoken, req_vouchertoken, requestid)
 VALUES ("tokusr_cashier", "tokvch_2", "scan");
-INSERT INTO actions (req_usertoken, req_vouchertoken, request)
+INSERT INTO actions (req_usertoken, req_vouchertoken, requestid)
 VALUES ("tokusr_cashier", "tokvch_2", "undo");
 
 
 -- User
 
 -- 17: error_user_invalid_token
-INSERT INTO actions (req_usertoken, request)
+INSERT INTO actions (req_usertoken, requestid)
 VALUES ("tokusr_invalid", "scan");
 
 -- 18: ok_user_authentified
-INSERT INTO actions (req_usertoken, request)
+INSERT INTO actions (req_usertoken, requestid)
 VALUES ("tokusr_cashier", "scan");
 
 
