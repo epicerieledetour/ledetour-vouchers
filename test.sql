@@ -254,6 +254,9 @@ BEGIN
     WHERE actions.actionid = new.actionid;
 END;
 
+
+-- Inserts
+
 INSERT INTO emissions (expiration_utc)
 VALUES
     (date('now', '+3 month')),
@@ -360,31 +363,3 @@ SELECT * FROM emissions;
 SELECT * FROM vouchers;
 SELECT * FROM tokens;
 SELECT * FROM actions;
---SELECT * FROM dectree;
-
-
-
--- TODO
--- + Trigger to create a response row
--- + Trigger to set voucher status
--- + Continue tests
--- + Data driven undo_expiration_utc
--- + Dec tree doc
--- + User can cashin ACL
--- + Add undo
---   + Q10 scan
---   + Q11 scan
---   + Q12 scan
---   + Q10 undo
---   + Q11 undo
---   + Q11 error if not scan / undo
---   + Q12 undo
---   + Q12 error if not scan / undo
--- + Add set
---   + Branch scan / undo top of the chart
---   + Move error_system_unknown_request top of the flow
---   + Implement set
--- - Add scan by voucherid
---   + error_voucher_invalid -> error_voucher_invalid
---   + error_voucher_user_needs_voucher_token
-
