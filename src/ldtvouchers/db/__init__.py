@@ -2,18 +2,17 @@ import pathlib
 import random
 import sqlite3
 import string
-from typing import NewType
+
+from .. import models
 
 _DIRPATH = pathlib.Path(__file__).parent
 
 _SQL_INIT = (_DIRPATH / "init.sql").read_text()
+_SQL_USER_CREATE = (_DIRPATH / "user_create.sql").read_text()
+_SQL_USER_READ = (_DIRPATH / "user_read.sql").read_text()
 
 _USERID_ALPHABET = "23456789abcdefghijkmnopqrstuvwxyz"
 _VOUCHERID_ALPHABET = string.ascii_uppercase
-
-EmissionId = NewType("EmissionId", int)
-UserId = NewType("UserId", int)
-VoucherId = NewType("VoucherId", int)
 
 
 def connect(path: pathlib.Path) -> sqlite3.Connection:
@@ -32,9 +31,26 @@ def _sample(population: str, counts: int) -> str:
     return "".join(random.sample(population, counts))
 
 
-def _user_id(userid: UserId, userlabel: str) -> str:
+def _user_id(userid: models.UserId, userlabel: str) -> str:
     return "tokusr_{}".format(_sample(_USERID_ALPHABET, 8))
 
 
-def _voucher_id(voucherid: VoucherId, emissionid: EmissionId, sortnumber: int) -> str:
+def _voucher_id(
+    voucherid: models.VoucherId, emissionid: models.EmissionId, sortnumber: int
+) -> str:
     return "{:04d}-{}".format(sortnumber, _sample(_VOUCHERID_ALPHABET, 5))
+
+
+# Users
+
+
+def create_user(conn: sqlite3.Connection, user: models.UserBase) -> models.User:
+    with conn:
+        cur = conn.cursor()
+        cur.execute(_SQL_USER_CREATE, user.dict())
+        return read_user(conn, cur.lastrowid)
+
+
+def read_user(conn: sqlite3.Connection, userid: models.UserId) -> models.User:
+    row = conn.execute(_SQL_USER_READ, (userid,)).fetchone()
+    return models.User(**row)

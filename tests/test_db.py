@@ -2,7 +2,7 @@ import datetime
 import pathlib
 import unittest
 
-from ldtvouchers import db
+from ldtvouchers import db, models
 
 
 class DbTestCase(unittest.TestCase):
@@ -13,6 +13,8 @@ class DbTestCase(unittest.TestCase):
     def tearDown(self):
         self.conn.close()
 
+
+class DbInitTestCase(DbTestCase):
     def test_triggers(self):
         # Deterministic tokens are needed in the test script,
         # so our USERID and VOUCHERID custom sqlite functions are
@@ -142,3 +144,23 @@ class DbTestCase(unittest.TestCase):
         self.assertEqual(len(randomstring), 5)
         self.assertTrue(randomstring.isalpha())
         self.assertTrue(randomstring.isupper())
+
+
+class DbUsersTestCase(DbTestCase):
+    def setUp(self):
+        super().setUp()
+
+        self.base = models.UserBase(
+            label="lbl", can_cashin=True, can_cashin_by_voucherid=True
+        )
+
+    def test_create(self):
+        new = db.create_user(self.conn, self.base)
+        self.assertTrue(new.userid)
+        self.assertDictEqual(self.base.dict(), new.dict(exclude=["userid"]))
+
+    def test_read(self):
+        new = db.create_user(self.conn, self.base)
+        read = db.read_user(self.conn, new.userid)
+
+        self.assertEqual(new, read)

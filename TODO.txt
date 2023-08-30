@@ -114,10 +114,9 @@
 
 ## Users
 
-- [ ] create 
-  - ldtvouchers users create --label=lkasdf --can_cashin=
-  - API + test
+- [ ] create
   - CLI + test
+    - ldtvouchers users create --label=lkasdf --can_cashin=
 - [ ] read user
 - [ ] update user
 - [ ] delete
