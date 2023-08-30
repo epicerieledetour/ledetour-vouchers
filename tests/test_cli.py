@@ -1,21 +1,12 @@
-import contextlib
-import pathlib
-import tempfile
 import unittest
 
+import testutils
 from ldtvouchers import cli
 
 
-class CliDbTestCase(unittest.TestCase):
-    @contextlib.contextmanager
-    def _tmpdir(self):
-        with tempfile.TemporaryDirectory(
-            prefix="test-ldtvouchers", ignore_cleanup_errors=True
-        ) as tmpdir:
-            yield pathlib.Path(tmpdir)
-
+class CliDbTestCase(unittest.TestCase, testutils.TestCaseMixin):
     def test_init(self):
-        with self._tmpdir() as root:
+        with self.tmpdir() as root:
             db = root / "db.sqlite3"
 
             cli.parse_args(["--db", str(db), "db", "init"])
