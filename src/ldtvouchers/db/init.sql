@@ -7,9 +7,9 @@ emissions (
 CREATE TABLE IF NOT EXISTS
 users (
     userid INTEGER PRIMARY KEY,
-    label TEXT NOT NULL,
-    can_cashin BOOLEAN DEFAULT FALSE,
-    can_cashin_by_voucherid BOOLEAN DEFAULT FALSE
+    label TEXT NOT NULL DEFAULT "",
+    can_cashin BOOLEAN NOT NULL DEFAULT FALSE,
+    can_cashin_by_voucherid BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE IF NOT EXISTS
@@ -154,7 +154,7 @@ BEGIN
     INSERT INTO tokens
     VALUES
         (
-            USERID(new.label),
+            USERID(new.userid, new.label),
             "users",
             new.userid
         );
@@ -167,7 +167,7 @@ BEGIN
     INSERT INTO tokens
     VALUES
         (
-            VOUCHERID(new.voucherid),
+            VOUCHERID(new.voucherid, new.emissionid, new.sortnumber),
             "vouchers",
             new.voucherid
         );

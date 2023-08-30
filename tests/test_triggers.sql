@@ -1,4 +1,3 @@
-
 -- Inserts
 
 INSERT INTO emissions (expiration_utc)

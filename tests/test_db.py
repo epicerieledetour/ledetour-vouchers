@@ -8,15 +8,44 @@ from ldtvouchers import db
 class DbTestCase(unittest.TestCase):
     def setUp(self):
         self.conn = db.connect(":memory:")
+        db.initdb(self.conn)
 
     def tearDown(self):
         self.conn.close()
 
-    def test_initdb(self):
-        db.initdb(self.conn)
+    def test_triggers(self):
+        # Deterministic tokens are needed in the test script,
+        # so our USERID and VOUCHERID custom sqlite functions are
+        # temporarily overriden
+
+        def _user_id(userid, userlabel):
+            return "tokusr_{}".format(userlabel)
+
+        def _voucher_id(voucherid, emissionid, sortnumber):
+            return "tokvch_{}".format(voucherid)
+
+        self.conn.create_function("USERID", 2, _user_id)
+        self.conn.create_function("VOUCHERID", 3, _voucher_id)
 
         sql = (pathlib.Path(__file__).parent / "test_triggers.sql").read_text()
         self.conn.executescript(sql)
+
+        # Test created tokens
+
+        expected_token_rows = (
+            {"token": "tokusr_dist", "tablename": "users", "idintable": 1},
+            {"token": "tokusr_cashier", "tablename": "users", "idintable": 2},
+            {"token": "tokusr_cashier2", "tablename": "users", "idintable": 3},
+            {"token": "tokvch_1", "tablename": "vouchers", "idintable": 1},
+            {"token": "tokvch_2", "tablename": "vouchers", "idintable": 2},
+            {"token": "tokvch_3", "tablename": "vouchers", "idintable": 3},
+            {"token": "tokvch_4", "tablename": "vouchers", "idintable": 4},
+            {"token": "tokvch_5", "tablename": "vouchers", "idintable": 5},
+        )
+        for tkn, row in zip(
+            expected_token_rows, self.conn.execute("SELECT * FROM tokens")
+        ):
+            self.assertDictEqual(tkn, dict(**row))
 
         # Testing final vouchers status
 
@@ -59,3 +88,57 @@ class DbTestCase(unittest.TestCase):
                 row["responseid"],
                 "Error at response id test {actionid}".format(**row),
             )
+
+    def test_token_user(self):
+        """Checking that user tokens do not leak user data like userid or label"""
+
+        with self.conn:
+            cur = self.conn.cursor()
+            cur.execute("INSERT INTO users (label) VALUES ('theUser')")
+            userid = cur.lastrowid
+
+        user = self.conn.execute(
+            "SELECT * FROM users WHERE userid = ?", (userid,)
+        ).fetchone()
+
+        token = self.conn.execute(
+            "SELECT * FROM tokens WHERE tablename = 'users' AND idintable = ?",
+            (userid,),
+        ).fetchone()
+
+        self.assertEqual("users", token["tablename"])
+        self.assertEqual(user["userid"], token["idintable"])
+
+        prefix, suffix = token["token"].split("_")
+        self.assertEqual(prefix, "tokusr")
+
+        for key in user.keys():
+            self.assertNotEqual(
+                suffix,
+                str(user[key]),
+                "Field '{}' is leaking in user token '{}'".format(key, token["token"]),
+            )
+
+    def test_token_voucher(self):
+        """Checking that voucher tokens are of the form sortnumber-random"""
+
+        with self.conn:
+            cur = self.conn.cursor()
+            cur.execute("INSERT INTO vouchers (emissionid, sortnumber) VALUES (42, 73)")
+            voucherid = cur.lastrowid
+
+        voucher = self.conn.execute(
+            "SELECT * FROM vouchers WHERE voucherid = ?", (voucherid,)
+        ).fetchone()
+
+        token = self.conn.execute(
+            "SELECT * FROM tokens WHERE tablename = 'vouchers' AND idintable = ?",
+            (voucherid,),
+        ).fetchone()
+
+        sortnumber, randomstring = token["token"].split("-")
+
+        self.assertEqual(voucher["sortnumber"], int(sortnumber))
+        self.assertEqual(len(randomstring), 5)
+        self.assertTrue(randomstring.isalpha())
+        self.assertTrue(randomstring.isupper())

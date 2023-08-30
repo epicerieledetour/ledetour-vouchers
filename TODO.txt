@@ -129,10 +129,6 @@
 
 # TODO NEXT
 
-- Test what I have
-  - initdb
-  - test with big sql script to test triggers
-  - create_function
 - Cli user
 - Cli emissions
 - Cli vouchers
