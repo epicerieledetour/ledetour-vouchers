@@ -16,15 +16,33 @@ def _connect(func):
     return wrap
 
 
+def _json(func):
+    def wrap(*args, **kwargs):
+        ret = func(*args, **kwargs)
+        print(ret.json())
+
+    return wrap
+
+
+def _add_id_argument(parser, model) -> None:
+    parser.add_argument("id", help=f"The {model.schema()['title'].lower()} ID")
+
+
 @_connect
 def _db_init(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
     db.initdb(conn)
 
 
 @_connect
+@_json
 def _users_create(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
-    user = db.create_user(conn, models.UserBase())
-    print(user.json())
+    return db.create_user(conn, models.UserBase())
+
+
+@_connect
+@_json
+def _users_read(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
+    return db.read_user(conn, args.id)
 
 
 def parse_args(args: Sequence[Text] | None = None) -> None:
@@ -64,6 +82,10 @@ def _build_parser() -> argparse.ArgumentParser:
 
     par = sub.add_parser("create")
     par.set_defaults(command=_users_create)
+
+    par = sub.add_parser("read")
+    _add_id_argument(par, models.User)
+    par.set_defaults(command=_users_read)
 
     # All done !
 

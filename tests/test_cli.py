@@ -22,6 +22,9 @@ class _Std:
     def out(self):
         return self.outio.getvalue()
 
+    def load(self, model):
+        return model(**json.loads(self.out))
+
     def validate(self, model):
         model.validate(json.loads(self.out))
 
@@ -58,9 +61,18 @@ class CliUsersTestCase(unittest.TestCase):
     def cli(self, *args):
         std = _Std()
         with redirect_stderr(std.errio), redirect_stdout(std.outio):
-            cli.parse_args(["--db", str(self.dbpath)] + list(args))
+            cli.parse_args(["--db", str(self.dbpath)] + [str(arg) for arg in args])
             yield std
 
     def test_create(self):
         with self.cli("users", "create") as std:
             std.validate(models.User)
+
+    def test_read(self):
+        with self.cli("users", "create") as std:
+            created = std.load(models.User)
+
+        with self.cli("users", "read", created.userid) as std:
+            read = std.load(models.User)
+
+        self.assertEqual(created, read)
