@@ -1,16 +1,30 @@
 import argparse
 import contextlib
 import pathlib
+import sqlite3
 from collections.abc import Sequence
 from typing import Text
 
-from . import db
+from . import db, models
 
 
-def _init(args: argparse.Namespace) -> None:
-    conn = db.connect(args.db)
-    with contextlib.closing(conn):
-        db.initdb(conn)
+def _connect(func):
+    def wrap(ns: argparse.Namespace, *args, **kwargs):
+        with contextlib.closing(db.connect(ns.db)) as conn:
+            func(ns, conn, *args, **kwargs)
+
+    return wrap
+
+
+@_connect
+def _db_init(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
+    db.initdb(conn)
+
+
+@_connect
+def _users_create(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
+    user = db.create_user(conn, models.UserBase())
+    print(user.json())
 
 
 def parse_args(args: Sequence[Text] | None = None) -> None:
@@ -42,7 +56,14 @@ def _build_parser() -> argparse.ArgumentParser:
     sub = subparsers.add_parser("db").add_subparsers()
 
     par = sub.add_parser("init")
-    par.set_defaults(command=_init)
+    par.set_defaults(command=_db_init)
+
+    # users
+
+    sub = subparsers.add_parser("users").add_subparsers()
+
+    par = sub.add_parser("create")
+    par.set_defaults(command=_users_create)
 
     # All done !
 

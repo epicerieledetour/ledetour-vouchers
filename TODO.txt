@@ -131,7 +131,6 @@
 
 # TODO NEXT
 
-- db multiple init
 - Cli user
 - Cli emissions
 - Cli vouchers
