@@ -1,6 +1,6 @@
 [project]
 name = "ldtvouchers"
-version = "2.0.0"
+dynamic = ["version"]
 description = "Épicerie Le Détour vouchers"
 authors = [
     {name = "Charles Flèche", email = "charles.fleche@free.fr"}
@@ -23,11 +23,14 @@ dependencies = [
 build-backend = "setuptools.build_meta"
 requires = [
     "fastapi",
-    "setuptools"
+    "setuptools",
+    "setuptools_scm[toml]"
 ]
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools_scm]
 
 [tool.coverage.run]
 branch = true
