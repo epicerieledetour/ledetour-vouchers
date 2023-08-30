@@ -157,7 +157,7 @@ class DbUsersTestCase(DbTestCase):
     def test_create(self):
         new = db.create_user(self.conn, self.base)
         self.assertTrue(new.userid)
-        self.assertDictEqual(self.base.dict(), new.dict(exclude=["userid"]))
+        self.assertDictEqual(self.base.model_dump(), new.model_dump(exclude=["userid"]))
 
     def test_read(self):
         new = db.create_user(self.conn, self.base)

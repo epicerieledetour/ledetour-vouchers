@@ -1,13 +1,13 @@
 from typing import NewType
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field  # type: ignore
 
 EmissionId = NewType("EmissionId", int)
 UserId = NewType("UserId", int)
 VoucherId = NewType("VoucherId", int)
 
 
-class UserBase(BaseModel):
+class UserBase(BaseModel):  # type: ignore
     label: str = Field(default="", description="A short name")
     can_cashin: bool = Field(
         default=False, description="Tells if the user can cash a voucher in"
