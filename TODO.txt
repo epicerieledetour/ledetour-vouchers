@@ -131,7 +131,7 @@
 
 # TODO NEXT
 
-- All tox
+- db multiple init
 - Cli user
 - Cli emissions
 - Cli vouchers

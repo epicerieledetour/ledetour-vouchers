@@ -15,6 +15,9 @@ class DbTestCase(unittest.TestCase):
 
 
 class DbInitTestCase(DbTestCase):
+    def test_multiple_initdb(self):
+        self.assertTrue(False)
+
     def test_triggers(self):
         # Deterministic tokens are needed in the test script,
         # so our USERID and VOUCHERID custom sqlite functions are
