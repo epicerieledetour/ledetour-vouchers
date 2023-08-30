@@ -1,7 +1,9 @@
+import contextlib
 import datetime
 import pathlib
 import unittest
 
+import testutils
 from ldtvouchers import db, models
 
 
@@ -14,9 +16,18 @@ class DbTestCase(unittest.TestCase):
         self.conn.close()
 
 
-class DbInitTestCase(DbTestCase):
+class DbInitTestCase(DbTestCase, testutils.TestCaseMixin):
     def test_multiple_initdb(self):
-        self.assertTrue(False)
+        with self.tmpdir() as dirpath:
+            dbpath = dirpath / "db.sqlite3"
+
+            self.assertFalse(dbpath.exists())
+
+            for _ in range(3):
+                with contextlib.closing(db.connect(dbpath)) as conn:
+                    db.initdb(conn)
+
+                self.assertTrue(dbpath.exists())
 
     def test_triggers(self):
         # Deterministic tokens are needed in the test script,

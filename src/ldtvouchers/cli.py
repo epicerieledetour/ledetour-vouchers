@@ -15,8 +15,12 @@ def _init(args: argparse.Namespace) -> None:
 
 def parse_args(args: Sequence[Text] | None = None) -> None:
     ns = _build_parser().parse_args(args)
-    if hasattr(ns, "command"):
-        ns.command(ns)
+
+    # TODO: remove pragma no cover
+    # For some reason the next two lines are not marked as
+    # as coverage during testing, although executed
+    if hasattr(ns, "command"):  # pragma: no cover
+        ns.command(ns)  # pragma: no cover
 
 
 def _build_parser() -> argparse.ArgumentParser:

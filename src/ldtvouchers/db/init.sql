@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS
 levels (
     levelid TEXT PRIMARY KEY
 );
-INSERT INTO levels (levelid)
+INSERT OR REPLACE INTO levels (levelid)
 VALUES
     ("ok"),
     ("warning"),
@@ -48,7 +48,16 @@ responses (
 
     FOREIGN KEY(levelid) REFERENCES levels(levelid)
 );
-INSERT INTO responses (responseid, httpcode, levelid, set_cashin, undo_timeout_datefunc_modifier, can_undo, description)
+INSERT OR REPLACE INTO
+responses (
+    responseid,
+    httpcode,
+    levelid,
+    set_cashin,
+    undo_timeout_datefunc_modifier,
+    can_undo,
+    description
+)
 VALUES
     (
         "error_voucher_unauthentified", 401, "error", NULL, NULL, NULL,
@@ -116,7 +125,8 @@ CREATE TABLE IF NOT EXISTS
 requests (
     requestid TEXT NOT NULL PRIMARY KEY
 );
-INSERT INTO requests (requestid)
+INSERT OR REPLACE INTO
+requests (requestid)
 VALUES
     ("scan"),
     ("undo");
