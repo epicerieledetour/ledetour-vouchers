@@ -10,6 +10,7 @@ _DIRPATH = pathlib.Path(__file__).parent
 _SQL_INIT = (_DIRPATH / "init.sql").read_text()
 _SQL_USER_CREATE = (_DIRPATH / "user_create.sql").read_text()
 _SQL_USER_READ = (_DIRPATH / "user_read.sql").read_text()
+_SQL_USER_UPDATE = (_DIRPATH / "user_update.sql").read_text()
 
 _USERID_ALPHABET = "23456789abcdefghijkmnopqrstuvwxyz"
 _VOUCHERID_ALPHABET = string.ascii_uppercase
@@ -70,3 +71,8 @@ def create_user(conn: sqlite3.Connection, user: models.UserBase) -> models.User:
 def read_user(conn: sqlite3.Connection, userid: models.UserId) -> models.User:
     row = conn.execute(_SQL_USER_READ, (userid,)).fetchone()
     return models.User(**row)
+
+
+def update_user(conn: sqlite3.Connection, user: models.User) -> models.User:
+    conn.execute(_SQL_USER_UPDATE, user.model_dump())
+    return read_user(conn, user.userid)

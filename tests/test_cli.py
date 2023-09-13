@@ -87,3 +87,16 @@ class CliUsersTestCase(unittest.TestCase):
             read = std.load(models.User)
 
         self.assertEqual(created, read)
+
+    def test_update(self):
+        with self.cli("users", "create") as std:
+            user = std.load(models.User)
+            self.assertEqual(user.label, "")
+
+        userid = user.userid
+        label = "userLabel"
+
+        with self.cli("users", "update", userid, "--label", label) as std:
+            user = std.load(models.User)
+            self.assertEqual(user.userid, userid)
+            self.assertEqual(user.label, label)

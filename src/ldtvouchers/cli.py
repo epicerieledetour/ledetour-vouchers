@@ -73,6 +73,15 @@ def _users_read(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
     return db.read_user(conn, args.id)
 
 
+@_connect
+@_model("user", models.User)
+@_json
+def _users_update(
+    args: argparse.Namespace, conn: sqlite3.Connection, user: models.User
+) -> None:
+    return db.update_user(conn, user)
+
+
 def _add_model_schema_as_arguments(
     model: type[pydantic.BaseModel], parser: argparse.ArgumentParser
 ) -> None:
@@ -130,6 +139,10 @@ def _build_parser() -> argparse.ArgumentParser:
     par = sub.add_parser("read")
     _add_id_argument(par, models.User)
     par.set_defaults(command=_users_read)
+
+    par = sub.add_parser("update")
+    _add_model_schema_as_arguments(models.User, par)
+    par.set_defaults(command=_users_update)
 
     # All done !
 
