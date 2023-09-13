@@ -114,7 +114,7 @@
 
 ## Users
 
-- [ ] create
+- [X] create
   - CLI + test
     - ldtvouchers users create --label=lkasdf --can_cashin=
 - [ ] update user

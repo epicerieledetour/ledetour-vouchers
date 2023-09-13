@@ -1,12 +1,14 @@
 # TODO: reactivate mypy
 # type: ignore
-
 import argparse
 import contextlib
+import functools
 import pathlib
 import sqlite3
 from collections.abc import Sequence
 from typing import Text
+
+import pydantic
 
 from . import db, models
 
@@ -27,6 +29,24 @@ def _json(func):
     return wrap
 
 
+def _model(arg_name: str, Model: type[pydantic.BaseModel]):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrap(*args, **kwargs):
+            ns = args[0]
+
+            model_args = dict((name, getattr(ns, name)) for name in Model.model_fields)
+            model = Model(**model_args)
+
+            kwargs[arg_name] = model
+
+            return func(*args, **kwargs)
+
+        return wrap
+
+    return decorator
+
+
 def _add_id_argument(parser, model) -> None:
     parser.add_argument(
         "id", help=f"The {model.model_json_schema()['title'].lower()} ID"
@@ -39,15 +59,30 @@ def _db_init(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
 
 
 @_connect
+@_model("user", models.UserBase)
 @_json
-def _users_create(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
-    return db.create_user(conn, models.UserBase())
+def _users_create(
+    args: argparse.Namespace, conn: sqlite3.Connection, user: models.UserBase
+) -> None:
+    return db.create_user(conn, user)
 
 
 @_connect
 @_json
 def _users_read(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
     return db.read_user(conn, args.id)
+
+
+def _add_model_schema_as_arguments(
+    model: type[pydantic.BaseModel], parser: argparse.ArgumentParser
+) -> None:
+    for name, field in model.model_fields.items():
+        parser.add_argument(
+            name if field.is_required() else f"--{name}",
+            type=field.annotation,
+            default=field.get_default(),
+            help=field.description,
+        )
 
 
 def parse_args(args: Sequence[Text] | None = None) -> None:
@@ -89,6 +124,7 @@ def _build_parser() -> argparse.ArgumentParser:
     sub = subparsers.add_parser("users").add_subparsers()
 
     par = sub.add_parser("create")
+    _add_model_schema_as_arguments(models.UserBase, par)
     par.set_defaults(command=_users_create)
 
     par = sub.add_parser("read")

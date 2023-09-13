@@ -64,9 +64,20 @@ class CliUsersTestCase(unittest.TestCase):
             cli.parse_args(["--db", str(self.dbpath)] + [str(arg) for arg in args])
             yield std
 
-    def test_create(self):
+    def test_create__no_argument(self):
         with self.cli("users", "create") as std:
             std.validate(models.User)
+
+    def test_create(self):
+        label = "testuser"
+        can_cashin = True
+        with self.cli(
+            "users", "create", "--label", label, "--can_cashin", can_cashin
+        ) as std:
+            user = std.load(models.User)
+            self.assertEqual(user.label, label)
+            self.assertTrue(user.can_cashin)
+            self.assertFalse(user.can_cashin_by_voucherid)
 
     def test_read(self):
         with self.cli("users", "create") as std:
