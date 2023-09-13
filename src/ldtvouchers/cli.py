@@ -25,7 +25,9 @@ def _json(func):
 
 
 def _add_id_argument(parser, model) -> None:
-    parser.add_argument("id", help=f"The {model.schema()['title'].lower()} ID")
+    parser.add_argument(
+        "id", help=f"The {model.model_json_schema()['title'].lower()} ID"
+    )
 
 
 @_connect
