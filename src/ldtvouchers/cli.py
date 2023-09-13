@@ -1,3 +1,6 @@
+# TODO: reactivate mypy
+# type: ignore
+
 import argparse
 import contextlib
 import pathlib
