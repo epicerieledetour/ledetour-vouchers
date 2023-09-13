@@ -14,9 +14,9 @@ class _Std:
         self.errio = StringIO()
         self.outio = StringIO()
 
-    @property
-    def err(self):
-        return self.errio.getvalue()
+    # @property
+    # def err(self):
+    #     return self.errio.getvalue()
 
     @property
     def out(self):
