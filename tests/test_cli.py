@@ -33,30 +33,18 @@ class _Std:
         model.validate(json.loads(self.out))
 
 
-class CliDbTestCase(unittest.TestCase, testutils.TestCaseMixin):
-    def test_init(self):
-        with self.tmpdir() as root:
-            db = root / "db.sqlite3"
-
-            cli.parse_args(["--db", str(db), "db", "init"])
-
-            self.assertTrue(db.exists())
-
-
-class CliUsersTestCase(unittest.TestCase):
+class CliTestCase(unittest.TestCase):
     def setUp(self):
         super().setUp()
 
         self._tmpdir = tempfile.TemporaryDirectory(
-            prefix="test-ldtvouchers", ignore_cleanup_errors=True
+            prefix="test-ldtvouchers-", ignore_cleanup_errors=True
         )
         self.tmpdir = Path(self._tmpdir.name)
         self.dbpath = self.tmpdir / "db.sqlite3"
 
         with self.cli("db", "init"):
             pass
-
-        self.unknown_id = 42
 
     def tearDown(self):
         self._tmpdir.cleanup()
@@ -71,6 +59,20 @@ class CliUsersTestCase(unittest.TestCase):
                 cli.parse_args(["--db", str(self.dbpath)] + [str(arg) for arg in args])
             finally:
                 yield std
+
+
+class CliDbTestCase(unittest.TestCase, testutils.TestCaseMixin):
+    def test_init(self):
+        with self.tmpdir() as root:
+            db = root / "db.sqlite3"
+
+            cli.parse_args(["--db", str(db), "db", "init"])
+
+            self.assertTrue(db.exists())
+
+
+class CliUsersTestCase(CliTestCase):
+    unknown_id = 42
 
     @contextmanager
     def assertUnknownUser(self):
