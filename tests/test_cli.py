@@ -6,17 +6,17 @@ from io import StringIO
 from pathlib import Path
 
 import testutils
-from ldtvouchers import cli, models
+from ldtvouchers import cli, db, models
 
 
 class _Std:
-    def __init__(self):
-        self.errio = StringIO()
-        self.outio = StringIO()
+    def __init__(self, outio=None, errio=None):
+        self.errio = StringIO() if outio is None else outio
+        self.outio = StringIO() if errio is None else errio
 
-    # @property
-    # def err(self):
-    #     return self.errio.getvalue()
+    @property
+    def err(self):
+        return self.errio.getvalue()
 
     @property
     def out(self):
@@ -52,17 +52,31 @@ class CliUsersTestCase(unittest.TestCase):
         with self.cli("db", "init"):
             pass
 
+        self.unknown_id = 42
+
     def tearDown(self):
         self._tmpdir.cleanup()
 
         super().tearDown()
 
     @contextmanager
-    def cli(self, *args):
+    def cli(self, *args, outio=None, errio=None):
         std = _Std()
         with redirect_stderr(std.errio), redirect_stdout(std.outio):
-            cli.parse_args(["--db", str(self.dbpath)] + [str(arg) for arg in args])
-            yield std
+            try:
+                cli.parse_args(["--db", str(self.dbpath)] + [str(arg) for arg in args])
+            finally:
+                yield std
+
+    @contextmanager
+    def assertUnknownUser(self):
+        with self.assertRaises(SystemExit) as cm:
+            yield
+
+        err = cm.exception.args[0]
+
+        self.assertTrue(isinstance(err, db.UnknownId))
+        self.assertRegex(str(err), r"^Unknown user .+$")
 
     def test_create__no_argument(self):
         with self.cli("users", "create") as std:
@@ -88,6 +102,11 @@ class CliUsersTestCase(unittest.TestCase):
 
         self.assertEqual(created, read)
 
+    def test_read__unknown_id(self):
+        with self.assertUnknownUser():
+            with self.cli("users", "read", self.unknown_id):
+                pass
+
     def test_update(self):
         with self.cli("users", "create") as std:
             user = std.load(models.User)
@@ -100,3 +119,25 @@ class CliUsersTestCase(unittest.TestCase):
             user = std.load(models.User)
             self.assertEqual(user.userid, userid)
             self.assertEqual(user.label, label)
+
+    def test_update__unknown_id(self):
+        with self.assertUnknownUser():
+            with self.cli("users", "update", self.unknown_id, "--label", "lbl"):
+                pass
+
+    def test_delete(self):
+        with self.cli("users", "create") as std:
+            user = std.load(models.User)
+            userid = user.userid
+
+        with self.cli("users", "delete", userid) as std:
+            self.assertFalse(std.out)
+
+        with self.assertUnknownUser():
+            with self.cli("users", "read", userid) as std:
+                pass
+
+    def test_delete__unknown_id(self):
+        with self.assertUnknownUser():
+            with self.cli("users", "delete", self.unknown_id):
+                pass

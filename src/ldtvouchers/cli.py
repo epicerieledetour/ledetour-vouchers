@@ -5,6 +5,7 @@ import contextlib
 import functools
 import pathlib
 import sqlite3
+import sys
 from collections.abc import Sequence
 from typing import Text
 
@@ -14,14 +15,24 @@ from . import db, models
 
 
 def _connect(func):
+    @functools.wraps(func)
     def wrap(ns: argparse.Namespace, *args, **kwargs):
-        with contextlib.closing(db.connect(ns.db)) as conn:
-            func(ns, conn, *args, **kwargs)
+        conn = db.connect(ns.db)
+
+        with contextlib.closing(conn):
+            with conn:
+                try:
+                    func(ns, conn, *args, **kwargs)
+                except db.UnknownId as err:
+                    sys.exit(err)
+                except Exception:
+                    raise
 
     return wrap
 
 
 def _json(func):
+    @functools.wraps(func)
     def wrap(*args, **kwargs):
         ret = func(*args, **kwargs)
         print(ret.json())
@@ -49,7 +60,7 @@ def _model(arg_name: str, Model: type[pydantic.BaseModel]):
 
 def _add_id_argument(parser, model) -> None:
     parser.add_argument(
-        "id", help=f"The {model.model_json_schema()['title'].lower()} ID"
+        "id", type=int, help=f"The {model.model_json_schema()['title'].lower()} ID"
     )
 
 
@@ -80,6 +91,11 @@ def _users_update(
     args: argparse.Namespace, conn: sqlite3.Connection, user: models.User
 ) -> None:
     return db.update_user(conn, user)
+
+
+@_connect
+def _users_delete(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
+    db.delete_user(conn, args.id)
 
 
 def _add_model_schema_as_arguments(
@@ -143,6 +159,10 @@ def _build_parser() -> argparse.ArgumentParser:
     par = sub.add_parser("update")
     _add_model_schema_as_arguments(models.User, par)
     par.set_defaults(command=_users_update)
+
+    par = sub.add_parser("delete")
+    _add_id_argument(par, models.User)
+    par.set_defaults(command=_users_delete)
 
     # All done !
 
