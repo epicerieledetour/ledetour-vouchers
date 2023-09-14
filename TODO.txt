@@ -130,7 +130,6 @@
 
 # TODO NEXT
 
-- Cli user
 - Cli emissions
-- Cli vouchers
+- Cli vouchers / scan
 - HttpApi vouchers

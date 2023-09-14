@@ -85,6 +85,12 @@ def _users_read(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
 
 
 @_connect
+def _users_list(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
+    for user in db.list_users(conn):
+        print(f"{user.userid} {user.label}")
+
+
+@_connect
 @_model("user", models.User)
 @_json
 def _users_update(
@@ -155,6 +161,9 @@ def _build_parser() -> argparse.ArgumentParser:
     par = sub.add_parser("read")
     _add_id_argument(par, models.User)
     par.set_defaults(command=_users_read)
+
+    par = sub.add_parser("list")
+    par.set_defaults(command=_users_list)
 
     par = sub.add_parser("update")
     _add_model_schema_as_arguments(models.User, par)

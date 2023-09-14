@@ -2,6 +2,7 @@ import pathlib
 import random
 import sqlite3
 import string
+from collections.abc import Generator
 from typing import Any
 
 import pydantic
@@ -13,6 +14,7 @@ _DIRPATH = pathlib.Path(__file__).parent
 _SQL_INIT = (_DIRPATH / "init.sql").read_text()
 _SQL_USER_CREATE = (_DIRPATH / "user_create.sql").read_text()
 _SQL_USER_READ = (_DIRPATH / "user_read.sql").read_text()
+_SQL_USERS_LIST = (_DIRPATH / "users_list.sql").read_text()
 _SQL_USER_UPDATE = (_DIRPATH / "user_update.sql").read_text()
 _SQL_USER_DELETE = (_DIRPATH / "user_delete.sql").read_text()
 
@@ -93,6 +95,12 @@ def read_user(conn: sqlite3.Connection, userid: models.UserId) -> models.User:
     if not row:
         raise UnknownId(models.User, userid)
     return models.User(**row)
+
+
+def list_users(conn: sqlite3.Connection) -> Generator[models.User, None, None]:
+    cur = conn.execute(_SQL_USERS_LIST)
+    for row in cur.fetchall():
+        yield models.User(**row)
 
 
 def update_user(conn: sqlite3.Connection, user: models.User) -> models.User:

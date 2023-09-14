@@ -22,6 +22,10 @@ class _Std:
     def out(self):
         return self.outio.getvalue()
 
+    @property
+    def outlines(self):
+        return self.out.split("\n")
+
     def load(self, model):
         return model(**json.loads(self.out))
 
@@ -106,6 +110,19 @@ class CliUsersTestCase(unittest.TestCase):
         with self.assertUnknownUser():
             with self.cli("users", "read", self.unknown_id):
                 pass
+
+    def test_list(self):
+        with self.cli("users", "create") as std:
+            user1 = std.load(models.User)
+
+        with self.cli("users", "create") as std:
+            user2 = std.load(models.User)
+
+        with self.cli("users", "list") as std:
+            line1, line2, _ = std.outlines
+
+            self.assertIn(str(user1.userid), line1)
+            self.assertIn(str(user2.userid), line2)
 
     def test_update(self):
         with self.cli("users", "create") as std:
