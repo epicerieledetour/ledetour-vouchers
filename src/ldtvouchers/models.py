@@ -63,6 +63,15 @@ class VoucherImport(BaseModel):
     distributed_by_label: str | None
 
 
+class Action(BaseModel):
+    origin: str | None = Field(default=None)
+    req_usertoken: str | None = Field(default=None)
+    req_vouchertoken: str | None = Field(default=None)
+    userid: UserId | None = Field(default=None)
+    voucherid: VoucherId | None = Field(default=None)
+    requestid: str
+
+
 class EmissionBase(BaseModel):
     label: str | None = Field(
         default=None,

@@ -18,7 +18,7 @@ vouchers (
     voucherid INTEGER PRIMARY KEY,
     emissionid INTEGER NOT NULL,
     sortnumber INTEGER NOT NULL,
-    value_CAN INTEGER NOT NULL,
+    value_CAN INTEGER,
     distributed_by INTEGER,
     cashedin_by INTEGER,
     cashedin_utc DATETIME,
@@ -139,6 +139,7 @@ CREATE TABLE IF NOT EXISTS
 actions (
     actionid INTEGER PRIMARY KEY,
     timestamp_utc DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    origin TEXT,
     req_usertoken TEXT,
     req_vouchertoken TEXT,
     userid INTEGER,
@@ -227,7 +228,7 @@ BEGIN
 	    voucherid = COALESCE(a.voucherid, v.voucherid),
         responseid =
     CASE
-        WHEN a.req_vouchertoken IS NULL AND a.voucherid IS NULL  -- Q1
+        WHEN COALESCE(a.voucherid, a.req_vouchertoken) IS NULL  -- Q1
             THEN  -- Auth scan
                 CASE
                     WHEN u.userid IS NULL  -- Q2
@@ -277,9 +278,9 @@ BEGIN
 	            END
     END
     FROM actions a
-        LEFT JOIN tokens tku ON a.req_usertoken = tku.token
-        LEFT JOIN users u ON tku.tablename = 'users' AND tku.idintable = u.userid
-        LEFT JOIN tokens tkv ON a.req_vouchertoken = tkv.token
+        LEFT JOIN tokens tku ON a.req_usertoken = tku.token AND tku.tablename = 'users'
+        LEFT JOIN users u ON COALESCE(a.userid, tku.idintable) = u.userid
+        LEFT JOIN tokens tkv ON a.req_vouchertoken = tkv.token AND tkv.tablename = 'vouchers'
         LEFT JOIN vouchers v ON COALESCE(a.voucherid, tkv.idintable) = v.voucherid
         LEFT JOIN emissions e ON v.emissionid = e.emissionid	
     WHERE actions.actionid = new.actionid;

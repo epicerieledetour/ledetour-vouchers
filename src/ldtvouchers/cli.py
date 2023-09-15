@@ -16,6 +16,9 @@ import pydantic
 
 from . import db, models
 
+_ACTION_ORIGIN_CLI = "cli"
+_ACTION_REQUEST_SCAN = "scan"
+
 
 def _connect(func):
     @functools.wraps(func)
@@ -180,6 +183,26 @@ def _emissions_import(
     return db.read_emission(conn, emissionid)
 
 
+# vouchers
+
+
+@_connect
+def _actions_scan(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
+    # origin: str | None = Field(default=None)
+    # req_usertoken: str | None = Field(default=None)
+    # req_vouchertoken: str | None = Field(default=None)
+    # userid: UserId | None = Field(default=None)
+    # voucherid: VoucherId | None = Field(default=None)
+    # requestid: str
+    action = models.Action(
+        origin=_ACTION_ORIGIN_CLI,
+        userid=args.userid,
+        voucherid=args.voucherid,
+        requestid=_ACTION_REQUEST_SCAN,
+    )
+    db.add_action(conn, action)
+
+
 # Utils
 
 _ARG_DEFAULT_FOR_TYPE = {datetime.datetime: datetime.datetime.fromisoformat}
@@ -196,20 +219,6 @@ def _add_model_schema_as_arguments(
         except:
             raise
         return not isinstance(default, Iterable)
-        # typ = field.annotation
-
-        # for name in ("__origin__", "__supertype__"):
-        #     if hasattr(typ, name):
-        #         typ = getattr(typ, name)
-        #         break
-
-        # try:
-        #     if issubclass(typ, str):
-        #         return True
-        # except:
-        #     raise
-
-        # return not issubclass(typ, Iterable)
 
     def _type(field: pydantic.Field) -> Callable[[str], Any] | None:
         typ = field.annotation
@@ -334,6 +343,15 @@ def _build_parser() -> argparse.ArgumentParser:
     _add_id_argument(par, models.Emission)
     par.add_argument("path", type=argparse.FileType("r"))
     par.set_defaults(command=_emissions_import)
+
+    # actions
+
+    sub = subparsers.add_parser("actions").add_subparsers()
+
+    par = sub.add_parser("scan")
+    par.add_argument("--voucherid", help="Voucher ID")
+    par.add_argument("--userid", help="User ID")
+    par.set_defaults(command=_actions_scan)
 
     # All done !
 

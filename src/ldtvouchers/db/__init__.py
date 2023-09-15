@@ -16,6 +16,7 @@ from ..models import Emission, EmissionBase, EmissionId
 _DIRPATH = pathlib.Path(__file__).parent
 
 _SQL_INIT = (_DIRPATH / "init.sql").read_text()
+_SQL_ACTION_CREATE = (_DIRPATH / "action_create.sql").read_text()
 _SQL_EMISSION_CREATE = (_DIRPATH / "emission_create.sql").read_text()
 _SQL_EMISSIONS_LIST = (_DIRPATH / "emissions_list.sql").read_text()
 _SQL_EMISSION_READ = (_DIRPATH / "emission_read.sql").read_text()
@@ -60,6 +61,13 @@ class VoucherCreationError(BaseException):
 
         self.emissionid = emissionid
         self.voucher = voucher
+
+
+class ActionError(BaseException):
+    def __init__(self, action: models.Action):
+        super().__init__()
+
+        self.action = action
 
 
 # Connection
@@ -233,3 +241,9 @@ def set_emission_vouchers(conn: Connection, emissionid: EmissionId) -> None:
     conn.execute(_SQL_VOUCHERS_DELETE, {"emissionid": emissionid})
 
     yield add_voucher
+
+
+def add_action(conn: Connection, action: models.Action) -> None:
+    cur = conn.execute(_SQL_ACTION_CREATE, action.model_dump())
+    if cur.rowcount == 0:
+        raise ActionError(action)

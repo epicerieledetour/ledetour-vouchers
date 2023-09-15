@@ -285,5 +285,77 @@ class EmissionsTestCase(CliTestCase):
 
         self.assertEqual(emissions1, emissions2)
 
-    def test_import__subsequent(self):
-        assert False
+
+class ActionsTestCase(CliTestCase):
+    def setUp(self):
+        super().setUp()
+
+        # Users
+
+        with self.cli(
+            "users",
+            "create",
+            "--label",
+            "user1",
+        ) as std:
+            self.user_dist1 = std.load(models.User)
+
+        with self.cli(
+            "users",
+            "create",
+            "--label",
+            "user2",
+        ) as std:
+            self.user_dist2 = std.load(models.User)
+
+        with self.cli(
+            "users",
+            "create",
+            "--label",
+            "user3",
+            "--can_cashin",
+            "true",
+            "--can_cashin_by_voucherid",
+            "true",
+        ) as std:
+            self.user_scan1 = std.load(models.User)
+
+        self.user = self.user_scan1
+
+        # Emission
+
+        with self.cli("emissions", "create") as std:
+            self.emission = std.load(models.Emission)
+
+        csvpath = Path(__file__).parent / "test_import.csv"
+
+        with self.cli(
+            "emissions",
+            "import",
+            self.emission.emissionid,
+            str(csvpath),
+        ) as std:
+            self.emission = std.load(models.Emission)
+
+        self.voucher1, self.voucher2 = self.emission.vouchers
+        self.voucher = self.voucher1
+
+    def test_scan__voucher_by_id(self):
+        with self.cli(
+            "actions",
+            "scan",
+            "--userid",
+            self.user.userid,
+            "--voucherid",
+            self.voucher.voucherid,
+        ):
+            pass
+
+        with self.cli("emissions", "read", self.emission.emissionid) as std:
+            emission = std.load(models.Emission)
+
+        voucher = emission.vouchers[0]
+
+        self.assertEqual(voucher.distributed_by, self.user_dist1.userid)
+        self.assertEqual(voucher.cashedin_by, self.user.userid)
+        self.assertIsInstance(voucher.cashedin_utc, datetime.datetime)

@@ -103,8 +103,8 @@
 - [X] cli emissions read ...
 - [X] cli emissions update --label ... --start-date ... --end-date ...
 - [X] cli emissions delete ...
-- [ ] cli emissions export id path
-- [ ] cli emissions import id path
+- [X] cli emissions import id path
+- [ ] cli emissions export (as csv)
 
 
 ## Events
@@ -127,13 +127,16 @@
 - [ ] httpapi scan
 - [ ] httpapi undo
 
-# TODO NEXT
+# Misc
 
-- Cli emissions
-  - models: no read in db after create / update
-  - users list --distributors
+- models: no read in db after create / update
+- users list --distributors
   - delete voucher token when voucher is deleted
   - delete user token when user is deleted
-- Cli vouchers / scan
+
+# TODO NEXT
+
+- Action: undo
+- Veriy tox
 - HttpApi vouchers
 - Reports
