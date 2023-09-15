@@ -1,3 +1,4 @@
+import datetime
 import json
 import tempfile
 import unittest
@@ -57,10 +58,8 @@ class CliTestCase(unittest.TestCase):
     def cli(self, *args, outio=None, errio=None):
         std = _Std()
         with redirect_stderr(std.errio), redirect_stdout(std.outio):
-            try:
-                cli.parse_args(["--db", str(self.dbpath)] + [str(arg) for arg in args])
-            finally:
-                yield std
+            cli.parse_args(["--db", str(self.dbpath)] + [str(arg) for arg in args])
+            yield std
 
     @contextmanager
     def assertUnknownId(self):
@@ -166,18 +165,27 @@ class EmissionsTestCase(CliTestCase):
     def setUp(self):
         super().setUp()
 
-        with self.cli("emissions", "create", "2999-12-31") as std:
+        with self.cli("emissions", "create") as std:
             self.emission = std.load(models.Emission)
 
-    def test_create(self):
-        self.assertIsInstance(self.emission, models.Emission)
+    def test_create__empty(self):
+        with self.cli("emissions", "create") as std:
+            emission = std.load(models.Emission)
 
-    def test_create__requires_expiration_utc(self):
-        with self.assertRaises(SystemExit):
-            with self.cli("emissions", "create") as std:
-                self.assertIn(
-                    "the following arguments are required: expiration_utc", std.err
-                )
+            self.assertIsInstance(emission, models.Emission)
+
+    def test_create(self):
+        label = "emissionLabel"
+        expiration_str = "2042-12-31"
+        expiration_utc = datetime.datetime.fromisoformat(expiration_str)
+
+        with self.cli(
+            "emissions", "create", "--expiration_utc", expiration_str, "--label", label
+        ) as std:
+            emission = std.load(models.Emission)
+
+            self.assertEqual(emission.label, label)
+            self.assertEqual(emission.expiration_utc, expiration_utc)
 
     def test_read(self):
         with self.cli("emissions", "read", self.emission.emissionid) as std:
@@ -191,7 +199,7 @@ class EmissionsTestCase(CliTestCase):
                 pass
 
     def test_list(self):
-        with self.cli("emissions", "create", "2042-01-01") as std:
+        with self.cli("emissions", "create") as std:
             emission = std.load(models.Emission)
 
         with self.cli("emissions", "list") as std:
@@ -199,3 +207,20 @@ class EmissionsTestCase(CliTestCase):
 
             self.assertIn(str(self.emission.emissionid), line1)
             self.assertIn(str(emission.emissionid), line2)
+
+    def test_update(self):
+        label = "emissionLabel"
+
+        with self.cli(
+            "emissions", "update", self.emission.emissionid, "--label", label
+        ) as std:
+            emission = std.load(models.Emission)
+
+            self.emission.label = label
+
+            self.assertEqual(self.emission, emission)
+
+    def test_update__unknown_id(self):
+        with self.assertUnknownId():
+            with self.cli("users", "update", self.unknown_id, "--label", "lbl"):
+                pass

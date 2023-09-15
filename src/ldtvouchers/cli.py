@@ -188,14 +188,17 @@ def _add_model_schema_as_arguments(
 
     def _type(field: pydantic.Field) -> Callable[[str], Any] | None:
         typ = field.annotation
-        if typ in _ARG_DEFAULT_FOR_TYPE:
-            return _ARG_DEFAULT_FOR_TYPE[typ]
 
         if isinstance(typ, UnionType):
             types = set(typ.__args__)
             if len(types) == 2 and NoneType in types:
                 types.remove(NoneType)
-                return types.pop()
+                typ = types.pop()
+
+        if typ in _ARG_DEFAULT_FOR_TYPE:
+            return _ARG_DEFAULT_FOR_TYPE[typ]
+
+        return typ
 
     fields = (
         (name, field)
@@ -212,10 +215,6 @@ def _add_model_schema_as_arguments(
         kwargs = {}
         if typ := _type(field):
             kwargs["type"] = typ
-
-        # default = field.get_default()
-        # if default is not pydantic.PydanticUndefined:
-        #     kwargs["default"] = default
 
         if description := field.description:
             kwargs["help"] = description

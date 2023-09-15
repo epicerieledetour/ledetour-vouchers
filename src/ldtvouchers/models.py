@@ -60,7 +60,8 @@ class EmissionBase(BaseModel):
         default=None,
         description="Short name of the emission",
     )
-    expiration_utc: datetime.datetime = Field(
+    expiration_utc: datetime.datetime | None = Field(
+        default=None,
         description="Expiration date in UTC time",
     )
     vouchers: list[Voucher] = Field(
