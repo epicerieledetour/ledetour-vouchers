@@ -224,3 +224,18 @@ class EmissionsTestCase(CliTestCase):
         with self.assertUnknownId():
             with self.cli("users", "update", self.unknown_id, "--label", "lbl"):
                 pass
+
+    def test_delete(self):
+        emissionid = self.emission.emissionid
+
+        with self.cli("emissions", "delete", emissionid) as std:
+            self.assertFalse(std.out)
+
+        with self.assertUnknownId():
+            with self.cli("emissions", "read", emissionid) as std:
+                pass
+
+    def test_delete__unknown_id(self):
+        with self.assertUnknownId():
+            with self.cli("emissions", "delete", self.unknown_id):
+                pass
