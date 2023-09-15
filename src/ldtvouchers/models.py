@@ -37,6 +37,9 @@ class VoucherBase(BaseModel):
     sortnumber: int = Field(
         description="Order of the voucher in its emission",
     )
+    distributed_by: UserId | None = Field(
+        default=None, description="ID of the user who distributed the voucher"
+    )
     cashedin_by: UserId | None = Field(
         default=None,
         description="ID of the user who cashed the voucher in",
@@ -53,6 +56,11 @@ class VoucherBase(BaseModel):
 
 class Voucher(VoucherBase):
     voucherid: VoucherId
+
+
+class VoucherImport(BaseModel):
+    value_CAN: int
+    distributed_by_label: str | None
 
 
 class EmissionBase(BaseModel):

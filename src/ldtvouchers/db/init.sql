@@ -18,11 +18,14 @@ vouchers (
     voucherid INTEGER PRIMARY KEY,
     emissionid INTEGER NOT NULL,
     sortnumber INTEGER NOT NULL,
+    value_CAN INTEGER NOT NULL,
+    distributed_by INTEGER,
     cashedin_by INTEGER,
     cashedin_utc DATETIME,
     undo_expiration_utc DATETIME,
 
     FOREIGN KEY(emissionid) REFERENCES emissions(emissionid),
+    FOREIGN KEY(distributed_by) REFERENCES users(userid),
     FOREIGN KEY(cashedin_by) REFERENCES users(userid)
 );
 

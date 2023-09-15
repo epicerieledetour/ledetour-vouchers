@@ -130,6 +130,10 @@
 # TODO NEXT
 
 - Cli emissions
+  - models: no read in db after create / update
+  - users list --distributors
+  - delete voucher token when voucher is deleted
+  - delete user token when user is deleted
 - Cli vouchers / scan
 - HttpApi vouchers
 - Reports

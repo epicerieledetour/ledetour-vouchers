@@ -1,8 +1,10 @@
+import functools
 import pathlib
 import random
 import sqlite3
 import string
 from collections.abc import Generator
+from contextlib import contextmanager
 from sqlite3 import Connection
 from typing import Any
 
@@ -24,6 +26,9 @@ _SQL_USER_READ = (_DIRPATH / "user_read.sql").read_text()
 _SQL_USERS_LIST = (_DIRPATH / "users_list.sql").read_text()
 _SQL_USER_UPDATE = (_DIRPATH / "user_update.sql").read_text()
 _SQL_USER_DELETE = (_DIRPATH / "user_delete.sql").read_text()
+_SQL_VOUCHER_CREATE = (_DIRPATH / "voucher_create.sql").read_text()
+_SQL_VOUCHERS_LIST = (_DIRPATH / "vouchers_list.sql").read_text()
+_SQL_VOUCHERS_DELETE = (_DIRPATH / "vouchers_delete.sql").read_text()
 
 _USERID_ALPHABET = "23456789abcdefghijkmnopqrstuvwxyz"
 _VOUCHERID_ALPHABET = string.ascii_uppercase
@@ -47,6 +52,14 @@ class UnknownId(BaseException):
 
     def __str__(self):
         return f"Unknown {self._Model.__name__.lower()} {self._id}"
+
+
+class VoucherCreationError(BaseException):
+    def __init__(self, emissionid: EmissionId, voucher: models.VoucherImport):
+        super().__init__(voucher)
+
+        self.emissionid = emissionid
+        self.voucher = voucher
 
 
 # Connection
@@ -144,6 +157,26 @@ def create_emission(conn: Connection, emission: EmissionBase) -> Emission:
     return read_emission(conn, models.EmissionId(cur.lastrowid))
 
 
+def _add_vouchers(func):
+    @functools.wraps(func)
+    def wrap(conn: sqlite3.Connection, *args, **kwargs):
+        def _stream(emissions):
+            for emission in emissions:
+                yield _add(emission)
+
+        def _add(emission):
+            emission.vouchers = list(_read_vouchers(conn, emission.emissionid))
+            return emission
+
+        ret = func(conn, *args, **kwargs)
+
+        _adder = _stream if isinstance(ret, Generator) else _add
+        return _adder(ret)
+
+    return wrap
+
+
+@_add_vouchers
 def read_emission(conn: Connection, emissionid: EmissionId) -> Emission:
     row = conn.execute(_SQL_EMISSION_READ, {"emissionid": emissionid}).fetchone()
     if not row:
@@ -151,6 +184,15 @@ def read_emission(conn: Connection, emissionid: EmissionId) -> Emission:
     return Emission(**row)
 
 
+def _read_vouchers(
+    conn: Connection, emissionid: EmissionId
+) -> Generator[models.Voucher, None, None]:
+    cur = conn.execute(_SQL_VOUCHERS_LIST, {"emissionid": emissionid})
+    for row in cur.fetchall():
+        yield models.Voucher(**row)
+
+
+@_add_vouchers
 def list_emissions(conn: Connection) -> Generator[Emission, None, None]:
     cur = conn.execute(_SQL_EMISSIONS_LIST)
     for row in cur.fetchall():
@@ -168,3 +210,26 @@ def delete_emission(conn: Connection, emissionid: EmissionId) -> None:
     cur = conn.execute(_SQL_EMISSION_DELETE, {"emissionid": emissionid})
     if cur.rowcount <= 0:
         raise UnknownId(Emission, emissionid)
+
+
+@contextmanager
+def set_emission_vouchers(conn: Connection, emissionid: EmissionId) -> None:
+    sortnumber = 0
+
+    def add_voucher(voucher: models.VoucherImport) -> None:
+        nonlocal sortnumber
+
+        sortnumber += 1
+
+        args = {
+            "emissionid": emissionid,
+            "sortnumber": sortnumber,
+            **voucher.model_dump(),
+        }
+        cur = conn.execute(_SQL_VOUCHER_CREATE, args)
+        if cur.rowcount == 0:
+            raise VoucherCreationError(emissionid, voucher)
+
+    conn.execute(_SQL_VOUCHERS_DELETE, {"emissionid": emissionid})
+
+    yield add_voucher

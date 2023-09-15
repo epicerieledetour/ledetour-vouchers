@@ -168,6 +168,14 @@ class EmissionsTestCase(CliTestCase):
         with self.cli("emissions", "create") as std:
             self.emission = std.load(models.Emission)
 
+        with self.cli("users", "create", "--label", "user1") as std:
+            self.user1 = std.load(models.User)
+
+        with self.cli("users", "create", "--label", "user2") as std:
+            self.user2 = std.load(models.User)
+
+        self.csvpath = Path(__file__).parent / "test_import.csv"
+
     def test_create__empty(self):
         with self.cli("emissions", "create") as std:
             emission = std.load(models.Emission)
@@ -239,3 +247,43 @@ class EmissionsTestCase(CliTestCase):
         with self.assertUnknownId():
             with self.cli("emissions", "delete", self.unknown_id):
                 pass
+
+    def test_import(self):
+        with self.cli(
+            "emissions", "import", self.emission.emissionid, str(self.csvpath)
+        ) as std:
+            emission = std.load(models.Emission)
+
+            self.emission.vouchers = [
+                models.Voucher(
+                    voucherid=1,
+                    emissionid=self.emission.emissionid,
+                    value_CAN=11,
+                    sortnumber=1,
+                    distributed_by=1,
+                ),
+                models.Voucher(
+                    voucherid=2,
+                    emissionid=self.emission.emissionid,
+                    value_CAN=12,
+                    sortnumber=2,
+                    distributed_by=2,
+                ),
+            ]
+            self.assertEqual(self.emission, emission)
+
+    def test_import__idempotency(self):
+        emissions = []
+
+        for _ in range(2):
+            with self.cli(
+                "emissions", "import", self.emission.emissionid, str(self.csvpath)
+            ) as std:
+                emissions.append(std.load(models.Emission))
+
+        emissions1, emissions2 = emissions
+
+        self.assertEqual(emissions1, emissions2)
+
+    def test_import__subsequent(self):
+        assert False

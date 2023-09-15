@@ -2,6 +2,7 @@
 # type: ignore
 import argparse
 import contextlib
+import csv
 import datetime
 import functools
 import pathlib
@@ -155,6 +156,30 @@ def _emissions_delete(args: argparse.Namespace, conn: sqlite3.Connection) -> Non
     db.delete_emission(conn, args.id)
 
 
+@_connect
+@_json
+def _emissions_import(
+    args: argparse.Namespace, conn: sqlite3.Connection
+) -> models.Emission:
+    emissionid = args.id
+
+    # Read the vouchers from the CSV
+    # TODO: make set_emission_vouchers safe to make sure existing vouchers
+    # are not deleted in case of csv reading / sql inserting errors
+
+    reader = csv.DictReader(args.path)
+    vouchers = (
+        models.VoucherImport(value_CAN=row["value"], distributed_by_label=row["by"])
+        for row in reader
+    )
+
+    with db.set_emission_vouchers(conn, emissionid) as create_voucher:
+        for voucher in vouchers:
+            create_voucher(voucher)
+
+    return db.read_emission(conn, emissionid)
+
+
 # Utils
 
 _ARG_DEFAULT_FOR_TYPE = {datetime.datetime: datetime.datetime.fromisoformat}
@@ -304,6 +329,11 @@ def _build_parser() -> argparse.ArgumentParser:
     par = sub.add_parser("delete")
     _add_id_argument(par, models.Emission)
     par.set_defaults(command=_emissions_delete)
+
+    par = sub.add_parser("import")
+    _add_id_argument(par, models.Emission)
+    par.add_argument("path", type=argparse.FileType("r"))
+    par.set_defaults(command=_emissions_import)
 
     # All done !
 
