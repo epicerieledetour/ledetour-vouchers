@@ -160,3 +160,21 @@ class CliUsersTestCase(CliTestCase):
         with self.assertUnknownUser():
             with self.cli("users", "delete", self.unknown_id):
                 pass
+
+
+class EmissionsTestCase(CliTestCase):
+    def setUp(self):
+        super().setUp()
+
+        with self.cli("emissions", "create", "2999-12-31") as std:
+            self.emission = std.load(models.Emission)
+
+    def test_create(self):
+        self.assertIsInstance(self.emission, models.Emission)
+
+    def test_create__requires_expiration_utc(self):
+        with self.assertRaises(SystemExit):
+            with self.cli("emissions", "create") as std:
+                self.assertIn(
+                    "the following arguments are required: expiration_utc", std.err
+                )

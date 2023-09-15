@@ -1,7 +1,8 @@
 CREATE TABLE IF NOT EXISTS
 emissions (
     emissionid INTEGER PRIMARY KEY,
-    expiration_utc TEXT NOT NULL
+    label TEXT,
+    expiration_utc DATETIME
 );
 
 CREATE TABLE IF NOT EXISTS

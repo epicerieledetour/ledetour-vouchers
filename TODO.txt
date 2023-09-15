@@ -99,14 +99,13 @@
 
 ## Emission
 
-- [X] app emission export emissionid path
-- [X] app emission import emissionid path
-- [X] app emission create
-- [X] app emission list
-- [X] app emission read emissionids...
-- [X] app emission update emissionid --field=value...
-- [X] app emission delete emissionids...
-- [ ] app emission info (list vouchers + sortnumber + expiration date for an emissionid)
+- cli emissions create --label ... --start-date ... --end-date ...
+- cli emissions read ...
+- cli emissions update --label ... --start-date ... --end-date ...
+- cli emissions delete ...
+- cli emissions export id path
+- cli emissions import id path
+
 
 ## Events
 
@@ -133,3 +132,4 @@
 - Cli emissions
 - Cli vouchers / scan
 - HttpApi vouchers
+- Reports

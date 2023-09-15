@@ -2,12 +2,14 @@
 # type: ignore
 import argparse
 import contextlib
+import datetime
 import functools
 import pathlib
 import sqlite3
 import sys
-from collections.abc import Sequence
-from typing import Text
+from collections.abc import Callable, Iterable, Sequence
+from types import NoneType, UnionType
+from typing import Any, Text
 
 import pydantic
 
@@ -46,8 +48,16 @@ def _model(arg_name: str, Model: type[pydantic.BaseModel]):
         def wrap(*args, **kwargs):
             ns = args[0]
 
-            model_args = dict((name, getattr(ns, name)) for name in Model.model_fields)
-            model = Model(**model_args)
+            # model_args = dict((name, getattr(ns, name)) for name in Model.model_fields)
+            model_args = {}
+            for name in Model.model_fields:
+                if val := getattr(ns, name, None):
+                    model_args[name] = val
+
+            try:
+                model = Model(**model_args)
+            except:
+                raise
 
             kwargs[arg_name] = model
 
@@ -67,6 +77,9 @@ def _add_id_argument(parser, model) -> None:
 @_connect
 def _db_init(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
     db.initdb(conn)
+
+
+# Users
 
 
 @_connect
@@ -104,16 +117,88 @@ def _users_delete(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
     db.delete_user(conn, args.id)
 
 
+# Emissions
+
+
+@_connect
+@_model("emission", models.EmissionBase)
+@_json
+def _emissions_create(
+    args: argparse.Namespace, conn: sqlite3.Connection, emission: models.EmissionBase
+) -> models.Emission:
+    ret = db.create_emission(conn, emission)
+    return ret
+
+
+# Utils
+
+_ARG_DEFAULT_FOR_TYPE = {datetime.datetime: datetime.datetime.fromisoformat}
+
+
 def _add_model_schema_as_arguments(
     model: type[pydantic.BaseModel], parser: argparse.ArgumentParser
 ) -> None:
-    for name, field in model.model_fields.items():
-        parser.add_argument(
-            name if field.is_required() else f"--{name}",
-            type=field.annotation,
-            default=field.get_default(),
-            help=field.description,
-        )
+    def _is_atomic_type(field: pydantic.Field) -> bool:
+        default = field.get_default()
+        try:
+            if isinstance(default, str):
+                return True
+        except:
+            raise
+        return not isinstance(default, Iterable)
+        # typ = field.annotation
+
+        # for name in ("__origin__", "__supertype__"):
+        #     if hasattr(typ, name):
+        #         typ = getattr(typ, name)
+        #         break
+
+        # try:
+        #     if issubclass(typ, str):
+        #         return True
+        # except:
+        #     raise
+
+        # return not issubclass(typ, Iterable)
+
+    def _type(field: pydantic.Field) -> Callable[[str], Any] | None:
+        typ = field.annotation
+        if typ in _ARG_DEFAULT_FOR_TYPE:
+            return _ARG_DEFAULT_FOR_TYPE[typ]
+
+        if isinstance(typ, UnionType):
+            types = set(typ.__args__)
+            if len(types) == 2 and NoneType in types:
+                types.remove(NoneType)
+                return types.pop()
+
+    fields = (
+        (name, field)
+        for name, field in model.model_fields.items()
+        # Not taking compound fields, like a list of vouchers
+        if _is_atomic_type(field)
+    )
+
+    fields = list(fields)
+
+    for name, field in fields:
+        args = (name if field.is_required() else f"--{name}",)
+
+        kwargs = {}
+        if typ := _type(field):
+            kwargs["type"] = typ
+
+        # default = field.get_default()
+        # if default is not pydantic.PydanticUndefined:
+        #     kwargs["default"] = default
+
+        if description := field.description:
+            kwargs["help"] = description
+
+        try:
+            parser.add_argument(*args, **kwargs)
+        except:
+            raise
 
 
 def parse_args(args: Sequence[Text] | None = None) -> None:
@@ -172,6 +257,29 @@ def _build_parser() -> argparse.ArgumentParser:
     par = sub.add_parser("delete")
     _add_id_argument(par, models.User)
     par.set_defaults(command=_users_delete)
+
+    # emissions
+
+    sub = subparsers.add_parser("emissions").add_subparsers()
+
+    par = sub.add_parser("create")
+    _add_model_schema_as_arguments(models.EmissionBase, par)
+    par.set_defaults(command=_emissions_create)
+
+    # par = sub.add_parser("read")
+    # _add_id_argument(par, models.Emission)
+    # par.set_defaults(command=_emissions_read)
+
+    # par = sub.add_parser("list")
+    # par.set_defaults(command=_emissions_list)
+
+    # par = sub.add_parser("update")
+    # _add_model_schema_as_arguments(models.Emission, par)
+    # par.set_defaults(command=_emissions_update)
+
+    # par = sub.add_parser("delete")
+    # _add_id_argument(par, models.Emission)
+    # par.set_defaults(command=_emissions_delete)
 
     # All done !
 
