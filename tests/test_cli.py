@@ -34,6 +34,8 @@ class _Std:
 
 
 class CliTestCase(unittest.TestCase):
+    unknown_id = 42
+
     def setUp(self):
         super().setUp()
 
@@ -60,6 +62,16 @@ class CliTestCase(unittest.TestCase):
             finally:
                 yield std
 
+    @contextmanager
+    def assertUnknownId(self):
+        with self.assertRaises(SystemExit) as cm:
+            yield
+
+        err = cm.exception.args[0]
+
+        self.assertTrue(isinstance(err, db.UnknownId))
+        self.assertRegex(str(err), r"^Unknown \w+ .+$")
+
 
 class CliDbTestCase(unittest.TestCase, testutils.TestCaseMixin):
     def test_init(self):
@@ -72,18 +84,6 @@ class CliDbTestCase(unittest.TestCase, testutils.TestCaseMixin):
 
 
 class CliUsersTestCase(CliTestCase):
-    unknown_id = 42
-
-    @contextmanager
-    def assertUnknownUser(self):
-        with self.assertRaises(SystemExit) as cm:
-            yield
-
-        err = cm.exception.args[0]
-
-        self.assertTrue(isinstance(err, db.UnknownId))
-        self.assertRegex(str(err), r"^Unknown user .+$")
-
     def test_create__no_argument(self):
         with self.cli("users", "create") as std:
             std.validate(models.User)
@@ -109,7 +109,7 @@ class CliUsersTestCase(CliTestCase):
         self.assertEqual(created, read)
 
     def test_read__unknown_id(self):
-        with self.assertUnknownUser():
+        with self.assertUnknownId():
             with self.cli("users", "read", self.unknown_id):
                 pass
 
@@ -140,7 +140,7 @@ class CliUsersTestCase(CliTestCase):
             self.assertEqual(user.label, label)
 
     def test_update__unknown_id(self):
-        with self.assertUnknownUser():
+        with self.assertUnknownId():
             with self.cli("users", "update", self.unknown_id, "--label", "lbl"):
                 pass
 
@@ -152,12 +152,12 @@ class CliUsersTestCase(CliTestCase):
         with self.cli("users", "delete", userid) as std:
             self.assertFalse(std.out)
 
-        with self.assertUnknownUser():
+        with self.assertUnknownId():
             with self.cli("users", "read", userid) as std:
                 pass
 
     def test_delete__unknown_id(self):
-        with self.assertUnknownUser():
+        with self.assertUnknownId():
             with self.cli("users", "delete", self.unknown_id):
                 pass
 
@@ -178,3 +178,14 @@ class EmissionsTestCase(CliTestCase):
                 self.assertIn(
                     "the following arguments are required: expiration_utc", std.err
                 )
+
+    def test_read(self):
+        with self.cli("emissions", "read", self.emission.emissionid) as std:
+            emission = std.load(models.Emission)
+
+        self.assertEqual(self.emission, emission)
+
+    def test_read__unknown_id(self):
+        with self.assertUnknownId():
+            with self.cli("emissions", "read", self.unknown_id):
+                pass

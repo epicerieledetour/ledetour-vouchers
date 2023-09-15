@@ -126,8 +126,33 @@ def _users_delete(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
 def _emissions_create(
     args: argparse.Namespace, conn: sqlite3.Connection, emission: models.EmissionBase
 ) -> models.Emission:
-    ret = db.create_emission(conn, emission)
-    return ret
+    return db.create_emission(conn, emission)
+
+
+@_connect
+@_json
+def _emissions_read(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
+    return db.read_emission(conn, args.id)
+
+
+@_connect
+def _emissions_list(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
+    for emission in db.list_emissions(conn):
+        print(f"{emission.emissionid} {emission.label}")
+
+
+@_connect
+@_model("emission", models.Emission)
+@_json
+def _emissions_update(
+    args: argparse.Namespace, conn: sqlite3.Connection, emission: models.Emission
+) -> None:
+    return db.update_emission(conn, emission)
+
+
+@_connect
+def _emissions_delete(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
+    db.delete_emission(conn, args.id)
 
 
 # Utils
@@ -266,20 +291,20 @@ def _build_parser() -> argparse.ArgumentParser:
     _add_model_schema_as_arguments(models.EmissionBase, par)
     par.set_defaults(command=_emissions_create)
 
-    # par = sub.add_parser("read")
-    # _add_id_argument(par, models.Emission)
-    # par.set_defaults(command=_emissions_read)
+    par = sub.add_parser("read")
+    _add_id_argument(par, models.Emission)
+    par.set_defaults(command=_emissions_read)
 
-    # par = sub.add_parser("list")
-    # par.set_defaults(command=_emissions_list)
+    par = sub.add_parser("list")
+    par.set_defaults(command=_emissions_list)
 
-    # par = sub.add_parser("update")
-    # _add_model_schema_as_arguments(models.Emission, par)
-    # par.set_defaults(command=_emissions_update)
+    par = sub.add_parser("update")
+    _add_model_schema_as_arguments(models.Emission, par)
+    par.set_defaults(command=_emissions_update)
 
-    # par = sub.add_parser("delete")
-    # _add_id_argument(par, models.Emission)
-    # par.set_defaults(command=_emissions_delete)
+    par = sub.add_parser("delete")
+    _add_id_argument(par, models.Emission)
+    par.set_defaults(command=_emissions_delete)
 
     # All done !
 
