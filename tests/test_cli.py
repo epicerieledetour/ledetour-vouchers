@@ -189,3 +189,13 @@ class EmissionsTestCase(CliTestCase):
         with self.assertUnknownId():
             with self.cli("emissions", "read", self.unknown_id):
                 pass
+
+    def test_list(self):
+        with self.cli("emissions", "create", "2042-01-01") as std:
+            emission = std.load(models.Emission)
+
+        with self.cli("emissions", "list") as std:
+            line1, line2, _ = std.outlines
+
+            self.assertIn(str(self.emission.emissionid), line1)
+            self.assertIn(str(emission.emissionid), line2)

@@ -15,6 +15,7 @@ _DIRPATH = pathlib.Path(__file__).parent
 
 _SQL_INIT = (_DIRPATH / "init.sql").read_text()
 _SQL_EMISSION_CREATE = (_DIRPATH / "emission_create.sql").read_text()
+_SQL_EMISSIONS_LIST = (_DIRPATH / "emissions_list.sql").read_text()
 _SQL_EMISSION_READ = (_DIRPATH / "emission_read.sql").read_text()
 _SQL_USER_CREATE = (_DIRPATH / "user_create.sql").read_text()
 _SQL_USER_READ = (_DIRPATH / "user_read.sql").read_text()
@@ -149,7 +150,7 @@ def read_emission(conn: Connection, emissionid: EmissionId) -> Emission:
 
 
 def list_emissions(conn: Connection) -> Generator[Emission, None, None]:
-    cur = conn.execute(_SQL_EMISSION_LIST)
+    cur = conn.execute(_SQL_EMISSIONS_LIST)
     for row in cur.fetchall():
         yield Emission(**row)
 
