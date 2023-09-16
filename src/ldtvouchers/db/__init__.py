@@ -48,9 +48,6 @@ class UnknownId(BaseException):
         self._id = id
         self._Model = Model
 
-    def __repr__(self):
-        return f"{self.__class__.__name__}({self._Model!r}, {self._id!r})"
-
     def __str__(self):
         return f"Unknown {self._Model.__name__.lower()} {self._id}"
 

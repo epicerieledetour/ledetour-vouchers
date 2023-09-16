@@ -2,6 +2,7 @@ import contextlib
 import datetime
 import pathlib
 import unittest
+import unittest.mock
 
 import testutils
 from ldtvouchers import db, models
@@ -178,3 +179,44 @@ class DbUsersTestCase(DbTestCase):
         read = db.read_user(self.conn, new.userid)
 
         self.assertEqual(new, read)
+
+
+def _mock_conn(rowcount: int = 0) -> unittest.mock.Mock:
+    cur = unittest.mock.Mock()
+    cur.rowcount = rowcount
+
+    conn = unittest.mock.Mock()
+    conn.execute.return_value = cur
+
+    return conn
+
+
+class DbEmissionsTestCase(DbTestCase):
+    def setUp(self):
+        super().setUp()
+
+        self.anyid = 23
+        self.unknownid = 42
+
+    def test_update__unknownid(self):
+        emission = models.Emission(emissionid=self.unknownid)
+
+        with self.assertRaises(db.UnknownId):
+            db.update_emission(self.conn, emission)
+
+    def test_set_emission_vouchers__creation_error(self):
+        conn = _mock_conn()
+
+        with db.set_emission_vouchers(conn, self.anyid) as add_voucher:
+            with self.assertRaises(db.VoucherCreationError):
+                add_voucher(
+                    models.VoucherImport(value_CAN=42, distributed_by_label="user")
+                )
+
+
+class DbActionsTestCase(DbTestCase):
+    def test_add_action__error(self):
+        conn = _mock_conn()
+
+        with self.assertRaises(db.ActionError):
+            db.add_action(conn, models.Action(requestid="scan"))

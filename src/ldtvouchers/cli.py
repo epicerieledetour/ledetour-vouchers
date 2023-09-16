@@ -32,8 +32,6 @@ def _connect(func):
                     func(ns, conn, *args, **kwargs)
                 except db.UnknownId as err:
                     sys.exit(err)
-                except Exception:
-                    raise
 
     return wrap
 
@@ -58,10 +56,7 @@ def _model(arg_name: str, Model: type[pydantic.BaseModel]):
                 if val := getattr(ns, name, None):
                     model_args[name] = val
 
-            try:
-                model = Model(**model_args)
-            except:
-                raise
+            model = Model(**model_args)
 
             kwargs[arg_name] = model
 
@@ -229,14 +224,11 @@ _ARG_DEFAULT_FOR_TYPE = {datetime.datetime: datetime.datetime.fromisoformat}
 
 def _add_model_schema_as_arguments(
     model: type[pydantic.BaseModel], parser: argparse.ArgumentParser
-) -> None:
+) -> None:  # pragma: no cover
     def _is_atomic_type(field: pydantic.Field) -> bool:
         default = field.get_default()
-        try:
-            if isinstance(default, str):
-                return True
-        except:
-            raise
+        if isinstance(default, str):
+            return True
         return not isinstance(default, Iterable)
 
     def _type(field: pydantic.Field) -> Callable[[str], Any] | None:
@@ -272,10 +264,7 @@ def _add_model_schema_as_arguments(
         if description := field.description:
             kwargs["help"] = description
 
-        try:
-            parser.add_argument(*args, **kwargs)
-        except:
-            raise
+        parser.add_argument(*args, **kwargs)
 
 
 def parse_args(args: Sequence[Text] | None = None) -> None:

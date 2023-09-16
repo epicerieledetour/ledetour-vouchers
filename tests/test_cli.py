@@ -15,9 +15,9 @@ class _Std:
         self.errio = StringIO() if outio is None else outio
         self.outio = StringIO() if errio is None else errio
 
-    @property
-    def err(self):
-        return self.errio.getvalue()
+    #    @property
+    #    def err(self):
+    #        return self.errio.getvalue()
 
     @property
     def out(self):
@@ -110,7 +110,7 @@ class CliUsersTestCase(CliTestCase):
     def test_read__unknown_id(self):
         with self.assertUnknownId():
             with self.cli("users", "read", self.unknown_id):
-                pass
+                pass  # pragma: no cover
 
     def test_list(self):
         with self.cli("users", "create") as std:
@@ -141,7 +141,7 @@ class CliUsersTestCase(CliTestCase):
     def test_update__unknown_id(self):
         with self.assertUnknownId():
             with self.cli("users", "update", self.unknown_id, "--label", "lbl"):
-                pass
+                pass  # pragma: no cover
 
     def test_delete(self):
         with self.cli("users", "create") as std:
@@ -153,12 +153,12 @@ class CliUsersTestCase(CliTestCase):
 
         with self.assertUnknownId():
             with self.cli("users", "read", userid) as std:
-                pass
+                pass  # pragma: no cover
 
     def test_delete__unknown_id(self):
         with self.assertUnknownId():
             with self.cli("users", "delete", self.unknown_id):
-                pass
+                pass  # pragma: no cover
 
 
 class EmissionsTestCase(CliTestCase):
@@ -204,7 +204,7 @@ class EmissionsTestCase(CliTestCase):
     def test_read__unknown_id(self):
         with self.assertUnknownId():
             with self.cli("emissions", "read", self.unknown_id):
-                pass
+                pass  # pragma: no cover
 
     def test_list(self):
         with self.cli("emissions", "create") as std:
@@ -231,7 +231,7 @@ class EmissionsTestCase(CliTestCase):
     def test_update__unknown_id(self):
         with self.assertUnknownId():
             with self.cli("users", "update", self.unknown_id, "--label", "lbl"):
-                pass
+                pass  # pragma: no cover
 
     def test_delete(self):
         emissionid = self.emission.emissionid
@@ -241,12 +241,12 @@ class EmissionsTestCase(CliTestCase):
 
         with self.assertUnknownId():
             with self.cli("emissions", "read", emissionid) as std:
-                pass
+                pass  # pragma: no cover
 
     def test_delete__unknown_id(self):
         with self.assertUnknownId():
             with self.cli("emissions", "delete", self.unknown_id):
-                pass
+                pass  # pragma: no cover
 
     def test_import(self):
         with self.cli(
