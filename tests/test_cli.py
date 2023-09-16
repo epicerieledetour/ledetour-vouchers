@@ -359,3 +359,31 @@ class ActionsTestCase(CliTestCase):
         self.assertEqual(voucher.distributed_by, self.user_dist1.userid)
         self.assertEqual(voucher.cashedin_by, self.user.userid)
         self.assertIsInstance(voucher.cashedin_utc, datetime.datetime)
+
+    def test_undo(self):
+        with self.cli(
+            "actions",
+            "scan",
+            "--userid",
+            self.user.userid,
+            "--voucherid",
+            self.voucher.voucherid,
+        ):
+            pass
+
+        with self.cli(
+            "actions",
+            "undo",
+            "--userid",
+            self.user.userid,
+            "--voucherid",
+            self.voucher.voucherid,
+        ):
+            pass
+
+        with self.cli("emissions", "read", self.emission.emissionid) as std:
+            emission = std.load(models.Emission)
+
+        voucher = emission.vouchers[0]
+
+        self.assertEqual(voucher, self.emission.vouchers[0])

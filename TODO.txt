@@ -136,7 +136,6 @@
 
 # TODO NEXT
 
-- Action: undo
-- Veriy tox
+- Verify tox
 - HttpApi vouchers
 - Reports

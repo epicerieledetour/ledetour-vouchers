@@ -18,6 +18,7 @@ from . import db, models
 
 _ACTION_ORIGIN_CLI = "cli"
 _ACTION_REQUEST_SCAN = "scan"
+_ACTION_REQUEST_UNDO = "undo"
 
 
 def _connect(func):
@@ -185,20 +186,39 @@ def _emissions_import(
 # vouchers
 
 
+def _action(requestid: str):
+    def decorator(func):
+        @functools.wraps(func)
+        def wraps(*args, **kwargs) -> None:
+            ns = args[0]
+
+            kwargs["action"] = models.Action(
+                origin=_ACTION_ORIGIN_CLI,
+                userid=ns.userid,
+                voucherid=ns.voucherid,
+                requestid=requestid,
+            )
+
+            return func(*args, **kwargs)
+
+        return wraps
+
+    return decorator
+
+
 @_connect
-def _actions_scan(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
-    # origin: str | None = Field(default=None)
-    # req_usertoken: str | None = Field(default=None)
-    # req_vouchertoken: str | None = Field(default=None)
-    # userid: UserId | None = Field(default=None)
-    # voucherid: VoucherId | None = Field(default=None)
-    # requestid: str
-    action = models.Action(
-        origin=_ACTION_ORIGIN_CLI,
-        userid=args.userid,
-        voucherid=args.voucherid,
-        requestid=_ACTION_REQUEST_SCAN,
-    )
+@_action(_ACTION_REQUEST_SCAN)
+def _actions_scan(
+    args: argparse.Namespace, conn: sqlite3.Connection, action: models.Action
+) -> None:
+    db.add_action(conn, action)
+
+
+@_connect
+@_action(_ACTION_REQUEST_UNDO)
+def _actions_undo(
+    args: argparse.Namespace, conn: sqlite3.Connection, action: models.Action
+) -> None:
     db.add_action(conn, action)
 
 
@@ -351,6 +371,11 @@ def _build_parser() -> argparse.ArgumentParser:
     par.add_argument("--voucherid", help="Voucher ID")
     par.add_argument("--userid", help="User ID")
     par.set_defaults(command=_actions_scan)
+
+    par = sub.add_parser("undo")
+    par.add_argument("--voucherid", help="Voucher ID")
+    par.add_argument("--userid", help="User ID")
+    par.set_defaults(command=_actions_undo)
 
     # All done !
 
