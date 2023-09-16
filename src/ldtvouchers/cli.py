@@ -52,7 +52,6 @@ def _model(arg_name: str, Model: type[pydantic.BaseModel]):
         def wrap(*args, **kwargs):
             ns = args[0]
 
-            # model_args = dict((name, getattr(ns, name)) for name in Model.model_fields)
             model_args = {}
             for name in Model.model_fields:
                 if val := getattr(ns, name, None):
