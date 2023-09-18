@@ -1,6 +1,5 @@
 import datetime
 import json
-import tempfile
 import unittest
 from contextlib import contextmanager, redirect_stderr, redirect_stdout
 from io import StringIO
@@ -34,25 +33,14 @@ class _Std:
         model.validate(json.loads(self.out))
 
 
-class CliTestCase(unittest.TestCase):
+class CliTestCase(testutils.TestCase):
     unknown_id = 42
 
     def setUp(self):
         super().setUp()
 
-        self._tmpdir = tempfile.TemporaryDirectory(
-            prefix="test-ldtvouchers-", ignore_cleanup_errors=True
-        )
-        self.tmpdir = Path(self._tmpdir.name)
-        self.dbpath = self.tmpdir / "db.sqlite3"
-
         with self.cli("db", "init"):
             pass
-
-    def tearDown(self):
-        self._tmpdir.cleanup()
-
-        super().tearDown()
 
     @contextmanager
     def cli(self, *args, outio=None, errio=None):
