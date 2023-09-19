@@ -19,6 +19,7 @@ dependencies = [
     "cairosvg",
     "fastapi",
     "jinja2",
+    "pypdf",
     "qrcode"
 ]
 

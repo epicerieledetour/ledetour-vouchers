@@ -9,6 +9,7 @@ import cairosvg
 import jinja2
 import qrcode
 import qrcode.image.svg
+from pypdf import PdfWriter
 
 from . import models
 
@@ -52,6 +53,8 @@ def _qrcode_path(value: str) -> pathlib.Path:
 
 def emission_vouchers(emission: models.PublicEmission, fp: BinaryIO) -> None:
     template = _ENV.get_template("vouchers/recto.svg.j2")
+
+    pdf_merger = PdfWriter()
 
     for i, vouchers in itertools.groupby(emission.vouchers, _groupby(6)):
         vouchers = list(vouchers)
@@ -97,9 +100,15 @@ def emission_vouchers(emission: models.PublicEmission, fp: BinaryIO) -> None:
                 fv=f.value_CAN,
             )
             pathlib.Path(f"/tmp/recto_{i:04d}.svg").write_text(tmpsvg)
-            with pathlib.Path(f"/tmp/recto_{i:04d}.pdf").open("wb") as fp:
-                cairosvg.svg2pdf(bytestring=tmpsvg, write_to=fp, unsafe=True)
-            # cairosvg.svg2pdf(bytestring=tmpsvg, write_to=fp, unsafe=True)
+
+            tmppdf = pathlib.Path(f"/tmp/recto_{i:04d}.pdf")
+
+            with tmppdf.open("wb") as tmpfp:
+                cairosvg.svg2pdf(bytestring=tmpsvg, write_to=tmpfp, unsafe=True)
+
+            pdf_merger.append(fileobj=tmppdf)
+
+    pdf_merger.write(fp)
 
 
 def _groupby(count: int) -> Callable[[Any], bool]:
