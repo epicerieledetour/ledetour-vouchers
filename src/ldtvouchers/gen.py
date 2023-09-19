@@ -17,6 +17,11 @@ _ENV = jinja2.Environment(
     loader=jinja2.PackageLoader("ldtvouchers"), autoescape=jinja2.select_autoescape
 )
 
+_TEMPLATES_PATH = pathlib.Path(__file__).parent / "templates/vouchers"
+
+_EMPTY_QRCODE_PATH = _TEMPLATES_PATH / "empty.svg"
+_VOUCHERS_VERSO_SVG_PATH = _TEMPLATES_PATH / "verso.svg"
+
 
 class _User(models.PublicUser):
     qrcode_svg_path: str
@@ -41,6 +46,10 @@ def user_authpage(user: models.PublicUser, fp: BinaryIO) -> None:
 
 @contextlib.contextmanager
 def _qrcode_path(value: str) -> pathlib.Path:
+    if not value:
+        yield _EMPTY_QRCODE_PATH
+        return
+
     img = qrcode.make(value, image_factory=qrcode.image.svg.SvgPathImage)
 
     prefix = f"ldtvoucher-qrcode-{value}-"
@@ -52,12 +61,24 @@ def _qrcode_path(value: str) -> pathlib.Path:
 
 
 def emission_vouchers(emission: models.PublicEmission, fp: BinaryIO) -> None:
+    verso_pdf_path = pathlib.Path("/tmp/verso.pdf")
+    with verso_pdf_path.open("wb") as pdf:
+        cairosvg.svg2pdf(url=str(_VOUCHERS_VERSO_SVG_PATH), write_to=pdf, unsafe=True)
+
     template = _ENV.get_template("vouchers/recto.svg.j2")
 
     pdf_merger = PdfWriter()
 
     for i, vouchers in itertools.groupby(emission.vouchers, _groupby(6)):
         vouchers = list(vouchers)
+        vouchers = vouchers + (6 - len(vouchers)) * [
+            models.PublicVoucher(
+                emissionid=-1,
+                sortnumber=-1,
+                token="",
+                value_CAN=0,
+            )
+        ]
 
         expiration_str = emission.expiration_utc.date().isoformat()
         a, b, c, d, e, f = vouchers
@@ -107,6 +128,7 @@ def emission_vouchers(emission: models.PublicEmission, fp: BinaryIO) -> None:
                 cairosvg.svg2pdf(bytestring=tmpsvg, write_to=tmpfp, unsafe=True)
 
             pdf_merger.append(fileobj=tmppdf)
+            pdf_merger.append(fileobj=verso_pdf_path)
 
     pdf_merger.write(fp)
 
