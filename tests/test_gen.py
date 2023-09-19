@@ -1,3 +1,6 @@
+import datetime
+import pathlib
+
 import testutils
 from ldtvouchers import gen, models
 
@@ -11,4 +14,29 @@ class GenTestCase(testutils.TestCase):
             gen.user_authpage(user, fp)
 
         # TODO: check content, no just existence
+        self.assertTrue(path.exists())
+
+    def test_emission_vouchers(self):
+        emissionid = 1
+        vouchers = []
+        for i in range(7):
+            vouchers.append(
+                models.PublicVoucher(
+                    token=f"{i:04d}-RAND",
+                    emissionid=emissionid,
+                    value_CAN=(i % 3) * 5,
+                    sortnumber=i,
+                )
+            )
+
+        emission = models.PublicEmission(
+            expiration_utc=datetime.datetime.utcnow(),
+            vouchers=vouchers,
+        )
+        # path = self.tmpdir / "vouchers.pdf"
+        path = pathlib.Path("/tmp/vouchers.pdf")
+
+        with path.open("wb") as fp:
+            gen.emission_vouchers(emission, fp)
+
         self.assertTrue(path.exists())

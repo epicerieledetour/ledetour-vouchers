@@ -67,6 +67,10 @@ class Voucher(VoucherBase):
     voucherid: VoucherId
 
 
+class PublicVoucher(VoucherBase):
+    token: Token
+
+
 class VoucherImport(BaseModel):
     value_CAN: int
     distributed_by_label: str | None
@@ -98,3 +102,7 @@ class EmissionBase(BaseModel):
 
 class Emission(EmissionBase):
     emissionid: EmissionId
+
+
+class PublicEmission(EmissionBase):
+    vouchers: list[PublicVoucher]

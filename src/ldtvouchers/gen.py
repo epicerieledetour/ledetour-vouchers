@@ -34,7 +34,6 @@ def user_authpage(user: models.PublicUser, fp: BinaryIO) -> None:
         tmpsvg = template.render(
             user=user, qrcode_svg_path=qrcode_svg_path, document_date=document_date
         )
-        pathlib.Path("/tmp/test.svg").write_text(tmpsvg)
         cairosvg.svg2pdf(bytestring=tmpsvg, write_to=fp, unsafe=True)
 
 
@@ -43,7 +42,56 @@ def _qrcode_path(value: str) -> pathlib.Path:
     img = qrcode.make(value, image_factory=qrcode.image.svg.SvgPathImage)
 
     prefix = f"ldtvoucher-qrcode-{value}-"
-    with tempfile.NamedTemporaryFile(prefix=prefix, suffix=".svg") as fp:
+    with tempfile.NamedTemporaryFile(delete=False, prefix=prefix, suffix=".svg") as fp:
         img.save(fp)
+        fp.flush()
 
         yield fp.name
+
+
+def emission_vouchers(emission: models.PublicEmission, fp: BinaryIO) -> None:
+    template = _ENV.get_template("vouchers/recto.svg.j2")
+    vouchers = emission.vouchers[:6]
+
+    expiration_str = emission.expiration_utc.date().isoformat()
+    a, b, c, d, e, f = vouchers
+
+    with _qrcode_path(a.token) as ac, _qrcode_path(b.token) as bc, _qrcode_path(
+        c.token
+    ) as cc, _qrcode_path(d.token) as dc, _qrcode_path(e.token) as ec, _qrcode_path(
+        f.token
+    ) as fc:
+        tmpsvg = template.render(
+            # top left
+            ac=ac,
+            ad=expiration_str,
+            ai=a.token,
+            av=a.value_CAN,
+            # top right
+            bc=bc,
+            bd=expiration_str,
+            bi=b.token,
+            bv=b.value_CAN,
+            # middle left
+            cc=cc,
+            cd=expiration_str,
+            ci=c.token,
+            cv=c.value_CAN,
+            # middle right
+            dc=dc,
+            dd=expiration_str,
+            di=d.token,
+            dv=d.value_CAN,
+            # bottom left
+            ec=ec,
+            ed=expiration_str,
+            ei=e.token,
+            ev=e.value_CAN,
+            # bottom right
+            fc=fc,
+            fd=expiration_str,
+            fi=f.token,
+            fv=f.value_CAN,
+        )
+        pathlib.Path("/tmp/recto_1.svg").write_text(tmpsvg)
+        cairosvg.svg2pdf(bytestring=tmpsvg, write_to=fp, unsafe=True)
