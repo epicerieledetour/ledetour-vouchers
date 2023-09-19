@@ -118,9 +118,13 @@ def _users_delete(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
 
 @_connect
 def _users_authpage(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
-    userid = args.id
-    user = db.read_public_user(conn, userid)
-    gen.user_authpage(user, args.path)
+    # TODO: do not make empty files
+    # If the userid is unknown, this command will create an empty file anyway.
+    # It should only touch the filesystem when a authpage is actually written.
+    with contextlib.closing(args.path):
+        userid = args.id
+        user = db.read_public_user(conn, userid)
+        gen.user_authpage(user, args.path)
 
 
 # Emissions

@@ -159,6 +159,14 @@ class CliUsersTestCase(CliTestCase):
         with self.cli("users", "authpage", user.userid, str(path)):
             self.assertTrue(path.exists())
 
+    def test_authpage__unknown_id(self):
+        path = self.tmpdir / "should-be-empty-user.pdf"
+        with self.assertUnknownId():
+            with self.cli("users", "authpage", self.unknown_id, path):
+                pass  # pragma: no cover
+        self.assertTrue(path.exists())
+        self.assertEqual(path.stat().st_size, 0)
+
 
 class EmissionsTestCase(CliTestCase):
     def setUp(self):
