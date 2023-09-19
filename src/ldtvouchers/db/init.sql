@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS
 users (
     userid INTEGER PRIMARY KEY,
     label TEXT NOT NULL DEFAULT "",
+    description TEXT,
     can_cashin BOOLEAN NOT NULL DEFAULT FALSE,
     can_cashin_by_voucherid BOOLEAN NOT NULL DEFAULT FALSE
 );

@@ -14,7 +14,7 @@ from typing import Any, Text
 
 import pydantic
 
-from . import db, models
+from . import db, gen, models
 
 _ACTION_ORIGIN_CLI = "cli"
 _ACTION_REQUEST_SCAN = "scan"
@@ -114,6 +114,13 @@ def _users_update(
 @_connect
 def _users_delete(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
     db.delete_user(conn, args.id)
+
+
+@_connect
+def _users_authpage(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
+    userid = args.id
+    user = db.read_public_user(conn, userid)
+    gen.user_authpage(user, args.path)
 
 
 # Emissions
@@ -323,6 +330,11 @@ def _build_parser() -> argparse.ArgumentParser:
     par = sub.add_parser("delete")
     _add_id_argument(par, models.User)
     par.set_defaults(command=_users_delete)
+
+    par = sub.add_parser("authpage")
+    _add_id_argument(par, models.User)
+    par.add_argument("path", type=argparse.FileType("wb"))
+    par.set_defaults(command=_users_authpage)
 
     # emissions
 

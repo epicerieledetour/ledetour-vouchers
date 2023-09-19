@@ -16,13 +16,15 @@ classifiers = [
     "Environment :: Web Environment"
 ]
 dependencies = [
-    "fastapi"
+    "cairosvg",
+    "fastapi",
+    "jinja2",
+    "qrcode"
 ]
 
 [build-system]
 build-backend = "setuptools.build_meta"
 requires = [
-    "fastapi",
     "setuptools",
     "setuptools_scm[toml]"
 ]

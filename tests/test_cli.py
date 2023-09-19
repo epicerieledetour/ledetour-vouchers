@@ -148,6 +148,17 @@ class CliUsersTestCase(CliTestCase):
             with self.cli("users", "delete", self.unknown_id):
                 pass  # pragma: no cover
 
+    def test_authpage(self):
+        with self.cli(
+            "users", "create", "--label", "USR1", "--description", "Desc usr1"
+        ) as std:
+            user = std.load(models.User)
+
+        path = self.tmpdir / "user.pdf"
+
+        with self.cli("users", "authpage", user.userid, str(path)):
+            self.assertTrue(path.exists())
+
 
 class EmissionsTestCase(CliTestCase):
     def setUp(self):

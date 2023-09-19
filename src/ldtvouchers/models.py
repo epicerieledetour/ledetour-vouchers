@@ -6,12 +6,17 @@ from pydantic import BaseModel, Field  # type: ignore
 EmissionId = NewType("EmissionId", int)
 UserId = NewType("UserId", int)
 VoucherId = NewType("VoucherId", int)
+Token = NewType("Token", str)
 
 
 class UserBase(BaseModel):  # type: ignore
     label: str = Field(
         default="",
         description="A short name",
+    )
+    description: str | None = Field(
+        default=None,
+        description="A longer description of the user",
     )
     can_cashin: bool = Field(
         default=False,
@@ -25,6 +30,10 @@ class UserBase(BaseModel):  # type: ignore
 
 class User(UserBase):
     userid: UserId
+
+
+class PublicUser(UserBase):
+    token: Token
 
 
 class VoucherBase(BaseModel):

@@ -24,6 +24,7 @@ _SQL_EMISSION_UPDATE = (_DIRPATH / "emission_update.sql").read_text()
 _SQL_EMISSION_DELETE = (_DIRPATH / "emission_delete.sql").read_text()
 _SQL_USER_CREATE = (_DIRPATH / "user_create.sql").read_text()
 _SQL_USER_READ = (_DIRPATH / "user_read.sql").read_text()
+_SQL_USER_READ_PUBLIC = (_DIRPATH / "user_read_public.sql").read_text()
 _SQL_USERS_LIST = (_DIRPATH / "users_list.sql").read_text()
 _SQL_USER_UPDATE = (_DIRPATH / "user_update.sql").read_text()
 _SQL_USER_DELETE = (_DIRPATH / "user_delete.sql").read_text()
@@ -127,6 +128,13 @@ def read_user(conn: sqlite3.Connection, userid: models.UserId) -> models.User:
     if not row:
         raise UnknownId(models.User, userid)
     return models.User(**row)
+
+
+def read_public_user(conn: sqlite3.Connection, userid: models.UserId) -> models.User:
+    row = conn.execute(_SQL_USER_READ_PUBLIC, {"userid": userid}).fetchone()
+    if not row:
+        raise UnknownId(models.User, userid)
+    return models.PublicUser(**row)
 
 
 def list_users(conn: sqlite3.Connection) -> Generator[models.User, None, None]:
