@@ -1,8 +1,9 @@
 import contextlib
 import datetime
+import itertools
 import pathlib
 import tempfile
-from typing import BinaryIO
+from typing import Any, BinaryIO, Callable
 
 import cairosvg
 import jinja2
@@ -51,47 +52,62 @@ def _qrcode_path(value: str) -> pathlib.Path:
 
 def emission_vouchers(emission: models.PublicEmission, fp: BinaryIO) -> None:
     template = _ENV.get_template("vouchers/recto.svg.j2")
-    vouchers = emission.vouchers[:6]
 
-    expiration_str = emission.expiration_utc.date().isoformat()
-    a, b, c, d, e, f = vouchers
+    for i, vouchers in itertools.groupby(emission.vouchers, _groupby(6)):
+        vouchers = list(vouchers)
 
-    with _qrcode_path(a.token) as ac, _qrcode_path(b.token) as bc, _qrcode_path(
-        c.token
-    ) as cc, _qrcode_path(d.token) as dc, _qrcode_path(e.token) as ec, _qrcode_path(
-        f.token
-    ) as fc:
-        tmpsvg = template.render(
-            # top left
-            ac=ac,
-            ad=expiration_str,
-            ai=a.token,
-            av=a.value_CAN,
-            # top right
-            bc=bc,
-            bd=expiration_str,
-            bi=b.token,
-            bv=b.value_CAN,
-            # middle left
-            cc=cc,
-            cd=expiration_str,
-            ci=c.token,
-            cv=c.value_CAN,
-            # middle right
-            dc=dc,
-            dd=expiration_str,
-            di=d.token,
-            dv=d.value_CAN,
-            # bottom left
-            ec=ec,
-            ed=expiration_str,
-            ei=e.token,
-            ev=e.value_CAN,
-            # bottom right
-            fc=fc,
-            fd=expiration_str,
-            fi=f.token,
-            fv=f.value_CAN,
-        )
-        pathlib.Path("/tmp/recto_1.svg").write_text(tmpsvg)
-        cairosvg.svg2pdf(bytestring=tmpsvg, write_to=fp, unsafe=True)
+        expiration_str = emission.expiration_utc.date().isoformat()
+        a, b, c, d, e, f = vouchers
+
+        with _qrcode_path(a.token) as ac, _qrcode_path(b.token) as bc, _qrcode_path(
+            c.token
+        ) as cc, _qrcode_path(d.token) as dc, _qrcode_path(e.token) as ec, _qrcode_path(
+            f.token
+        ) as fc:
+            tmpsvg = template.render(
+                # top left
+                ac=ac,
+                ad=expiration_str,
+                ai=a.token,
+                av=a.value_CAN,
+                # top right
+                bc=bc,
+                bd=expiration_str,
+                bi=b.token,
+                bv=b.value_CAN,
+                # middle left
+                cc=cc,
+                cd=expiration_str,
+                ci=c.token,
+                cv=c.value_CAN,
+                # middle right
+                dc=dc,
+                dd=expiration_str,
+                di=d.token,
+                dv=d.value_CAN,
+                # bottom left
+                ec=ec,
+                ed=expiration_str,
+                ei=e.token,
+                ev=e.value_CAN,
+                # bottom right
+                fc=fc,
+                fd=expiration_str,
+                fi=f.token,
+                fv=f.value_CAN,
+            )
+            pathlib.Path(f"/tmp/recto_{i:04d}.svg").write_text(tmpsvg)
+            with pathlib.Path(f"/tmp/recto_{i:04d}.pdf").open("wb") as fp:
+                cairosvg.svg2pdf(bytestring=tmpsvg, write_to=fp, unsafe=True)
+            # cairosvg.svg2pdf(bytestring=tmpsvg, write_to=fp, unsafe=True)
+
+
+def _groupby(count: int) -> Callable[[Any], bool]:
+    cur = -1
+
+    def key(_):
+        nonlocal cur
+        cur += 1
+        return cur // count
+
+    return key

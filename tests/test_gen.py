@@ -19,7 +19,7 @@ class GenTestCase(testutils.TestCase):
     def test_emission_vouchers(self):
         emissionid = 1
         vouchers = []
-        for i in range(7):
+        for i in range(18):
             vouchers.append(
                 models.PublicVoucher(
                     token=f"{i:04d}-RAND",
