@@ -1,4 +1,3 @@
-import contextlib
 import datetime
 import functools
 import itertools
@@ -35,18 +34,6 @@ _VOUCHERS_PER_PAGE_COUNT = 6
 _svg2pdf = functools.partial(cairosvg.svg2pdf, unsafe=True)
 
 
-class _User(models.PublicUser):
-    qrcode_svg_path: str
-
-
-# @contextlib.contextmanager
-# def _tmpdir(name: str) -> Generator[pathlib.Path, None, None]:
-#     with tempfile.TemporaryDirectory(
-#         prefix=f"ldtvouchers-gen-{name}-", ignore_cleanup_errors=True
-#     ) as tmp:
-#         yield pathlib.Path(tmp.name)
-
-
 def _tmpdir(func):
     @functools.wraps(func)
     def wrap(*args, **kwargs):
@@ -58,37 +45,16 @@ def _tmpdir(func):
     return wrap
 
 
-def user_authpage(user: models.PublicUser, fp: BinaryIO) -> None:
+@_tmpdir
+def user_authpage(user: models.PublicUser, fp: BinaryIO, tmpdir: pathlib.Path) -> None:
     template = _ENV.get_template("user_authpage.svg.j2")
 
-    document_date = datetime.datetime.now().replace(microsecond=0)
-
-    with _qrcode_path(user.token) as qrcode_svg_path:
-        user = _User(
-            **user.model_dump(),
-            qrcode_svg_path=str(qrcode_svg_path),
-        )
-
-        tmpsvg = template.render(
-            user=user, qrcode_svg_path=qrcode_svg_path, document_date=document_date
-        )
-        cairosvg.svg2pdf(bytestring=tmpsvg, write_to=fp, unsafe=True)
-
-
-@contextlib.contextmanager
-def _qrcode_path(value: str) -> pathlib.Path:
-    if not value:
-        yield _EMPTY_QRCODE_PATH
-        return
-
-    img = qrcode.make(value, image_factory=qrcode.image.svg.SvgPathImage)
-
-    prefix = f"ldtvoucher-qrcode-{value}-"
-    with tempfile.NamedTemporaryFile(delete=False, prefix=prefix, suffix=".svg") as fp:
-        img.save(fp)
-        fp.flush()
-
-        yield fp.name
+    svg = template.render(
+        user=user,
+        qrcode_svg_path=_write_qrcode(user.token, tmpdir / "qrcode.svg"),
+        document_date=datetime.datetime.now().replace(microsecond=0),
+    )
+    _svg2pdf(bytestring=svg, write_to=fp)
 
 
 def _write_qrcode(value: str, path: pathlib.Path) -> pathlib.Path:
