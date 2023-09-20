@@ -10,8 +10,10 @@
 <body>
   <header>
   <h1>Emission {{ emission.label }}</h1>
-  Expire: <time datetime="{{ emission.expiration_utc }}">{{ emission.expiration_utc }}</time>
+  Expire: <time datetime="{{ emission.expiration_utc }}">{{ emission.expiration_localtime }}</time>
   </header>
+
+  <h2>Vouchers</h2>
 
   {% if vouchers %}
   <table>
@@ -27,8 +29,30 @@
     </tr>
     {% endfor %}
   </table>
+  {% else %}
+  <p>No voucher</p>
   {% endif %}
 
+  <h2>History</h2>
+
+  {% if actions %}
+  <table>
+    <tr>
+        {% for key in actions[0].keys() %}<th>{{ key }}</th>
+        {% endfor %}
+    </tr>
+    {% for action in actions %}
+    <tr>
+        {% for value in action %}
+        <td>{{ value }}</td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+  </table>
+  {% else%}
+  <p>No history</p>
+  {% endif %}
+  
 </body>
 
 </html>

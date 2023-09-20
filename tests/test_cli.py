@@ -416,8 +416,6 @@ class GenerateTestCase(FullDBTestCase):
         with self.cli(
             "actions",
             "scan",
-            "--voucherid",
-            self.voucher1.voucherid,
             "--userid",
             self.user_scan1.userid,
         ):
@@ -429,7 +427,33 @@ class GenerateTestCase(FullDBTestCase):
             "--voucherid",
             self.voucher1.voucherid,
             "--userid",
+            self.user_scan1.userid,
+        ):
+            pass
+
+        with self.cli(
+            "actions",
+            "scan",
+            "--userid",
             self.user_dist1.userid,
+        ):
+            pass
+
+        with self.cli(
+            "actions",
+            "scan",
+            "--voucherid",
+            self.voucher1.voucherid,
+            "--userid",
+            self.user_dist1.userid,
+        ):
+            pass
+
+        with self.cli(
+            "actions",
+            "scan",
+            "--userid",
+            self.user_dist2.userid,
         ):
             pass
 

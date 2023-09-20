@@ -153,6 +153,14 @@ def emission_htmlreport(
     template = _ENV.get_template("emission_htmlreport.html.j2")
 
     args = {"emissionid": emissionid}
-    emission = conn.execute(db.get_sql("emission_read"), args).fetchone()
-    vouchers = conn.execute(db.get_sql("emission_htmlreport_vouchers"), args).fetchall()
-    template.stream(emission=emission, vouchers=vouchers).dump(fp)
+    template.stream(
+        emission=conn.execute(
+            db.get_sql("emission_htmlreport_emission"), args
+        ).fetchone(),
+        vouchers=conn.execute(
+            db.get_sql("emission_htmlreport_vouchers"), args
+        ).fetchall(),
+        actions=conn.execute(
+            db.get_sql("emission_htmlreport_actions"), args
+        ).fetchall(),
+    ).dump(fp)
