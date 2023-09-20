@@ -1,5 +1,4 @@
 import datetime
-import pathlib
 
 import testutils
 from ldtvouchers import gen, models
@@ -19,7 +18,7 @@ class GenTestCase(testutils.TestCase):
     def test_emission_vouchers(self):
         emissionid = 1
         vouchers = []
-        for i in range(18):
+        for i in range(21):
             vouchers.append(
                 models.PublicVoucher(
                     token=f"{i:04d}-RAND",
@@ -33,10 +32,10 @@ class GenTestCase(testutils.TestCase):
             expiration_utc=datetime.datetime.utcnow(),
             vouchers=vouchers,
         )
-        # path = self.tmpdir / "vouchers.pdf"
-        path = pathlib.Path("/tmp/vouchers.pdf")
+        path = self.tmpdir / "vouchers.pdf"
 
         with path.open("wb") as fp:
             gen.emission_vouchers(emission, fp)
 
+        # TODO: check content, no just existence
         self.assertTrue(path.exists())

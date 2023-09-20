@@ -1,7 +1,9 @@
 import contextlib
 import datetime
+import functools
 import itertools
 import pathlib
+import string
 import tempfile
 from typing import Any, BinaryIO, Callable
 
@@ -22,9 +24,38 @@ _TEMPLATES_PATH = pathlib.Path(__file__).parent / "templates/vouchers"
 _EMPTY_QRCODE_PATH = _TEMPLATES_PATH / "empty.svg"
 _VOUCHERS_VERSO_SVG_PATH = _TEMPLATES_PATH / "verso.svg"
 
+_EMPTY_VOUCHER = models.PublicVoucher(
+    emissionid=-1,
+    sortnumber=-1,
+    token="",
+    value_CAN=0,
+)
+_VOUCHERS_PER_PAGE_COUNT = 6
+
+_svg2pdf = functools.partial(cairosvg.svg2pdf, unsafe=True)
+
 
 class _User(models.PublicUser):
     qrcode_svg_path: str
+
+
+# @contextlib.contextmanager
+# def _tmpdir(name: str) -> Generator[pathlib.Path, None, None]:
+#     with tempfile.TemporaryDirectory(
+#         prefix=f"ldtvouchers-gen-{name}-", ignore_cleanup_errors=True
+#     ) as tmp:
+#         yield pathlib.Path(tmp.name)
+
+
+def _tmpdir(func):
+    @functools.wraps(func)
+    def wrap(*args, **kwargs):
+        with tempfile.TemporaryDirectory(
+            prefix=f"ldtvouchers-gen-{func.__name__}-", ignore_cleanup_errors=True
+        ) as path:
+            return func(*args, tmpdir=pathlib.Path(path), **kwargs)
+
+    return wrap
 
 
 def user_authpage(user: models.PublicUser, fp: BinaryIO) -> None:
@@ -60,85 +91,84 @@ def _qrcode_path(value: str) -> pathlib.Path:
         yield fp.name
 
 
-def emission_vouchers(emission: models.PublicEmission, fp: BinaryIO) -> None:
-    verso_pdf_path = pathlib.Path("/tmp/verso.pdf")
-    with verso_pdf_path.open("wb") as pdf:
-        cairosvg.svg2pdf(url=str(_VOUCHERS_VERSO_SVG_PATH), write_to=pdf, unsafe=True)
+def _write_qrcode(value: str, path: pathlib.Path) -> pathlib.Path:
+    if not value:
+        return _EMPTY_QRCODE_PATH
 
-    template = _ENV.get_template("vouchers/recto.svg.j2")
+    img = qrcode.make(value, image_factory=qrcode.image.svg.SvgPathImage)
+    with path.open("wb") as fp:
+        img.save(fp)
+
+    return path
+
+
+@_tmpdir
+def emission_vouchers(
+    emission: models.PublicEmission, fp: BinaryIO, tmpdir: pathlib.Path
+) -> None:
+    def _groupby(count: int) -> Callable[[Any], bool]:
+        cur = -1
+
+        def key(_):
+            nonlocal cur
+            cur += 1
+            return cur // count
+
+        return key
+
+    def _pages():
+        for i, vouchers in itertools.groupby(
+            emission.vouchers, _groupby(_VOUCHERS_PER_PAGE_COUNT)
+        ):
+            vouchers = list(vouchers)
+            pad_count = _VOUCHERS_PER_PAGE_COUNT - len(vouchers)
+            vouchers = vouchers + pad_count * [_EMPTY_VOUCHER]
+
+            yield i, vouchers
+
+    def _args(vouchers):
+        prefixes = iter(string.ascii_lowercase)
+
+        ret = {}
+        for v in vouchers:
+            p = next(prefixes)
+            ret.update(
+                {
+                    f"{p}c": _write_qrcode(v.token, tmpdir / f"{v.token}.svg"),
+                    f"{p}d": emission.expiration_utc.date().isoformat(),
+                    f"{p}i": v.token,
+                    f"{p}v": v.value_CAN,
+                }
+            )
+        return ret
+
+    # Initialize the PDF merger
 
     pdf_merger = PdfWriter()
 
-    for i, vouchers in itertools.groupby(emission.vouchers, _groupby(6)):
-        vouchers = list(vouchers)
-        vouchers = vouchers + (6 - len(vouchers)) * [
-            models.PublicVoucher(
-                emissionid=-1,
-                sortnumber=-1,
-                token="",
-                value_CAN=0,
-            )
-        ]
+    # Convert the verso SVG to a temporary PDF
 
-        expiration_str = emission.expiration_utc.date().isoformat()
-        a, b, c, d, e, f = vouchers
+    verso_pdf_path = tmpdir / "verso.pdf"
+    with verso_pdf_path.open("wb") as fd:
+        _svg2pdf(url=str(_VOUCHERS_VERSO_SVG_PATH), write_to=fd)
 
-        with _qrcode_path(a.token) as ac, _qrcode_path(b.token) as bc, _qrcode_path(
-            c.token
-        ) as cc, _qrcode_path(d.token) as dc, _qrcode_path(e.token) as ec, _qrcode_path(
-            f.token
-        ) as fc:
-            tmpsvg = template.render(
-                # top left
-                ac=ac,
-                ad=expiration_str,
-                ai=a.token,
-                av=a.value_CAN,
-                # top right
-                bc=bc,
-                bd=expiration_str,
-                bi=b.token,
-                bv=b.value_CAN,
-                # middle left
-                cc=cc,
-                cd=expiration_str,
-                ci=c.token,
-                cv=c.value_CAN,
-                # middle right
-                dc=dc,
-                dd=expiration_str,
-                di=d.token,
-                dv=d.value_CAN,
-                # bottom left
-                ec=ec,
-                ed=expiration_str,
-                ei=e.token,
-                ev=e.value_CAN,
-                # bottom right
-                fc=fc,
-                fd=expiration_str,
-                fi=f.token,
-                fv=f.value_CAN,
-            )
-            pathlib.Path(f"/tmp/recto_{i:04d}.svg").write_text(tmpsvg)
+    # Initialize the jinja environment
 
-            tmppdf = pathlib.Path(f"/tmp/recto_{i:04d}.pdf")
+    template = _ENV.get_template("vouchers/recto.svg.j2")
 
-            with tmppdf.open("wb") as tmpfp:
-                cairosvg.svg2pdf(bytestring=tmpsvg, write_to=tmpfp, unsafe=True)
+    # Write each PDF page
 
-            pdf_merger.append(fileobj=tmppdf)
-            pdf_merger.append(fileobj=verso_pdf_path)
+    for page_number, vouchers in _pages():
+        svg = template.render(**_args(vouchers))
+
+        pdf = tmpdir / "recto_{page_number:04d}.pdf"
+
+        with pdf.open("wb") as fd:
+            _svg2pdf(bytestring=svg, write_to=fd)
+
+        pdf_merger.append(fileobj=pdf)
+        pdf_merger.append(fileobj=verso_pdf_path)
+
+    # Merge all pages and output the final PDF
 
     pdf_merger.write(fp)
-
-
-def _groupby(count: int) -> Callable[[Any], bool]:
-    cur = -1
-
-    def key(_):
-        nonlocal cur
-        cur += 1
-        return cur // count
-
-    return key
