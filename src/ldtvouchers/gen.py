@@ -10,7 +10,10 @@ from typing import Any, BinaryIO, Callable
 
 import cairosvg
 import jinja2
+import odf.number
 import odf.opendocument
+import odf.table
+import odf.text
 import qrcode
 import qrcode.image.svg
 from pypdf import PdfWriter
@@ -170,4 +173,22 @@ def emission_htmlreport(
 
 def emission_odsreport(conn: Connection, fp: StringIO) -> None:
     doc = odf.opendocument.OpenDocumentSpreadsheet()
+
+    table = odf.table.Table(name="vouchers")
+    table.addElement(odf.table.TableColumn())
+    table.addElement(odf.table.TableColumn())
+
+    tr = odf.table.TableRow()
+    table.addElement(tr)
+
+    cl = odf.table.TableCell(valuetype="string", value="3")
+    # cl.addElement(odf.text.P(text="3"))
+    tr.addElement(cl)
+
+    cl = odf.table.TableCell(valuetype="float", value=7.0)
+    # cl.addElement(odf.text.P(text="7.0"))
+    tr.addElement(cl)
+
+    doc.spreadsheet.addElement(table)
+
     doc.write(fp)
