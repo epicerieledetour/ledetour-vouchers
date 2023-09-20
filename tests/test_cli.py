@@ -308,6 +308,13 @@ class EmissionsTestCase(CliTestCase):
         with self.cli("emissions", "vouchers", self.emission.emissionid, path):
             pass
 
+    def test_vouchers__unknown_id(self):
+        path = self.tmpdir / "vouchers.pdf"
+
+        with self.assertUnknownId():
+            with self.cli("emissions", "vouchers", self.unknown_id, path):
+                pass  # pragma: no cover
+
 
 class ActionsTestCase(CliTestCase):
     def setUp(self):
