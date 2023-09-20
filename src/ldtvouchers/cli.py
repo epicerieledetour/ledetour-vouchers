@@ -200,9 +200,7 @@ def _emissions_vouchers(args: argparse.Namespace, conn: sqlite3.Connection) -> N
 @_connect
 def _emissions_htmlreport(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
     with contextlib.closing(args.path):
-        emissionid = args.id
-        emission = db.read_public_emission(conn, emissionid)
-        gen.emission_htmlreport(emission, args.path)
+        gen.emission_htmlreport(conn, args.id, args.path)
 
 
 # vouchers
@@ -391,7 +389,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
     par = sub.add_parser("htmlreport")
     _add_id_argument(par, models.Emission)
-    par.add_argument("path", type=argparse.FileType("wb"))
+    par.add_argument("path", type=argparse.FileType("w"))
     par.set_defaults(command=_emissions_htmlreport)
 
     # actions

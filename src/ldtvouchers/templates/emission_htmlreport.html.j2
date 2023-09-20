@@ -1,0 +1,34 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <title>Emission {{ emission.label }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+  <header>
+  <h1>Emission {{ emission.label }}</h1>
+  Expire: <time datetime="{{ emission.expiration_utc }}">{{ emission.expiration_utc }}</time>
+  </header>
+
+  {% if vouchers %}
+  <table>
+    <tr>
+        {% for key in vouchers[0].keys() %}<th>{{ key }}</th>
+        {% endfor %}
+    </tr>
+    {% for voucher in vouchers %}
+    <tr>
+        {% for value in voucher %}
+        <td>{{ value }}</td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+
+</body>
+
+</html>

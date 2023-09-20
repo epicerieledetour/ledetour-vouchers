@@ -4,6 +4,7 @@ import itertools
 import pathlib
 import string
 import tempfile
+from sqlite3 import Connection
 from typing import Any, BinaryIO, Callable
 
 import cairosvg
@@ -12,7 +13,7 @@ import qrcode
 import qrcode.image.svg
 from pypdf import PdfWriter
 
-from . import models
+from . import db, models
 
 _ENV = jinja2.Environment(
     loader=jinja2.PackageLoader("ldtvouchers"), autoescape=jinja2.select_autoescape
@@ -144,7 +145,14 @@ def emission_vouchers(
     pdf_merger.write(fp)
 
 
-def emission_htmlreport(emission: models.PublicEmission, fp: BinaryIO) -> None:
+def emission_htmlreport(
+    conn: Connection,
+    emissionid: models.EmissionId,
+    fp: BinaryIO,
+) -> None:
     template = _ENV.get_template("emission_htmlreport.html.j2")
 
-    template.stream(emission=emission).dump(fp)
+    args = {"emissionid": emissionid}
+    emission = conn.execute(db.get_sql("emission_read"), args).fetchone()
+    vouchers = conn.execute(db.get_sql("emission_htmlreport_vouchers"), args).fetchall()
+    template.stream(emission=emission, vouchers=vouchers).dump(fp)

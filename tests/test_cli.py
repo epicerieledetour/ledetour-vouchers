@@ -312,7 +312,14 @@ class FullDBTestCase(CliTestCase):
 
         # Emission
 
-        with self.cli("emissions", "create") as std:
+        with self.cli(
+            "emissions",
+            "create",
+            "--label",
+            "EmissionLabel",
+            "--expiration_utc",
+            "2042-12-31",
+        ) as std:
             self.emission = std.load(models.Emission)
 
         csvpath = Path(__file__).parent / "test_import.csv"
@@ -404,3 +411,51 @@ class GenerateTestCase(FullDBTestCase):
         with self.assertUnknownId():
             with self.cli("emissions", "vouchers", self.unknown_id, path):
                 pass  # pragma: no cover
+
+    def test_emission_htmlreport(self):
+        with self.cli(
+            "actions",
+            "scan",
+            "--voucherid",
+            self.voucher1.voucherid,
+            "--userid",
+            self.user_scan1.userid,
+        ):
+            pass
+
+        with self.cli(
+            "actions",
+            "scan",
+            "--voucherid",
+            self.voucher1.voucherid,
+            "--userid",
+            self.user_dist1.userid,
+        ):
+            pass
+
+        with self.cli(
+            "actions",
+            "scan",
+            "--voucherid",
+            self.voucher2.voucherid,
+            "--userid",
+            self.user_dist2.userid,
+        ):
+            pass
+
+        with self.cli(
+            "actions",
+            "undo",
+            "--voucherid",
+            self.voucher2.voucherid,
+            "--userid",
+            self.user_scan1.userid,
+        ):
+            pass
+
+        # path = self.tmpdir / "vouchers.pdf"
+        path = Path("/tmp/htmlreport.html")
+
+        with self.cli("emissions", "htmlreport", self.emission.emissionid, path):
+            pass
+        pass

@@ -1,3 +1,4 @@
+import functools
 import pathlib
 import random
 import sqlite3
@@ -34,6 +35,12 @@ _SQL_VOUCHERS_DELETE = (_DIRPATH / "vouchers_delete.sql").read_text()
 
 _USERID_ALPHABET = "23456789abcdefghijkmnopqrstuvwxyz"
 _VOUCHERID_ALPHABET = string.ascii_uppercase
+
+
+@functools.cache
+def get_sql(name: str) -> str:
+    return (_DIRPATH / f"{name}.sql").read_text()
+
 
 # Exceptions
 
