@@ -137,6 +137,5 @@
 # TODO NEXT
 
 - Static data generator
-  - emission vouchers PDF generate: cli emission vouchers [emissionid] -
   - emission report HTML: cli emission report [emissionid] -
 - HttpApi vouchers

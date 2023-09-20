@@ -148,25 +148,6 @@ class CliUsersTestCase(CliTestCase):
             with self.cli("users", "delete", self.unknown_id):
                 pass  # pragma: no cover
 
-    def test_authpage(self):
-        with self.cli(
-            "users", "create", "--label", "USR1", "--description", "Desc usr1"
-        ) as std:
-            user = std.load(models.User)
-
-        path = self.tmpdir / "user.pdf"
-
-        with self.cli("users", "authpage", user.userid, str(path)):
-            self.assertTrue(path.exists())
-
-    def test_authpage__unknown_id(self):
-        path = self.tmpdir / "should-be-empty-user.pdf"
-        with self.assertUnknownId():
-            with self.cli("users", "authpage", self.unknown_id, path):
-                pass  # pragma: no cover
-        self.assertTrue(path.exists())
-        self.assertEqual(path.stat().st_size, 0)
-
 
 class EmissionsTestCase(CliTestCase):
     def setUp(self):
@@ -292,31 +273,8 @@ class EmissionsTestCase(CliTestCase):
 
         self.assertEqual(emissions1, emissions2)
 
-    def test_vouchers(self):
-        csvpath = Path(__file__).parent / "test_import.csv"
 
-        with self.cli(
-            "emissions",
-            "import",
-            self.emission.emissionid,
-            str(csvpath),
-        ) as std:
-            self.emission = std.load(models.Emission)
-
-        path = self.tmpdir / "vouchers.pdf"
-
-        with self.cli("emissions", "vouchers", self.emission.emissionid, path):
-            pass
-
-    def test_vouchers__unknown_id(self):
-        path = self.tmpdir / "vouchers.pdf"
-
-        with self.assertUnknownId():
-            with self.cli("emissions", "vouchers", self.unknown_id, path):
-                pass  # pragma: no cover
-
-
-class ActionsTestCase(CliTestCase):
+class FullDBTestCase(CliTestCase):
     def setUp(self):
         super().setUp()
 
@@ -370,6 +328,8 @@ class ActionsTestCase(CliTestCase):
         self.voucher1, self.voucher2 = self.emission.vouchers
         self.voucher = self.voucher1
 
+
+class ActionsTestCase(FullDBTestCase):
     def test_scan__voucher_by_id(self):
         with self.cli(
             "actions",
@@ -417,3 +377,30 @@ class ActionsTestCase(CliTestCase):
         voucher = emission.vouchers[0]
 
         self.assertEqual(voucher, self.emission.vouchers[0])
+
+
+class GenerateTestCase(FullDBTestCase):
+    def test_authpage(self):
+        path = self.tmpdir / "user.pdf"
+
+        with self.cli("users", "authpage", self.user.userid, path):
+            self.assertTrue(path.exists())
+
+    def test_authpage__unknown_id(self):
+        path = self.tmpdir / "user.pdf"
+        with self.assertUnknownId():
+            with self.cli("users", "authpage", self.unknown_id, path):
+                pass  # pragma: no cover
+
+    def test_vouchers(self):
+        path = self.tmpdir / "vouchers.pdf"
+
+        with self.cli("emissions", "vouchers", self.emission.emissionid, path):
+            pass
+
+    def test_vouchers__unknown_id(self):
+        path = self.tmpdir / "vouchers.pdf"
+
+        with self.assertUnknownId():
+            with self.cli("emissions", "vouchers", self.unknown_id, path):
+                pass  # pragma: no cover

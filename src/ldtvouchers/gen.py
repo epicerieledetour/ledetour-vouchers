@@ -142,3 +142,9 @@ def emission_vouchers(
     # Merge all pages and output the final PDF
 
     pdf_merger.write(fp)
+
+
+def emission_htmlreport(emission: models.PublicEmission, fp: BinaryIO) -> None:
+    template = _ENV.get_template("emission_htmlreport.html.j2")
+
+    template.stream(emission=emission).dump(fp)
