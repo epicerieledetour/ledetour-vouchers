@@ -387,32 +387,9 @@ class ActionsTestCase(FullDBTestCase):
 
 
 class GenerateTestCase(FullDBTestCase):
-    def test_authpage(self):
-        path = self.tmpdir / "user.pdf"
+    def setUp(self):
+        super().setUp()
 
-        with self.cli("users", "authpage", self.user.userid, path):
-            self.assertTrue(path.exists())
-
-    def test_authpage__unknown_id(self):
-        path = self.tmpdir / "user.pdf"
-        with self.assertUnknownId():
-            with self.cli("users", "authpage", self.unknown_id, path):
-                pass  # pragma: no cover
-
-    def test_vouchers(self):
-        path = self.tmpdir / "vouchers.pdf"
-
-        with self.cli("emissions", "vouchers", self.emission.emissionid, path):
-            pass
-
-    def test_vouchers__unknown_id(self):
-        path = self.tmpdir / "vouchers.pdf"
-
-        with self.assertUnknownId():
-            with self.cli("emissions", "vouchers", self.unknown_id, path):
-                pass  # pragma: no cover
-
-    def test_emission_htmlreport(self):
         with self.cli(
             "actions",
             "scan",
@@ -477,9 +454,41 @@ class GenerateTestCase(FullDBTestCase):
         ):
             pass
 
-        # path = self.tmpdir / "vouchers.pdf"
-        path = Path("/tmp/htmlreport.html")
+    def test_authpage(self):
+        path = self.tmpdir / "user.pdf"
+
+        with self.cli("users", "authpage", self.user.userid, path):
+            self.assertTrue(path.exists())
+
+    def test_authpage__unknown_id(self):
+        path = self.tmpdir / "user.pdf"
+        with self.assertUnknownId():
+            with self.cli("users", "authpage", self.unknown_id, path):
+                pass  # pragma: no cover
+
+    def test_vouchers(self):
+        path = self.tmpdir / "vouchers.pdf"
+
+        with self.cli("emissions", "vouchers", self.emission.emissionid, path):
+            pass
+
+    def test_vouchers__unknown_id(self):
+        path = self.tmpdir / "vouchers.pdf"
+
+        with self.assertUnknownId():
+            with self.cli("emissions", "vouchers", self.unknown_id, path):
+                pass  # pragma: no cover
+
+    def test_emission_htmlreport(self):
+        path = self.tmpdir / "vouchers.pdf"
 
         with self.cli("emissions", "htmlreport", self.emission.emissionid, path):
+            pass
+        pass
+
+    def test_emission_odsreport(self):
+        path = Path("/tmp/report.ods")
+
+        with self.cli("emissions", "odsreport", path):
             pass
         pass

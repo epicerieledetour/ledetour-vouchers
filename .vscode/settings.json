@@ -14,4 +14,17 @@
         "tests",
         "discover"
     ],
+    "launch": {
+        "configurations": [
+            {
+                "name": "Python: Debug Tests",
+                "type": "python",
+                "request": "launch",
+                "program": "${file}",
+                "purpose": ["debug-test"],
+                "console": "integratedTerminal",
+                "justMyCode": false
+            }
+        ]
+    }
 }

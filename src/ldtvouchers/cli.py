@@ -194,6 +194,7 @@ def _emissions_vouchers(args: argparse.Namespace, conn: sqlite3.Connection) -> N
     with contextlib.closing(args.path):
         emissionid = args.id
         emission = db.read_public_emission(conn, emissionid)
+        # TODO: pass a conn and let the report queries what it needs
         gen.emission_vouchers(emission, args.path)
 
 
@@ -201,6 +202,12 @@ def _emissions_vouchers(args: argparse.Namespace, conn: sqlite3.Connection) -> N
 def _emissions_htmlreport(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
     with contextlib.closing(args.path):
         gen.emission_htmlreport(conn, args.id, args.path)
+
+
+@_connect
+def _emissions_odsreport(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
+    # with contextlib.closing(args.path):
+    gen.emission_odsreport(conn, args.path)
 
 
 # vouchers
@@ -382,15 +389,19 @@ def _build_parser() -> argparse.ArgumentParser:
     par.add_argument("path", type=argparse.FileType("r"))
     par.set_defaults(command=_emissions_import)
 
-    par = sub.add_parser("vouchers")
+    par = sub.add_parser("vouchers")  # TODO: move to generates subparser
     _add_id_argument(par, models.Emission)
     par.add_argument("path", type=argparse.FileType("wb"))
     par.set_defaults(command=_emissions_vouchers)
 
-    par = sub.add_parser("htmlreport")
+    par = sub.add_parser("htmlreport")  # TODO: move to generates subparser
     _add_id_argument(par, models.Emission)
     par.add_argument("path", type=argparse.FileType("w"))
     par.set_defaults(command=_emissions_htmlreport)
+
+    par = sub.add_parser("odsreport")  # TODO: move to generates subparser
+    par.add_argument("path", type=pathlib.Path)
+    par.set_defaults(command=_emissions_odsreport)
 
     # actions
 

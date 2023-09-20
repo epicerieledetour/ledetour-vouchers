@@ -4,11 +4,13 @@ import itertools
 import pathlib
 import string
 import tempfile
+from io import StringIO
 from sqlite3 import Connection
 from typing import Any, BinaryIO, Callable
 
 import cairosvg
 import jinja2
+import odf.opendocument
 import qrcode
 import qrcode.image.svg
 from pypdf import PdfWriter
@@ -164,3 +166,8 @@ def emission_htmlreport(
             db.get_sql("emission_htmlreport_actions"), args
         ).fetchall(),
     ).dump(fp)
+
+
+def emission_odsreport(conn: Connection, fp: StringIO) -> None:
+    doc = odf.opendocument.OpenDocumentSpreadsheet()
+    doc.write(fp)

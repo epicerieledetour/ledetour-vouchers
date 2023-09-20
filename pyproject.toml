@@ -19,6 +19,7 @@ dependencies = [
     "cairosvg",
     "fastapi",
     "jinja2",
+    "odfpy",
     "pypdf",
     "qrcode"
 ]
@@ -27,7 +28,8 @@ dependencies = [
 build-backend = "setuptools.build_meta"
 requires = [
     "setuptools",
-    "setuptools_scm[toml]"
+    "setuptools_scm[toml]",
+    "wheel"  # for odfpy as it does not yet use pyproject.toml
 ]
 
 [tool.setuptools.packages.find]
