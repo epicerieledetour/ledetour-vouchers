@@ -292,6 +292,22 @@ class EmissionsTestCase(CliTestCase):
 
         self.assertEqual(emissions1, emissions2)
 
+    def test_vouchers(self):
+        csvpath = Path(__file__).parent / "test_import.csv"
+
+        with self.cli(
+            "emissions",
+            "import",
+            self.emission.emissionid,
+            str(csvpath),
+        ) as std:
+            self.emission = std.load(models.Emission)
+
+        path = self.tmpdir / "vouchers.pdf"
+
+        with self.cli("emissions", "vouchers", self.emission.emissionid, path):
+            pass
+
 
 class ActionsTestCase(CliTestCase):
     def setUp(self):

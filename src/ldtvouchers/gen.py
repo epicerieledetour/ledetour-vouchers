@@ -101,12 +101,16 @@ def emission_vouchers(
             ret.update(
                 {
                     f"{p}c": _write_qrcode(v.token, tmpdir / f"{v.token}.svg"),
-                    f"{p}d": emission.expiration_utc.date().isoformat(),
+                    f"{p}d": expiration_date_str,
                     f"{p}i": v.token,
                     f"{p}v": v.value_CAN,
                 }
             )
         return ret
+
+    expiration_date_str = (
+        emission.expiration_utc.date().isoformat() if emission.expiration_utc else ""
+    )
 
     # Initialize the PDF merger
 

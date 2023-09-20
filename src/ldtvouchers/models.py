@@ -105,4 +105,6 @@ class Emission(EmissionBase):
 
 
 class PublicEmission(EmissionBase):
-    vouchers: list[PublicVoucher]
+    vouchers: list[PublicVoucher] = Field(
+        default_factory=list,
+    )

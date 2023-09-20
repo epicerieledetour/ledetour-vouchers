@@ -1,4 +1,3 @@
-import functools
 import pathlib
 import random
 import sqlite3
@@ -11,7 +10,7 @@ from typing import Any
 import pydantic
 
 from .. import models
-from ..models import Emission, EmissionBase, EmissionId
+from ..models import Emission, EmissionBase, EmissionId, PublicEmission
 
 _DIRPATH = pathlib.Path(__file__).parent
 
@@ -30,6 +29,7 @@ _SQL_USER_UPDATE = (_DIRPATH / "user_update.sql").read_text()
 _SQL_USER_DELETE = (_DIRPATH / "user_delete.sql").read_text()
 _SQL_VOUCHER_CREATE = (_DIRPATH / "voucher_create.sql").read_text()
 _SQL_VOUCHERS_LIST = (_DIRPATH / "vouchers_list.sql").read_text()
+_SQL_VOUCHERS_LIST_PUBLIC = (_DIRPATH / "vouchers_list_public.sql").read_text()
 _SQL_VOUCHERS_DELETE = (_DIRPATH / "vouchers_delete.sql").read_text()
 
 _USERID_ALPHABET = "23456789abcdefghijkmnopqrstuvwxyz"
@@ -170,33 +170,6 @@ def create_emission(conn: Connection, emission: EmissionBase) -> Emission:
     return read_emission(conn, models.EmissionId(cur.lastrowid))
 
 
-def _add_vouchers(func):
-    @functools.wraps(func)
-    def wrap(conn: sqlite3.Connection, *args, **kwargs):
-        def _stream(emissions):
-            for emission in emissions:
-                yield _add(emission)
-
-        def _add(emission):
-            emission.vouchers = list(_read_vouchers(conn, emission.emissionid))
-            return emission
-
-        ret = func(conn, *args, **kwargs)
-
-        _adder = _stream if isinstance(ret, Generator) else _add
-        return _adder(ret)
-
-    return wrap
-
-
-@_add_vouchers
-def read_emission(conn: Connection, emissionid: EmissionId) -> Emission:
-    row = conn.execute(_SQL_EMISSION_READ, {"emissionid": emissionid}).fetchone()
-    if not row:
-        raise UnknownId(Emission, emissionid)
-    return Emission(**row)
-
-
 def _read_vouchers(
     conn: Connection, emissionid: EmissionId
 ) -> Generator[models.Voucher, None, None]:
@@ -205,11 +178,41 @@ def _read_vouchers(
         yield models.Voucher(**row)
 
 
-@_add_vouchers
+def _read_public_vouchers(
+    conn: Connection, emissionid: EmissionId
+) -> Generator[models.PublicVoucher, None, None]:
+    cur = conn.execute(_SQL_VOUCHERS_LIST_PUBLIC, {"emissionid": emissionid})
+    for row in cur.fetchall():
+        yield models.PublicVoucher(**row)
+
+
+def read_emission(conn: Connection, emissionid: EmissionId) -> Emission:
+    row = conn.execute(_SQL_EMISSION_READ, {"emissionid": emissionid}).fetchone()
+    if not row:
+        raise UnknownId(Emission, emissionid)
+    return Emission(
+        vouchers=list(_read_vouchers(conn, emissionid)),
+        **row,
+    )
+
+
+def read_public_emission(conn: Connection, emissionid: EmissionId) -> PublicEmission:
+    row = conn.execute(_SQL_EMISSION_READ, {"emissionid": emissionid}).fetchone()
+    if not row:
+        raise UnknownId(Emission, emissionid)
+    return PublicEmission(
+        vouchers=list(_read_public_vouchers(conn, emissionid)),
+        **row,
+    )
+
+
 def list_emissions(conn: Connection) -> Generator[Emission, None, None]:
     cur = conn.execute(_SQL_EMISSIONS_LIST)
     for row in cur.fetchall():
-        yield Emission(**row)
+        yield Emission(
+            vouchers=list(_read_vouchers(conn, row["emissionid"])),
+            **row,
+        )
 
 
 def update_emission(conn: Connection, emission: Emission) -> Emission:
