@@ -262,3 +262,82 @@ def add_action(conn: Connection, action: models.Action) -> None:
     cur = conn.execute(_SQL_ACTION_CREATE, action.model_dump())
     if cur.rowcount == 0:
         raise ActionError(action)
+
+
+# Debug
+import datetime
+import random
+
+
+def filldb(conn: Connection) -> None:
+    values = [5, 10, 20, 50]
+    bools = (False, True)
+
+    users_dist = []
+    for i in range(random.randint(3, 6)):
+        label = f"dist{i:04d}"
+        users_dist.append(
+            create_user(
+                conn,
+                models.UserBase(
+                    label=f"dist{i:02d}",
+                    description=f"User {label}",
+                    can_cashin=False,
+                    can_cashin_by_voucherid=False,
+                ),
+            )
+        )
+
+    users_cash = []
+    for i in range(random.randint(3, 6)):
+        can_cashin_by_voucherid = random.choice(bools)
+        label = f"cash{i:02d}{'-v' if can_cashin_by_voucherid else ''}"
+
+        users_cash.append(
+            create_user(
+                conn,
+                models.UserBase(
+                    label=label,
+                    description=f"User {label}",
+                    can_cashin=True,
+                    can_cashin_by_voucherid=can_cashin_by_voucherid,
+                ),
+            )
+        )
+
+    vouchers = []
+    for i in range(random.randint(3, 5)):
+        now = datetime.datetime.now().date().replace(day=1)
+
+        emission = create_emission(
+            conn,
+            models.EmissionBase(
+                label=f"Em{i:02d}",
+                expiration_utc=now + datetime.timedelta(days=90 + 30 * i),
+            ),
+        )
+
+        with set_emission_vouchers(conn, emission.emissionid) as add_voucher:
+            for _ in range(random.randrange(80, 100, 10)):
+                add_voucher(
+                    models.VoucherImport(
+                        value_CAN=random.choice(values),
+                        distributed_by_label=random.choice(users_dist).label,
+                    )
+                )
+
+        vouchers.extend(_read_public_vouchers(conn, emission.emissionid))
+
+    users_cash = [read_public_user(conn, user.userid) for user in users_cash]
+    for i in range(random.randint(len(vouchers) * 3, len(vouchers) * 5)):
+        has_user = random.random() < 0.99
+        has_voucher = random.random() < 0.95
+        add_action(
+            conn,
+            models.Action(
+                origin="debug",
+                req_usertoken=random.choice(users_cash).token if has_user else None,
+                req_vouchertoken=random.choice(vouchers).token if has_voucher else None,
+                requestid="scan" if random.random() < 0.95 else "undo",
+            ),
+        )

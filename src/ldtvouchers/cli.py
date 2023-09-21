@@ -210,6 +210,11 @@ def _emissions_odsreport(args: argparse.Namespace, conn: sqlite3.Connection) -> 
     gen.emission_odsreport(conn, args.path)
 
 
+@_connect
+def _emissions_emailreport(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
+    gen.emission_emailreport(conn)
+
+
 # vouchers
 
 
@@ -247,6 +252,14 @@ def _actions_undo(
     args: argparse.Namespace, conn: sqlite3.Connection, action: models.Action
 ) -> None:
     db.add_action(conn, action)
+
+
+# Debug
+
+
+@_connect
+def _debug_filldb(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
+    db.filldb(conn)
 
 
 # Utils
@@ -403,6 +416,9 @@ def _build_parser() -> argparse.ArgumentParser:
     par.add_argument("path", type=pathlib.Path)
     par.set_defaults(command=_emissions_odsreport)
 
+    par = sub.add_parser("emailreport")  # TODO: move to generates subparser
+    par.set_defaults(command=_emissions_emailreport)
+
     # actions
 
     sub = subparsers.add_parser("actions").add_subparsers()
@@ -416,6 +432,13 @@ def _build_parser() -> argparse.ArgumentParser:
     par.add_argument("--voucherid", help="Voucher ID")
     par.add_argument("--userid", help="User ID")
     par.set_defaults(command=_actions_undo)
+
+    # debug
+
+    sub = subparsers.add_parser("debug").add_subparsers()
+
+    par = sub.add_parser("filldb")
+    par.set_defaults(command=_debug_filldb)
 
     # All done !
 

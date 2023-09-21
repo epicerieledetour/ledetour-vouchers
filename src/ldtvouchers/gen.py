@@ -343,3 +343,20 @@ def emission_odsreport(conn: Connection, fp: StringIO) -> None:
     # Write
 
     doc.write(fp)
+
+
+def emission_emailreport(conn: Connection) -> None:
+    since = datetime.datetime.utcnow().date()
+    until = since + datetime.timedelta(hours=23, minutes=59)
+
+    rows = conn.execute(
+        db.get_sql("emission_emailreport"),
+        {
+            "since": since,
+            "until": until,
+        },
+    )
+
+    rows
+
+    _ENV.get_template("emission_emailreport.j2").render(since, until)
