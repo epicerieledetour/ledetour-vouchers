@@ -225,7 +225,17 @@ _ODF_VALUETYPE_MAPPING = (
 )
 
 
+def _transform(val):
+    if not isinstance(val, datetime.datetime):
+        try:
+            return datetime.datetime.fromisoformat(val)
+        except (TypeError, ValueError):
+            pass
+    return val
+
+
 def _table_cell_args(val):
+    val = _transform(val)
     for typ, func in _ODF_VALUETYPE_MAPPING:
         if isinstance(val, typ):
             return func(val)
@@ -235,6 +245,7 @@ def _table_cell_args(val):
 
 def emission_odsreport(conn: Connection, fp: StringIO) -> None:
     def _table_column_args(val):
+        val = _transform(val)
         ret = {}
         if isinstance(val, bool):
             ret["defaultcellstylename"] = "auto-bool-style"  # pragma: no cover
@@ -257,19 +268,23 @@ def emission_odsreport(conn: Connection, fp: StringIO) -> None:
 
                 tr = odf.table.TableRow(parent=table)
                 for val in row.keys():
-                    args, text = _table_cell_args(val)
-                    cl = odf.table.TableCell(**args)
-                    cl.addElement(odf.text.P(text=text))
-                    tr.addElement(cl)
+                    _add_row_cell(tr, val)
 
-            tr = odf.table.TableRow()
-            table.addElement(tr)
-
+            tr = odf.table.TableRow(parent=table)
             for val in tuple(row):
-                args, text = _table_cell_args(val)
-                cl = odf.table.TableCell(**args)
-                cl.addElement(odf.text.P(text=text))
-                tr.addElement(cl)
+                _add_row_cell(tr, val)
+
+    def _add_row_cell(tr, val, **kwargs):
+        args, text = _table_cell_args(val)
+        kwargs.update(args)
+        cl = odf.table.TableCell(parent=tr, **kwargs)
+        cl.addElement(odf.text.P(text=text))
+
+    def _add_info_table():
+        table = odf.table.Table(parent=doc.spreadsheet, name="info")
+        tr = odf.table.TableRow(parent=table)
+        _add_row_cell(tr, "generation_date")
+        _add_row_cell(tr, datetime.datetime.now(), stylename="auto-date-style")
 
     doc = odf.opendocument.OpenDocumentSpreadsheet()
 
@@ -323,6 +338,7 @@ def emission_odsreport(conn: Connection, fp: StringIO) -> None:
     _add_table(
         "actions", conn.execute(db.get_sql("emission_odsreport_actions")).fetchall()
     )
+    _add_info_table()
 
     # Write
 

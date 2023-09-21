@@ -137,5 +137,6 @@
 # TODO NEXT
 
 - Static data generator
-  - emission report HTML: cli emission report [emissionid] -
+  - email report
+- Move every generation 
 - HttpApi vouchers
