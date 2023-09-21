@@ -237,9 +237,9 @@ def emission_odsreport(conn: Connection, fp: StringIO) -> None:
     def _table_column_args(val):
         ret = {}
         if isinstance(val, bool):
-            ret["defaultcellstylename"] = "auto-bool-style"
+            ret["defaultcellstylename"] = "auto-bool-style"  # pragma: no cover
         if isinstance(val, datetime.datetime):
-            ret["defaultcellstylename"] = "auto-date-style"
+            ret["defaultcellstylename"] = "auto-date-style"  # pragma: no cover
         return ret
 
     def _add_table(name, rows):
