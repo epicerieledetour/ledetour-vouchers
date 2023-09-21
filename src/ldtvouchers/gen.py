@@ -234,23 +234,6 @@ def _table_cell_args(val):
 
 
 def emission_odsreport(conn: Connection, fp: StringIO) -> None:
-    rows = [
-        {
-            "int": 42,
-            "bool": False,
-            "date": datetime.datetime.utcnow(),
-            "string": "hello",
-        },
-        {
-            "int": 43,
-            "bool": True,
-            "date": datetime.datetime.now(),
-            "string": "world",
-        },
-    ]
-
-    doc = odf.opendocument.OpenDocumentSpreadsheet()
-
     def _table_column_args(val):
         ret = {}
         if isinstance(val, bool):
@@ -258,6 +241,37 @@ def emission_odsreport(conn: Connection, fp: StringIO) -> None:
         if isinstance(val, datetime.datetime):
             ret["defaultcellstylename"] = "auto-date-style"
         return ret
+
+    def _add_table(name, rows):
+        table = odf.table.Table(parent=doc.spreadsheet, name=name)
+
+        first_row = True
+
+        for row in rows:
+            if first_row:
+                first_row = False
+                hcol = odf.table.TableHeaderColumns(parent=table)
+
+                for val in tuple(row):
+                    odf.table.TableColumn(parent=hcol, **_table_column_args(val))
+
+                tr = odf.table.TableRow(parent=table)
+                for val in row.keys():
+                    args, text = _table_cell_args(val)
+                    cl = odf.table.TableCell(**args)
+                    cl.addElement(odf.text.P(text=text))
+                    tr.addElement(cl)
+
+            tr = odf.table.TableRow()
+            table.addElement(tr)
+
+            for val in tuple(row):
+                args, text = _table_cell_args(val)
+                cl = odf.table.TableCell(**args)
+                cl.addElement(odf.text.P(text=text))
+                tr.addElement(cl)
+
+    doc = odf.opendocument.OpenDocumentSpreadsheet()
 
     # Date style
 
@@ -301,36 +315,15 @@ def emission_odsreport(conn: Connection, fp: StringIO) -> None:
         datastylename="bool-style",
     )
 
-    # Table
+    # Tables
 
-    table = odf.table.Table(name="vouchers")
+    _add_table(
+        "vouchers", conn.execute(db.get_sql("emission_odsreport_vouchers")).fetchall()
+    )
+    _add_table(
+        "actions", conn.execute(db.get_sql("emission_odsreport_actions")).fetchall()
+    )
 
-    first_row = True
-
-    for row in rows:
-        if first_row:
-            first_row = False
-            hcol = odf.table.TableHeaderColumns(parent=table)
-
-            for val in row.values():
-                odf.table.TableColumn(parent=hcol, **_table_column_args(val))
-
-            tr = odf.table.TableRow(parent=table)
-            for val in row.keys():
-                args, text = _table_cell_args(val)
-                cl = odf.table.TableCell(**args)
-                cl.addElement(odf.text.P(text=text))
-                tr.addElement(cl)
-
-        tr = odf.table.TableRow()
-        table.addElement(tr)
-
-        for val in row.values():
-            args, text = _table_cell_args(val)
-            cl = odf.table.TableCell(**args)
-            cl.addElement(odf.text.P(text=text))
-            tr.addElement(cl)
-
-    doc.spreadsheet.addElement(table)
+    # Write
 
     doc.write(fp)

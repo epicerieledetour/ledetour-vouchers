@@ -5,6 +5,7 @@ from contextlib import contextmanager, redirect_stderr, redirect_stdout
 from io import StringIO
 from pathlib import Path
 
+import odf.opendocument
 import testutils
 from ldtvouchers import cli, db, models
 
@@ -484,11 +485,11 @@ class GenerateTestCase(FullDBTestCase):
 
         with self.cli("emissions", "htmlreport", self.emission.emissionid, path):
             pass
-        pass
 
     def test_emission_odsreport(self):
-        path = Path("/tmp/report.ods")
+        path = self.tmpdir / "report.ods"
 
         with self.cli("emissions", "odsreport", path):
             pass
-        pass
+
+        odf.opendocument.load(path)
