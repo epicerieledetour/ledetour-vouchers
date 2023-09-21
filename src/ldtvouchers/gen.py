@@ -12,6 +12,7 @@ import cairosvg
 import jinja2
 import odf.number
 import odf.opendocument
+import odf.style
 import odf.table
 import odf.text
 import qrcode
@@ -171,23 +172,164 @@ def emission_htmlreport(
     ).dump(fp)
 
 
+_ODF_VALUETYPE_MAPPING = (
+    (
+        str,
+        lambda val: (
+            {
+                "valuetype": "string",
+            },
+            val,
+        ),
+    ),
+    (
+        bool,
+        lambda val: (
+            {
+                "valuetype": "boolean",
+                "booleanvalue": str(val).lower(),
+            },
+            val,
+        ),
+    ),
+    (
+        float,
+        lambda val: (
+            {
+                "valuetype": "float",
+                "value": val,
+            },
+            val,
+        ),
+    ),
+    (
+        int,
+        lambda val: (
+            {
+                "valuetype": "float",
+                "value": val,
+            },
+            val,
+        ),
+    ),
+    (
+        datetime.datetime,
+        lambda val: (
+            {
+                "valuetype": "date",
+                "datevalue": val.isoformat(),
+            },
+            val.isoformat(),
+        ),
+    ),
+)
+
+
+def _table_cell_args(val):
+    for typ, func in _ODF_VALUETYPE_MAPPING:
+        if isinstance(val, typ):
+            return func(val)
+    func = _ODF_VALUETYPE_MAPPING[0][1]
+    return func(val)
+
+
 def emission_odsreport(conn: Connection, fp: StringIO) -> None:
+    rows = [
+        {
+            "int": 42,
+            "bool": False,
+            "date": datetime.datetime.utcnow(),
+            "string": "hello",
+        },
+        {
+            "int": 43,
+            "bool": True,
+            "date": datetime.datetime.now(),
+            "string": "world",
+        },
+    ]
+
     doc = odf.opendocument.OpenDocumentSpreadsheet()
 
+    def _table_column_args(val):
+        ret = {}
+        if isinstance(val, bool):
+            ret["defaultcellstylename"] = "auto-bool-style"
+        if isinstance(val, datetime.datetime):
+            ret["defaultcellstylename"] = "auto-date-style"
+        return ret
+
+    # Date style
+
+    date_style = odf.number.DateStyle(parent=doc.automaticstyles, name="date-style")
+    odf.number.Year(parent=date_style, style="long")
+    odf.number.Text(parent=date_style, text="-")
+    odf.number.Month(parent=date_style, style="long")
+    odf.number.Text(parent=date_style, text="-")
+    odf.number.Day(parent=date_style, style="long")
+
+    odf.number.Text(parent=date_style, text=" ")
+
+    odf.number.DayOfWeek(parent=date_style, style="long")
+
+    odf.number.Text(parent=date_style, text=" ")
+
+    odf.number.Hours(parent=date_style, style="long")
+    odf.number.Text(parent=date_style, text=":")
+    odf.number.Minutes(parent=date_style, style="long")
+    odf.number.Text(parent=date_style, text=":")
+    odf.number.Seconds(parent=date_style, style="long")
+
+    odf.style.Style(
+        parent=doc.automaticstyles,
+        name="auto-date-style",
+        family="table-cell",
+        parentstylename="Default",
+        datastylename="date-style",
+    )
+
+    # Boolean style
+
+    bool_style = odf.number.BooleanStyle(parent=doc.automaticstyles, name="bool-style")
+    odf.number.Boolean(parent=bool_style)
+
+    odf.style.Style(
+        parent=doc.automaticstyles,
+        name="auto-bool-style",
+        family="table-cell",
+        parentstylename="Default",
+        datastylename="bool-style",
+    )
+
+    # Table
+
     table = odf.table.Table(name="vouchers")
-    table.addElement(odf.table.TableColumn())
-    table.addElement(odf.table.TableColumn())
 
-    tr = odf.table.TableRow()
-    table.addElement(tr)
+    first_row = True
 
-    cl = odf.table.TableCell(valuetype="string", value="3")
-    # cl.addElement(odf.text.P(text="3"))
-    tr.addElement(cl)
+    for row in rows:
+        if first_row:
+            first_row = False
+            hcol = odf.table.TableHeaderColumns(parent=table)
 
-    cl = odf.table.TableCell(valuetype="float", value=7.0)
-    # cl.addElement(odf.text.P(text="7.0"))
-    tr.addElement(cl)
+            for val in row.values():
+                odf.table.TableColumn(parent=hcol, **_table_column_args(val))
+
+            tr = odf.table.TableRow(parent=table)
+            for val in row.keys():
+                args, text = _table_cell_args(val)
+                cl = odf.table.TableCell(**args)
+                cl.addElement(odf.text.P(text=text))
+                tr.addElement(cl)
+
+        tr = odf.table.TableRow()
+        table.addElement(tr)
+
+        for val in row.values():
+            args, text = _table_cell_args(val)
+            cl = odf.table.TableCell(**args)
+            cl.addElement(odf.text.P(text=text))
+            tr.addElement(cl)
 
     doc.spreadsheet.addElement(table)
 
