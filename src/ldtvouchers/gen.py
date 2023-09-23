@@ -346,17 +346,23 @@ def emission_odsreport(conn: Connection, fp: StringIO) -> None:
 
 
 def emission_emailreport(conn: Connection) -> None:
-    since = datetime.datetime.utcnow().date()
-    until = since + datetime.timedelta(hours=23, minutes=59)
+    now_locatime = datetime.datetime.utcnow()
+    now_utc = now_locatime.astimezone(datetime.UTC)
 
     rows = conn.execute(
         db.get_sql("emission_emailreport"),
         {
-            "since": since,
-            "until": until,
+            "date_utc": now_utc,
         },
+    ).fetchall()
+
+    vouchers_by_user = [
+        (label, list(vouchers))
+        for (label, vouchers) in itertools.groupby(rows, lambda r: r["user"])
+    ]
+
+    print(
+        _ENV.get_template("emission_emailreport.j2").render(
+            date_localtime=now_locatime, vouchers_by_user=vouchers_by_user
+        )
     )
-
-    rows
-
-    _ENV.get_template("emission_emailreport.j2").render(since, until)

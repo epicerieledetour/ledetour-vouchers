@@ -493,3 +493,11 @@ class GenerateTestCase(FullDBTestCase):
             pass
 
         odf.opendocument.load(path)
+
+    def test_emission_remailreport(self):
+        # TODO: better test
+        with self.cli("debug", "filldb"):
+            pass
+
+        with self.cli("emissions", "emailreport"):
+            pass
