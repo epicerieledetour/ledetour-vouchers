@@ -133,10 +133,15 @@
 - users list --distributors
   - delete voucher token when voucher is deleted
   - delete user token when user is deleted
+- Move every generation
+- Reorder Q questions
+- Email gen to file descriptor, for consistency (will pass stdout)
 
 # TODO NEXT
 
-- Static data generator
-  - email report
-- Move every generation 
-- HttpApi vouchers
+- HttpApi
+  - serve http
+  - serve unix socket
+  - scan / undo
+- systemd: send reports
+- gens: publish

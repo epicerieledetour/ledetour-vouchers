@@ -254,6 +254,16 @@ def _actions_undo(
     db.add_action(conn, action)
 
 
+# Server
+def _server_serve(args: argparse.Namespace) -> None:
+    import uvicorn
+
+    import ldtvouchers.webapp
+
+    ldtvouchers.webapp.get_db.dbpath = args.db
+    uvicorn.run(ldtvouchers.webapp.app, port=args.port, log_level="info")
+
+
 # Debug
 
 
@@ -432,6 +442,14 @@ def _build_parser() -> argparse.ArgumentParser:
     par.add_argument("--voucherid", help="Voucher ID")
     par.add_argument("--userid", help="User ID")
     par.set_defaults(command=_actions_undo)
+
+    # server
+
+    sub = subparsers.add_parser("server").add_subparsers()
+
+    par = sub.add_parser("serve")
+    par.add_argument("--port", default=8080, type=int, help="Web server port")
+    par.set_defaults(command=_server_serve)
 
     # debug
 

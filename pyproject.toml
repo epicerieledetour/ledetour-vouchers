@@ -21,7 +21,8 @@ dependencies = [
     "jinja2",
     "odfpy",
     "pypdf",
-    "qrcode"
+    "qrcode",
+    "uvicorn[standard]"
 ]
 
 [build-system]

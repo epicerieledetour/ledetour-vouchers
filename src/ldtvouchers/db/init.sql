@@ -40,7 +40,7 @@ VALUES
     ("warning"),
     ("error");
 
-
+-- TODO: rename levelid to status
 CREATE TABLE IF NOT EXISTS
 responses (
     responseid TEXT PRIMARY KEY,
@@ -64,65 +64,65 @@ responses (
     description
 )
 VALUES
-    (
+    (  -- 1
         "error_voucher_unauthentified", 401, "error", NULL, NULL, NULL,
         "Invalid user authorization"
     ),
-    (
+    (  -- 2
         "error_voucher_user_needs_voucher_token", 401, "error", NULL, NULL, NULL,
         "User requires a voucher token"
     ),
-    (
+    (  -- 3
         "error_voucher_invalid", 404, "error", NULL, NULL, NULL,
         "Invalid voucher"
     ),
-    (
+    (  -- 4
         "error_voucher_expired", 403, "error", NULL, NULL, NULL,
         "Voucher has expired"
     ),
-    (
+    (  -- 5
         "ok_voucher_cashedin", 200, "ok", 1, "+5 minute", 1,
         "Voucher cashedin"
     ),
-    (
+    (  -- 6
         "error_voucher_cashedin_by_another_user", 403, "error", NULL, NULL, NULL,
         "Voucher has already cashedin by another user"
     ),
-    (
+    (  -- 7
         "warning_voucher_cannot_undo_cashedin", 200, "warning", NULL, NULL, NULL,
         "Voucher has already been cashed by the user but too long ago so it can't be undone"
     ),
-    (
+    (  -- 8
         "warning_voucher_can_undo_cashedin", 200, "warning", NULL, 1, NULL,
         "Voucher has already been cashed in by the user but recently enough so they can still undo"
     ),
-    (
+    (  -- 9
         "error_user_invalid_token", 401, "error", NULL, NULL, NULL,
         "User auth token can not be found"
     ),
-    (
+    (  -- 10
         "ok_user_authentified", 200, "ok", NULL, NULL, NULL,
         "User has been authentified"
     ),
-    (
+    (  -- 11
         "ok_voucher_info", 200, "ok", NULL, NULL, NULL,
         "User read the voucher without changing its state"
     ),
-    (
-	"error_voucher_cannot_undo_cashedin", 403, "error", NULL, NULL, NULL,
-	"It is not possible to undo a cashedin voucher anymore"
+    (  -- 12
+        "error_voucher_cannot_undo_cashedin", 403, "error", NULL, NULL, NULL,
+        "It is not possible to undo a cashedin voucher anymore"
     ),
-    (
-	"error_system_unexpected_request", 500, "error", NULL, NULL, NULL,
-	"Unexpected request led to an internal error"
+    (  -- 13
+        "error_system_unexpected_request", 500, "error", NULL, NULL, NULL,
+        "Unexpected request led to an internal error"
     ),
-    (
-	"ok_voucher_undo", 200, "ok", 0, NULL, NULL,
-	"A voucher previously cashedin has been undone"
+    (  -- 14
+        "ok_voucher_undo", 200, "ok", 0, NULL, NULL,
+        "A voucher previously cashedin has been undone"
     ),
-    (
-	"error_voucher_cannot_undo_not_cashedin", 403, "error", NULL, NULL, NULL,
-	"A voucher can not been undone if not cashedin first"
+    (  -- 15
+        "error_voucher_cannot_undo_not_cashedin", 403, "error", NULL, NULL, NULL,
+        "A voucher can not been undone if not cashedin first"
     )
 ;
 

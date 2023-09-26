@@ -258,13 +258,69 @@ def set_emission_vouchers(conn: Connection, emissionid: EmissionId) -> None:
     yield add_voucher
 
 
-def add_action(conn: Connection, action: models.Action) -> None:
+def add_action(conn: Connection, action: models.BaseAction) -> models.Action:
     cur = conn.execute(_SQL_ACTION_CREATE, action.model_dump())
     if cur.rowcount == 0:
         raise ActionError(action)
 
+    # TODO: test return value
+    return _read_action(conn, models.EmissionId(cur.lastrowid))
+
+
+def _read_action(conn: Connection, actionid: models.ActionId) -> models.Action:
+    row = conn.execute(get_sql("action_read"), {"actionid": actionid}).fetchone()
+    if not row:
+        raise UnknownId(Emission, actionid)
+    return models.Action(**row)
+
+
+def build_http_response(
+    conn: Connection, action: models.Action
+) -> tuple[models.HttpStatusCode, models.HttpResponse]:
+    # Code and Status
+
+    row = conn.execute(
+        get_sql("http_response_read", {"responseid": action.responseid})
+    ).fetchone()
+    resp = dict(**row)
+    code = resp.pop("httpcode")
+
+    status = models.HttpResponseStatus(
+        level=resp["levelid"],
+        description=resp["description"],
+    )
+
+    # User
+
+    user = None
+    if action.userid:
+        row = conn.execute(
+            get_sql("http_user_read", {"responseid": action.responseid})
+        ).fetchone()
+        user = read_public_user(conn, action.userid)
+
+    # Voucher
+
+    voucher = None
+    if action.voucherid:
+        args = {"voucherid": action.voucherid}
+        rows = conn.execute("http_voucher_actions_read", args).fetchall()
+        history = [models.HttpAction(**row) for row in rows]
+
+        row = conn.execute("http_voucher_read", args).fetchall()
+        voucher = models.HttpVoucher(history=history, **row)
+
+    # Return
+
+    return code, models.HttpResponse(status=status, user=user, voucher=voucher)
+
+
+def _read_response():
+    pass
+
 
 # Debug
+
 import datetime
 import random
 

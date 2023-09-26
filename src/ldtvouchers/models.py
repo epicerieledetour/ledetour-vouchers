@@ -3,10 +3,14 @@ from typing import NewType
 
 from pydantic import BaseModel, Field  # type: ignore
 
+ActionId = NewType("ActionId", int)
 EmissionId = NewType("EmissionId", int)
+ResponseId = NewType("ResponseId", int)
 UserId = NewType("UserId", int)
 VoucherId = NewType("VoucherId", int)
 Token = NewType("Token", str)
+
+HttpStatusCode = NewType("HttpStatusCode", int)  # TODO: use http.HTTPStatus
 
 
 class UserBase(BaseModel):  # type: ignore
@@ -76,13 +80,18 @@ class VoucherImport(BaseModel):
     distributed_by_label: str | None
 
 
-class Action(BaseModel):
+class ActionBase(BaseModel):
     origin: str | None = Field(default=None)
     req_usertoken: str | None = Field(default=None)
     req_vouchertoken: str | None = Field(default=None)
     userid: UserId | None = Field(default=None)
     voucherid: VoucherId | None = Field(default=None)
     requestid: str
+
+
+class Action(ActionBase):
+    actionid: ActionId
+    responseid: ResponseId
 
 
 class EmissionBase(BaseModel):
@@ -108,3 +117,33 @@ class PublicEmission(EmissionBase):
     vouchers: list[PublicVoucher] = Field(
         default_factory=list,
     )
+
+
+# Http
+
+
+class HttpResponseStatus(BaseModel):
+    level: str
+    code: int
+    description: str
+
+
+class HttpAction(BaseModel):
+    at: datetime.datetime
+    by: str
+    action: str
+
+
+class HttpVoucher(BaseModel):
+    token: Token
+    value: int
+    cashedin_by: str
+    cashedin_at: datetime.datetime
+    undo_expires_at: datetime.datetime | None
+    history: list[HttpAction]
+
+
+class HttpResponse(BaseModel):
+    status: HttpResponseStatus
+    user: PublicUser
+    voucher: HttpVoucher
