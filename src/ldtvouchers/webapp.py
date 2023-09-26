@@ -1,3 +1,5 @@
+# TODO: rename module to httpapi
+
 import contextlib
 from sqlite3 import Connection
 from typing import Annotated
