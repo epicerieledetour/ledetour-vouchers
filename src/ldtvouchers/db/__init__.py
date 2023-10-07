@@ -258,7 +258,7 @@ def set_emission_vouchers(conn: Connection, emissionid: EmissionId) -> None:
     yield add_voucher
 
 
-def add_action(conn: Connection, action: models.BaseAction) -> models.Action:
+def add_action(conn: Connection, action: models.ActionBase) -> models.Action:
     cur = conn.execute(_SQL_ACTION_CREATE, action.model_dump())
     if cur.rowcount == 0:
         raise ActionError(action)
@@ -390,7 +390,7 @@ def filldb(conn: Connection) -> None:
         has_voucher = random.random() < 0.95
         add_action(
             conn,
-            models.Action(
+            models.ActionBase(
                 origin="debug",
                 req_usertoken=random.choice(users_cash).token if has_user else None,
                 req_vouchertoken=random.choice(vouchers).token if has_voucher else None,

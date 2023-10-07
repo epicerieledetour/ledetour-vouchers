@@ -219,4 +219,4 @@ class DbActionsTestCase(DbTestCase):
         conn = _mock_conn()
 
         with self.assertRaises(db.ActionError):
-            db.add_action(conn, models.Action(requestid="scan"))
+            db.add_action(conn, models.ActionBase(requestid="scan"))

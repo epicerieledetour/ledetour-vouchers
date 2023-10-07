@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field  # type: ignore
 
 ActionId = NewType("ActionId", int)
 EmissionId = NewType("EmissionId", int)
-ResponseId = NewType("ResponseId", int)
+ResponseId = NewType("ResponseId", str)
 UserId = NewType("UserId", int)
 VoucherId = NewType("VoucherId", int)
 Token = NewType("Token", str)

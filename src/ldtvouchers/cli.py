@@ -224,7 +224,7 @@ def _action(requestid: str):
         def wraps(*args, **kwargs) -> None:
             ns = args[0]
 
-            kwargs["action"] = models.Action(
+            kwargs["action"] = models.ActionBase(
                 origin=_ACTION_ORIGIN_CLI,
                 userid=ns.userid,
                 voucherid=ns.voucherid,
