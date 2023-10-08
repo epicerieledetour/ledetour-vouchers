@@ -1,12 +1,13 @@
 # TODO: rename module to httpapi
 
 import contextlib
+import re
 from sqlite3 import Connection
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, Header, Response
 
-from ldtvouchers import db, models
+from . import db, models
 
 app = FastAPI()
 
@@ -34,11 +35,11 @@ get_db = DBGetter()
 def scan(
     response: Response,
     url_token,
-    bearer: Annotated[str, None, Header()],
+    authorization: Annotated[str | None, Header()],
     conn: Connection = Depends(get_db),
 ):
-    split = bearer.split()
-    bearer_token = split[1] if len(split) > 1 else None
+    m = re.match(r"Bearer (?P<token>.+)", authorization)
+    bearer_token = m.groupdict()["token"] if m else None
 
     user_token, voucher_token = (
         (bearer_token, url_token) if bearer_token else (url_token, None)
@@ -46,15 +47,16 @@ def scan(
 
     action = db.add_action(
         conn,
-        models.Action(
+        models.ActionBase(
             origin=_ACTION_ORIGIN_HTTPAPI,
-            user_token=user_token,
-            voucher_token=voucher_token,
+            req_usertoken=user_token,
+            req_vouchertoken=voucher_token,
             requestid="scan",
         ),
     )
 
     status_code, http_response = db.build_http_response(conn, action)
+
     response.status_code = status_code
 
     return http_response

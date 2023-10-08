@@ -277,10 +277,11 @@ def _read_action(conn: Connection, actionid: models.ActionId) -> models.Action:
 def build_http_response(
     conn: Connection, action: models.Action
 ) -> tuple[models.HttpStatusCode, models.HttpResponse]:
+    # TODO: just pass an actionid
     # Code and Status
 
     row = conn.execute(
-        get_sql("http_response_read", {"responseid": action.responseid})
+        get_sql("http_response_status"), {"responseid": action.responseid}
     ).fetchone()
     resp = dict(**row)
     code = resp.pop("httpcode")
@@ -294,20 +295,20 @@ def build_http_response(
 
     user = None
     if action.userid:
-        row = conn.execute(
-            get_sql("http_user_read", {"responseid": action.responseid})
-        ).fetchone()
         user = read_public_user(conn, action.userid)
 
     # Voucher
 
     voucher = None
     if action.voucherid:
-        args = {"voucherid": action.voucherid}
-        rows = conn.execute("http_voucher_actions_read", args).fetchall()
+        rows = conn.execute(
+            get_sql("http_response_voucher_history"), {"voucherid": action.voucherid}
+        ).fetchall()
         history = [models.HttpAction(**row) for row in rows]
 
-        row = conn.execute("http_voucher_read", args).fetchall()
+        row = conn.execute(
+            get_sql("http_response_voucher"), {"actionid": action.actionid}
+        ).fetchone()
         voucher = models.HttpVoucher(history=history, **row)
 
     # Return

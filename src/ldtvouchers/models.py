@@ -5,7 +5,6 @@ from pydantic import BaseModel, Field  # type: ignore
 
 ActionId = NewType("ActionId", int)
 EmissionId = NewType("EmissionId", int)
-ResponseId = NewType("ResponseId", str)
 UserId = NewType("UserId", int)
 VoucherId = NewType("VoucherId", int)
 Token = NewType("Token", str)
@@ -91,7 +90,7 @@ class ActionBase(BaseModel):
 
 class Action(ActionBase):
     actionid: ActionId
-    responseid: ResponseId
+    responseid: str
 
 
 class EmissionBase(BaseModel):
@@ -124,22 +123,32 @@ class PublicEmission(EmissionBase):
 
 class HttpResponseStatus(BaseModel):
     level: str
-    code: int
     description: str
 
 
 class HttpAction(BaseModel):
-    at: datetime.datetime
-    by: str
-    action: str
+    timestamp_utc: datetime.datetime
+    user_label: str
+    user_description: str | None
+    requestid: str
+    responseid: str
 
 
 class HttpVoucher(BaseModel):
-    token: Token
-    value: int
-    cashedin_by: str
-    cashedin_at: datetime.datetime
-    undo_expires_at: datetime.datetime | None
+    token: str
+    value_CAN: int = Field(
+        description="Value in CAN",
+    )
+    cashedin_by_label: str | None
+    cashedin_by_description: str | None
+    cashedin_utc: datetime.datetime | None = Field(
+        default=None,
+        description="Date the voucher has been cashed in in UTC time",
+    )
+    undo_expiration_utc: datetime.datetime | None = Field(
+        default=None,
+        description="The date until a cashed in voucher can be undone in UTC time",
+    )
     history: list[HttpAction]
 
 
