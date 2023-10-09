@@ -25,6 +25,7 @@ class UserBase(BaseModel):  # type: ignore
         default=False,
         description="Tells if the user can cash a voucher in",
     )
+    # TODOL is can_cashin_by_voucherid really necessary ?
     can_cashin_by_voucherid: bool = Field(
         default=False,
         description="Tells if the user can use a voucher",

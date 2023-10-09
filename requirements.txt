@@ -1,9 +1,5 @@
 black
 coverage
-#cairosvg
-#fastapi[all]
-#ninja
-#pytest
-#requests
+httpx
 mypy
 tox

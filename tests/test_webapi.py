@@ -1,4 +1,10 @@
+import datetime
+from http import HTTPStatus
+
 import testutils
+from fastapi.testclient import TestClient
+
+from ldtvouchers import db, models, webapp
 
 {
     "status": {
@@ -21,8 +27,120 @@ import testutils
     },
 }
 
+# action url
+# - unknown
+# - scan
+# - undo
+
+# Auth header
+# - None
+# - Malformed
+# - Unknown user
+# - Valid user
+
+# scan url_token
+# - None
+# - malformed
+# - Unkown token
+# - Valid user
+# - Valid voucher
+
+# User can scan
+# - no
+# - yes
+
+# User can undo
+# - no
+# - yes
+
+# Voucher cashed in
+# - no
+# - by current user
+# - by another user
+
+# Voucher current time withing timeout
+# - no
+# - yes
+
 
 class WebAPITestCase(testutils.TestCase):
+    def setUp(self):
+        super().setUp()
+
+        webapp.get_db.dbpath = self.dbpath
+        self.client = TestClient(webapp.app)
+
+        with db.connect(self.dbpath) as conn:
+            db.initdb(conn)
+
+            self.cashier1 = db.create_user(
+                conn,
+                models.UserBase(
+                    label="cashier1",
+                    description="cashier1 description",
+                    can_cashin=True,
+                ),
+            )
+            self.public_cashier1 = db.read_public_user(conn, self.cashier1.userid)
+            self.headers_cashier1 = {
+                "Authorization": "Bearer {}".format(self.public_cashier1.token)
+            }
+
+            self.cashier2 = db.create_user(
+                conn,
+                models.UserBase(
+                    label="cashier2",
+                    description="cashier2 description",
+                    can_cashin=True,
+                ),
+            )
+            self.public_cashier2 = db.read_public_user(conn, self.cashier2.userid)
+            self.headers_cashier2 = {
+                "Authorization": "Bearer {}".format(self.public_cashier2.token)
+            }
+
+            self.distributor = db.create_user(
+                conn,
+                models.UserBase(
+                    label="distributor",
+                    description="distributor description",
+                    can_cashin=False,
+                ),
+            )
+
+            self.now = datetime.datetime.utcnow()
+            self.expiration_timedelta = datetime.timedelta(90)
+
+            self.emission1 = db.create_emission(
+                conn,
+                models.EmissionBase(
+                    label="emission1",
+                    expiration_utc=self.now + self.expiration_timedelta,
+                ),
+            )
+
+            with db.set_emission_vouchers(
+                conn, self.emission1.emissionid
+            ) as add_voucher:
+                add_voucher(
+                    models.VoucherImport(
+                        value_CAN=1, distributed_by_label=self.distributor.label
+                    )
+                )
+                add_voucher(
+                    models.VoucherImport(
+                        value_CAN=2, distributed_by_label=self.distributor.label
+                    )
+                )
+
+            self.emission1 = db.read_public_emission(conn, self.emission1.emissionid)
+            self.voucher1, self.voucher2 = self.emission1.vouchers
+
+            self.url_scan_voucher1 = "/scan/{}".format(self.voucher1.token)
+            self.url_undo_voucher1 = "/undo/{}".format(self.voucher1.token)
+            self.url_scan_voucher2 = "/scan/{}".format(self.voucher2.token)
+            self.url_undo_voucher2 = "/undo/{}".format(self.voucher2.token)
+
     # 1
     def test_error_voucher_unauthentified(self):
         pass
@@ -41,7 +159,8 @@ class WebAPITestCase(testutils.TestCase):
 
     # 5
     def test_ok_voucher_cashedin(self):
-        pass
+        resp = self.client.get(self.url_scan_voucher1, headers=self.headers_cashier1)
+        self.assertEqual(resp.status_code, HTTPStatus.OK)
 
     # 6
     def test_error_voucher_cashedin_by_another_user(self):
