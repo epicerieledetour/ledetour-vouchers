@@ -45,11 +45,7 @@ from ldtvouchers import db, models, webapp
 # - Valid user
 # - Valid voucher
 
-# User can scan
-# - no
-# - yes
-
-# User can undo
+# Voucher expired
 # - no
 # - yes
 
@@ -57,6 +53,10 @@ from ldtvouchers import db, models, webapp
 # - no
 # - by current user
 # - by another user
+
+# User can scan
+# - no
+# - yes
 
 # Voucher current time withing timeout
 # - no
@@ -146,6 +146,12 @@ class WebAPITestCase(testutils.TestCase):
     def get(self, *args, **kwargs):
         resp = self.client.get(*args, **kwargs)
         return resp.status_code, models.HttpResponse(**resp.json())
+
+    def test_invalid_action_url(self):
+        resp = self.client.get("/this/endpoint/does/not/exist")
+
+        self.assertEqual(resp.status_code, HTTPStatus.NOT_FOUND)
+        self.assertDictEqual(resp.json(), {"detail": "Not Found"})
 
     # 1
     def test_error_voucher_unauthentified(self):
