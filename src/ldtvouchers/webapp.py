@@ -35,7 +35,7 @@ get_db = DBGetter()
 def scan(
     response: Response,
     url_token,
-    authorization: Annotated[str | None, Header()],
+    authorization: Annotated[str, Header()] = "",
     conn: Connection = Depends(get_db),
 ):
     m = re.match(r"Bearer (?P<token>.+)", authorization)

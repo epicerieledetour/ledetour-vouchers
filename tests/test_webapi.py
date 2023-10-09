@@ -136,10 +136,16 @@ class WebAPITestCase(testutils.TestCase):
             self.emission1 = db.read_public_emission(conn, self.emission1.emissionid)
             self.voucher1, self.voucher2 = self.emission1.vouchers
 
+            self.url_scan_cashier1 = "/scan/{}".format(self.public_cashier1.token)
+            self.url_scan_cashier2 = "/scan/{}".format(self.public_cashier2.token)
             self.url_scan_voucher1 = "/scan/{}".format(self.voucher1.token)
             self.url_undo_voucher1 = "/undo/{}".format(self.voucher1.token)
             self.url_scan_voucher2 = "/scan/{}".format(self.voucher2.token)
             self.url_undo_voucher2 = "/undo/{}".format(self.voucher2.token)
+
+    def get(self, *args, **kwargs):
+        resp = self.client.get(*args, **kwargs)
+        return resp.status_code, models.HttpResponse(**resp.json())
 
     # 1
     def test_error_voucher_unauthentified(self):
@@ -180,7 +186,15 @@ class WebAPITestCase(testutils.TestCase):
 
     # 10
     def test_ok_user_authentified(self):
-        pass
+        status_code, resp = self.get(
+            self.url_scan_cashier1,
+        )
+
+        self.assertEqual(status_code, HTTPStatus.OK)
+
+        self.assertEqual(resp.status.level, "ok")
+        self.assertEqual(resp.user, self.public_cashier1)
+        self.assertIsNone(resp.voucher)
 
     # 11
     def test_ok_voucher_info(self):

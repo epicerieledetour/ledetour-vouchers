@@ -155,5 +155,5 @@ class HttpVoucher(BaseModel):
 
 class HttpResponse(BaseModel):
     status: HttpResponseStatus
-    user: PublicUser
-    voucher: HttpVoucher
+    user: PublicUser | None
+    voucher: HttpVoucher | None
