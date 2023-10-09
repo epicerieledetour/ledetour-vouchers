@@ -165,8 +165,16 @@ class WebAPITestCase(testutils.TestCase):
 
     # 5
     def test_ok_voucher_cashedin(self):
-        resp = self.client.get(self.url_scan_voucher1, headers=self.headers_cashier1)
-        self.assertEqual(resp.status_code, HTTPStatus.OK)
+        status_code, resp = self.get(
+            self.url_scan_voucher1,
+            headers=self.headers_cashier1,
+        )
+
+        self.assertEqual(status_code, HTTPStatus.OK)
+
+        self.assertEqual(resp.status.level, "ok")
+        self.assertEqual(resp.user, self.public_cashier1)
+        self.assertIsNone(resp.voucher)
 
     # 6
     def test_error_voucher_cashedin_by_another_user(self):
