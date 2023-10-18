@@ -54,7 +54,7 @@ from ldtvouchers import db, models, webapp
 # - by current user
 # - by another user
 
-# User can scan
+# User can cashin / undo
 # - no
 # - yes
 
@@ -152,6 +152,10 @@ class WebAPITestCase(testutils.TestCase):
 
         self.assertEqual(resp.status_code, HTTPStatus.NOT_FOUND)
         self.assertDictEqual(resp.json(), {"detail": "Not Found"})
+
+    def test_invalid_url_character(self):
+        resp = self.client.get("/scan/ɸ")
+        self.assertEqual(resp.status_code, HTTPStatus.NOT_FOUND)
 
     # 1
     def test_error_voucher_unauthentified(self):
