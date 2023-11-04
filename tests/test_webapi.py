@@ -135,9 +135,6 @@ class WebAPITestCase(testutils.TestCase):
             self.emission1 = db.read_public_emission(conn, self.emission1.emissionid)
             self.voucher1, self.voucher2 = self.emission1.vouchers
 
-            # self.voucher1_token = db._get_user_token(conn, self.voucher1.voucherid)
-            # self.voucher2_token = db._get_user_token(conn, self.voucher2.voucherid)
-
             self.url_scan_cashier1 = "/scan/{}".format(self.public_cashier1.token)
             self.url_scan_cashier2 = "/scan/{}".format(self.public_cashier2.token)
             self.url_scan_voucher1 = "/scan/{}".format(self.voucher1.token)
