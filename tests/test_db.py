@@ -90,7 +90,7 @@ class DbInitTestCase(DbTestCase, testutils.TestCaseMixin):
             "error_voucher_cashedin_by_another_user",
             "warning_voucher_cannot_undo_cashedin",
             "error_voucher_cannot_undo_cashedin",
-            "error_system_unexpected_request",
+            "error_bad_request",
             "warning_voucher_can_undo_cashedin",
             "ok_voucher_cashedin",
             "ok_voucher_undo",

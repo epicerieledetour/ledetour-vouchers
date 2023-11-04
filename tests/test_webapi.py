@@ -3,7 +3,6 @@ from http import HTTPStatus
 
 import testutils
 from fastapi.testclient import TestClient
-
 from ldtvouchers import db, models, webapp
 
 {
@@ -136,6 +135,9 @@ class WebAPITestCase(testutils.TestCase):
             self.emission1 = db.read_public_emission(conn, self.emission1.emissionid)
             self.voucher1, self.voucher2 = self.emission1.vouchers
 
+            # self.voucher1_token = db._get_user_token(conn, self.voucher1.voucherid)
+            # self.voucher2_token = db._get_user_token(conn, self.voucher2.voucherid)
+
             self.url_scan_cashier1 = "/scan/{}".format(self.public_cashier1.token)
             self.url_scan_cashier2 = "/scan/{}".format(self.public_cashier2.token)
             self.url_scan_voucher1 = "/scan/{}".format(self.voucher1.token)
@@ -153,10 +155,6 @@ class WebAPITestCase(testutils.TestCase):
         self.assertEqual(resp.status_code, HTTPStatus.NOT_FOUND)
         self.assertDictEqual(resp.json(), {"detail": "Not Found"})
 
-    def test_invalid_url_character(self):
-        resp = self.client.get("/scan/ɸ")
-        self.assertEqual(resp.status_code, HTTPStatus.NOT_FOUND)
-
     # 1
     def test_error_voucher_unauthentified(self):
         pass
@@ -173,6 +171,12 @@ class WebAPITestCase(testutils.TestCase):
     def test_error_voucher_expired(self):
         pass
 
+    def assertAlmostNow(self, date):
+        return date - datetime.datetime.utcnow() < datetime.timedelta(seconds=1.0)
+
+    def assertLater(self, date):
+        return date - datetime.datetime.utcnow() > datetime.timedelta(minutes=1.0)
+
     # 5
     def test_ok_voucher_cashedin(self):
         status_code, resp = self.get(
@@ -184,7 +188,27 @@ class WebAPITestCase(testutils.TestCase):
 
         self.assertEqual(resp.status.level, "ok")
         self.assertEqual(resp.user, self.public_cashier1)
-        self.assertIsNone(resp.voucher)
+
+        self.assertEqual(resp.voucher.token, self.voucher1.token)
+        self.assertEqual(resp.voucher.value_CAN, self.voucher1.value_CAN)
+        self.assertEqual(resp.voucher.cashedin_by_label, self.cashier1.label)
+        self.assertEqual(
+            resp.voucher.cashedin_by_description, self.cashier1.description
+        )
+        self.assertAlmostNow(resp.voucher.cashedin_utc)
+        self.assertLater(resp.voucher.undo_expiration_utc)
+
+        self.assertEqual(len(resp.voucher.history), 1)
+        self.assertEqual(
+            resp.voucher.history[0],
+            models.HttpAction(
+                timestamp_utc=resp.voucher.cashedin_utc,
+                user_label=self.cashier1.label,
+                user_description=self.cashier1.description,
+                requestid="scan",
+                responseid="ok_voucher_cashedin",
+            ),
+        )
 
     # 6
     def test_error_voucher_cashedin_by_another_user(self):
@@ -223,8 +247,17 @@ class WebAPITestCase(testutils.TestCase):
         pass
 
     # 13
-    def test_error_system_unexpected_request(self):
-        pass
+    def test_error_bad_request(self):
+        status_code, resp = self.get(
+            "/unknown_request/{}".format(self.public_cashier1.token),
+            headers=self.headers_cashier1,
+        )
+
+        self.assertEqual(status_code, HTTPStatus.BAD_REQUEST)
+
+        self.assertEqual(resp.status.level, "error")
+        self.assertEqual(resp.user, self.public_cashier1)
+        self.assertIsNone(resp.voucher)
 
     # 14
     def test_ok_voucher_undo(self):

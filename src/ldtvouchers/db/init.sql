@@ -113,8 +113,8 @@ VALUES
         "It is not possible to undo a cashedin voucher anymore"
     ),
     (  -- 13
-        "error_system_unexpected_request", 500, "error", NULL, NULL, NULL,
-        "Unexpected request led to an internal error"
+        "error_bad_request", 400, "error", NULL, NULL, NULL,
+        "Unexpected request"
     ),
     (  -- 14
         "ok_voucher_undo", 200, "ok", 0, NULL, NULL,
@@ -240,7 +240,7 @@ BEGIN
             ELSE  -- Voucher scan
                 CASE
                     WHEN a.requestid NOT IN (SELECT requestid FROM requests)  -- Q13
-                        THEN "error_system_unexpected_request"
+                        THEN "error_bad_request"
                     WHEN u.userid IS NULL  -- Q3
                         THEN "error_voucher_unauthentified"
                     WHEN u.can_cashin_by_voucherid = FALSE AND a.req_vouchertoken IS NULL

@@ -72,7 +72,7 @@ VALUES ("tokusr_cashier", "tokvch_1", datetime('now', '+6 minute'), "scan");
 INSERT INTO actions (req_usertoken, req_vouchertoken, timestamp_utc, requestid)
 VALUES ("tokusr_cashier", "tokvch_1", datetime('now', '+6 minute'), "undo");
 
--- 13: error_system_unexpected_request
+-- 13: error_bad_request
 INSERT INTO actions (req_usertoken, req_vouchertoken, timestamp_utc, requestid)
 VALUES ("tokusr_cashier", "tokvch_1", datetime('now', '+6 minute'), "other_action");
 

@@ -4,11 +4,11 @@
 
 ```mermaid
 flowchart TD
-    S(Start)
+    S(Voucher scanned)
     S --> Q13
 
     Q13{Q13: Is request verb valid ?}
-    Q13N[error_system_unexpected_request]:::error
+    Q13N[error_bad_request]:::error
     Q13 -- other verb --> Q13N
     Q13 -- scan / undo --> Q1
 

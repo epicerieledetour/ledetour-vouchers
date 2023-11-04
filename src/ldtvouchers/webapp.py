@@ -31,10 +31,11 @@ class DBGetter:
 get_db = DBGetter()
 
 
-@app.get("/scan/{url_token}")
+@app.get("/{requestid}/{url_token}")
 def scan(
     response: Response,
-    url_token,
+    requestid: str,
+    url_token: str,
     authorization: Annotated[str, Header()] = "",
     conn: Connection = Depends(get_db),
 ):
@@ -51,7 +52,7 @@ def scan(
             origin=_ACTION_ORIGIN_HTTPAPI,
             req_usertoken=user_token,
             req_vouchertoken=voucher_token,
-            requestid="scan",
+            requestid=requestid,
         ),
     )
 
