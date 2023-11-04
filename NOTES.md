@@ -20,3 +20,7 @@
 # ARCH QUESTIONS ?
 
 - gens queries in SQL directly or go through an API ? First case, DB is the API, second case, we do data transformation in python not in SQL (which is made for)
+
+
+- Why unittest vs pytest ? pytest is nicer but it's one less dependency
+- Do not run new subprocesses to test cli, too slow
