@@ -24,3 +24,6 @@
 
 - Why unittest vs pytest ? pytest is nicer but it's one less dependency
 - Do not run new subprocesses to test cli, too slow
+
+- Data driver from database, no business logic should be outside of the database. If and For
+  and for data presentation only

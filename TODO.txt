@@ -149,7 +149,7 @@
 # Refactoring
 
 * All IDs can be public, what matters is a user Bearers table
-* Remove the Token table and replace it by a Bearers table
+* Remove the Token table and replace it by a Bearers table, just for user
 * Make all IDs public
 * We will be leaking internal IDs, but what matters is that
   * User Bearer

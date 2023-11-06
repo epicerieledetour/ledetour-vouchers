@@ -1,0 +1,61 @@
+<!doctype html>
+<html class="no-js" lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Bons Solidaires</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta property="og:title" content="">
+  <meta property="og:type" content="">
+  <meta property="og:url" content="">
+  <meta property="og:image" content="">
+
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="apple-touch-icon" href="icon.png">
+  <!-- Place favicon.ico in the root directory -->
+
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/app.css">
+
+  <meta name="theme-color" content="#fafafa">
+</head>
+
+<body>
+  <p>level: {{ level }}</p>
+  <header id="header">
+    {# <button id="exit">Exit</button> #}
+    {# <p id="user"></p> #}
+    {# <button id="history">History</button> #}
+  </header>
+  <section id="scan">
+    <video id="scan-preview">Scan preview</video>
+  </section>
+  {# <section id="voucher">
+    <p id="voucher-title"></p>
+    <p id="voucher-id"></p>
+    <p id="voucher-expire"></p>
+    <p id="voucher-value"></p>
+  </section> #}
+  <section id="message-area">
+    <section id="message">Status: {{ status }}</section>
+  </section>
+  <section id="prompt-area">
+    <section id="prompt">Prompt: {{ prompt }}</section>
+  </section>
+  {# <section id="detail"></section> #}
+  {# <button id="action"></button> #}
+
+  {# <dialog id="dialog">
+    <h1 id="dialog-title"></h1>
+    <section id="dialog-content">
+    </section>
+  </dialog> #}
+
+  {# <script type="text/javascript" src="https://unpkg.com/@zxing/browser@latest"></script> #}
+  {# <script type="text/javascript" src="js/main.js"></script> #}
+</body>
+
+</html>

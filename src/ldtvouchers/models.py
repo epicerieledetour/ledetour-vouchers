@@ -123,8 +123,9 @@ class PublicEmission(EmissionBase):
 
 
 class HttpResponseStatus(BaseModel):
+    responseid: str
+    domain: str
     level: str
-    description: str
 
 
 class HttpAction(BaseModel):

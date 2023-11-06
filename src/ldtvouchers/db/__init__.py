@@ -274,9 +274,7 @@ def _read_action(conn: Connection, actionid: models.ActionId) -> models.Action:
     return models.Action(**row)
 
 
-def build_http_response(
-    conn: Connection, action: models.Action
-) -> tuple[models.HttpStatusCode, models.HttpResponse]:
+def build_http_response(conn: Connection, action: models.Action) -> models.HttpResponse:
     # TODO: just pass an actionid
     # Code and Status
 
@@ -287,8 +285,9 @@ def build_http_response(
     code = resp.pop("httpcode")
 
     status = models.HttpResponseStatus(
+        responseid=resp["responseid"],
+        domain=resp["responseid"].split("_")[1],  # TODO: should be in DB, not computed
         level=resp["levelid"],
-        description=resp["description"],
     )
 
     # User
@@ -313,7 +312,7 @@ def build_http_response(
 
     # Return
 
-    return code, models.HttpResponse(status=status, user=user, voucher=voucher)
+    return models.HttpResponse(status=status, user=user, voucher=voucher)
 
 
 def _read_response():
