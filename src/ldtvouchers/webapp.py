@@ -70,6 +70,9 @@ _ENV = jinja2.Environment(
 
 
 _RESPONSES = {
+    None: {  # used for the start page
+        "http_return_code": status.HTTP_200_OK,
+    },
     "error_voucher_unauthentified": {
         "http_return_code": status.HTTP_401_UNAUTHORIZED,
     },
@@ -96,7 +99,7 @@ _RESPONSES = {
 }
 
 _DOMAINS = {
-    None: {
+    None: {  # used for the start page
         "prompt": "Scan an user code",
     },
     "user": {"prompt": "Scan a voucher"},
@@ -121,22 +124,35 @@ def scan(
         ),
     )
 
-    resp = db.build_http_response(conn, action)
+    return _response(db.build_http_response(conn, action))
+
+
+def _response(resp: models.HttpResponse | None) -> HTMLResponse:
+    responseid = None
+    level = None
+    domain = None
+    if resp:
+        responseid = resp.status.responseid
+        level = resp.status.level
+        domain = resp.status.domain
 
     template = _ENV.get_template("index.html.j2")
     content = template.render(
-        level=resp.status.level,
-        status=_RESPONSES[resp.status.responseid].get("status", ""),
-        prompt=_DOMAINS[resp.status.domain]["prompt"],
+        level=level,
+        status=_RESPONSES[responseid].get("status", ""),
+        prompt=_DOMAINS[domain]["prompt"],
     )
 
-    status_code = _RESPONSES[resp.status.responseid]["http_return_code"]
+    status_code = _RESPONSES[responseid]["http_return_code"]
 
     return HTMLResponse(content=content, status_code=status_code)
 
 
 @app.get("/")
 def index():
-    template = _ENV.get_template("index.html.j2")
-    content = template.render(message="Scan an authentification code")
-    return HTMLResponse(content=content, status_code=200)
+    return _response(None)
+
+
+# http://localhost:8080/                      # start
+# http://localhost:8080/scan/tokusr_invalid   # invalid user
+# http://localhost:8080/scan/tokusr_ijpxzkbf  # valid user
