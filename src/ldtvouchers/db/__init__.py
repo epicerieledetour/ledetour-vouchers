@@ -298,6 +298,7 @@ def build_http_response(conn: Connection, action: models.Action) -> models.HttpR
 
     # Voucher
 
+    # TODO: extract read_public_voucher
     voucher = None
     if action.voucherid:
         rows = conn.execute(
