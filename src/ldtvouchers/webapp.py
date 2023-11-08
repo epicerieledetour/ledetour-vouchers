@@ -1,10 +1,11 @@
 # TODO: rename module to httpapi
 
 import contextlib
+import datetime
 from sqlite3 import Connection
 
 import jinja2
-from fastapi import Depends, FastAPI, Response, status
+from fastapi import Depends, FastAPI, Request, Response, status
 from fastapi.responses import HTMLResponse
 
 from . import db, models
@@ -77,7 +78,10 @@ _RESPONSES = {
         "http_return_code": status.HTTP_401_UNAUTHORIZED,
     },
     # "error_voucher_user_needs_voucher_token"
-    # "error_voucher_invalid"
+    "error_voucher_invalid": {
+        "http_return_code": status.HTTP_400_BAD_REQUEST,
+        "status": "Invalid voucher",
+    },
     # "error_voucher_expired"
     # "ok_voucher_cashedin"
     # "error_voucher_cashedin_by_another_user"
@@ -98,36 +102,80 @@ _RESPONSES = {
     # "error_voucher_cannot_undo_not_cashedin"
 }
 
+
+def _url_for_user(request: Request, response: HTMLResponse) -> str:
+    return request.url_for("user", usertoken=response.user.token)
+
+
+def _noop(*_, **__) -> None:
+    return None
+
+
 _DOMAINS = {
     None: {  # used for the start page
         "prompt": "Scan an user code",
+        "scan": True,
+        "timeout": None,
+        "timeout_nexturl_builder": _noop,
     },
-    "user": {"prompt": "Scan a voucher"},
-    "voucher": {"prompt": ""},
+    "user": {
+        "prompt": "Scan a voucher",
+        "scan": True,
+        "timeout": None,
+        "timeout_nexturl_builder": _noop,
+    },
+    "voucher": {
+        "prompt": "",
+        "scan": False,
+        "timeout": datetime.timedelta(seconds=10),
+        "timeout_nexturl_builder": _url_for_user,
+    },
 }
 
 
-@app.get("/{requestid}/{url_token}")
-def scan(
+@app.get("/{requestid}/{usertoken}/{vouchertoken}")
+def voucher(
+    request: Request,
     response: Response,
     requestid: str,
-    url_token: str,
+    usertoken: str,
+    vouchertoken: str,
     conn: Connection = Depends(get_db),
 ):
     action = db.add_action(
         conn,
         models.ActionBase(
             origin=_ACTION_ORIGIN_HTTPAPI,
-            req_usertoken=url_token,
-            req_vouchertoken=None,
+            req_usertoken=usertoken,
+            req_vouchertoken=vouchertoken,
             requestid=requestid,
         ),
     )
 
-    return _response(db.build_http_response(conn, action))
+    return _response(request, db.build_http_response(conn, action))
 
 
-def _response(resp: models.HttpResponse | None) -> HTMLResponse:
+@app.get("/scan/{usertoken}")
+def user(
+    request: Request,
+    response: Response,
+    usertoken: str,
+    conn: Connection = Depends(get_db),
+):
+    action = db.add_action(
+        conn,
+        models.ActionBase(
+            origin=_ACTION_ORIGIN_HTTPAPI,
+            req_usertoken=usertoken,
+            req_vouchertoken=None,
+            requestid="scan",
+        ),
+    )
+
+    return _response(request, db.build_http_response(conn, action))
+
+
+def _response(request: Request, resp: models.HttpResponse | None) -> HTMLResponse:
     responseid = None
     level = None
     domain = None
@@ -137,10 +185,18 @@ def _response(resp: models.HttpResponse | None) -> HTMLResponse:
         domain = resp.status.domain
 
     template = _ENV.get_template("index.html.j2")
+    import pprint
+
+    pprint.pprint(resp)
+    pprint.pprint(_DOMAINS[domain])
+
     content = template.render(
         level=level,
         status=_RESPONSES[responseid].get("status", ""),
         prompt=_DOMAINS[domain]["prompt"],
+        scan=_DOMAINS[domain]["scan"],
+        timeout=_DOMAINS[domain]["timeout"],
+        timeout_nexturl=_DOMAINS[domain]["timeout_nexturl_builder"](request, resp),
     )
 
     status_code = _RESPONSES[responseid]["http_return_code"]
@@ -149,8 +205,8 @@ def _response(resp: models.HttpResponse | None) -> HTMLResponse:
 
 
 @app.get("/")
-def index():
-    return _response(None)
+def index(request: Request):
+    return _response(request, None)
 
 
 # http://localhost:8080/                      # start

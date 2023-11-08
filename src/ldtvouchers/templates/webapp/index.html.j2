@@ -31,7 +31,7 @@
     {# <button id="history">History</button> #}
   </header>
   <section id="scan">
-    <video id="scan-preview">Scan preview</video>
+    <video id="scan-preview">Scan preview: {{ scan }}</video>
   </section>
   {# <section id="voucher">
     <p id="voucher-title"></p>
@@ -45,6 +45,12 @@
   <section id="prompt-area">
     <section id="prompt">Prompt: {{ prompt }}</section>
   </section>
+
+  {% if timeout %}
+  <p>Timeout: {{ timeout.total_seconds() }}</p>
+  <p>Next url after timeout: {{ timeout_nexturl }}</p>
+  {% else %}<p>No timeout</p>
+  {% endif %}
   {# <section id="detail"></section> #}
   {# <button id="action"></button> #}
 
