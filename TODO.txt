@@ -139,10 +139,8 @@
 
 # TODO NEXT
 
-- HttpApi
-  - serve http
-  - serve unix socket
-  - scan / undo
+- FrontEnd
+  - Welcome page
 - systemd: send reports
 - gens: publish
 

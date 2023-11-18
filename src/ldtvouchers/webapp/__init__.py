@@ -8,7 +8,7 @@ import jinja2
 from fastapi import Depends, FastAPI, Request, Response, status
 from fastapi.responses import HTMLResponse
 
-from . import db, models
+from .. import db, models
 
 app = FastAPI()
 
@@ -65,7 +65,7 @@ get_db = DBGetter()
 
 
 _ENV = jinja2.Environment(
-    loader=jinja2.PackageLoader("ldtvouchers", "templates/webapp"),
+    loader=jinja2.PackageLoader("ldtvouchers.webapp"),
     autoescape=jinja2.select_autoescape,
 )
 
