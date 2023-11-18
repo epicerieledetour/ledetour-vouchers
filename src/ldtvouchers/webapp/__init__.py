@@ -2,11 +2,13 @@
 
 import contextlib
 import datetime
+from pathlib import Path
 from sqlite3 import Connection
 
 import jinja2
 from fastapi import Depends, FastAPI, Request, Response, status
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 
 from .. import db, models
 
@@ -212,3 +214,5 @@ def index(request: Request):
 # http://localhost:8080/                      # start
 # http://localhost:8080/scan/tokusr_invalid   # invalid user
 # http://localhost:8080/scan/tokusr_ijpxzkbf  # valid user
+
+app.mount("/", StaticFiles(directory=Path(__file__).parent / "static"), name="static")
