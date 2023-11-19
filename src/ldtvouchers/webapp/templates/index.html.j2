@@ -37,9 +37,13 @@
     {% endif %}
     </p>
 
-    {% if voucher and voucher.history %}
-      <button id="history">History</button>
-    {% endif %}
+    
+      <button
+        id="history"
+        {% if not (voucher and voucher.history) %}class="invisible"{% endif %}
+        >History
+      </button>
+    
   </header>
   {% if voucher %}
     {#
@@ -81,17 +85,17 @@
 
   <progress id="progress" style="visibility:hidden"></progress>
 
-  {% if timeout_milliseconds and timeout_url %}
+  {% if timeout %}
   <script type="text/javascript">
   const t0 = window.performance.now()
 
   setTimeout(
-    () => window.location.href = "{{ timeout_url }}",
+    () => window.location.href = "{{ timeout.url }}",
     {{ timeout_milliseconds }}
   )
 
   const el = document.getElementById("progress")
-  el.max = {{ timeout_milliseconds }}
+  el.max = {{ timeout.milliseconds }}
   el.value = 0
   el.style.visibility = "visible"
 

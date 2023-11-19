@@ -80,6 +80,11 @@ def _noop(*_, **__) -> None:
     return None
 
 
+class Timeout(BaseModel):
+    url: str
+    milliseconds: int
+
+
 class ResponseData(BaseModel):
     http_return_code: int = Field(
         description="The HTTP code returned when reaching this page",
@@ -106,14 +111,42 @@ class ResponseData(BaseModel):
     )
 
 
+def _url(func):
+    def wrap(*args, **kwargs):
+        ret = func(*args, **kwargs)
+        return str(ret)
+
+    return wrap
+
+
+def _js_template(func):
+    def wrap(*args, **kwargs):
+        ret = func(*args, **kwargs)
+        return f"`{ret}`"
+
+    return wrap
+
+
+@_js_template
+@_url
 def _url_template_for_scanning_user(request: Request, response: HTMLResponse) -> str:
-    url = request.url_for("user", usertoken="{scanResult}")
-    return f"`{url}`"
+    return request.url_for("user", usertoken="{scanResult}")
 
 
+@_js_template
+@_url
+def _url_template_for_scanning_voucher(request: Request, response: HTMLResponse) -> str:
+    return request.url_for(
+        "voucher",
+        requestid="scan",
+        usertoken=response.user.token,
+        vouchertoken="{scanResult}",
+    )
+
+
+@_url
 def _url_for_scanning_user(request: Request, response: HTMLResponse) -> str:
-    url = request.url_for("index")
-    return url
+    return request.url_for("index")
 
 
 _RESPONSES = {
@@ -145,10 +178,11 @@ _RESPONSES = {
         timeout_milliseconds=5000,
         timeout_url_builder=_url_for_scanning_user,
     ),
-    "ok_user_authentified": {
-        "http_return_code": status.HTTP_200_OK,
-        "status": "",
-    },
+    "ok_user_authentified": ResponseData(
+        http_return_code=status.HTTP_200_OK,
+        prompt="Scan a voucher",
+        scan_url_builder=_url_template_for_scanning_voucher,
+    ),
     # "ok_voucher_info"
     # "error_voucher_cannot_undo_cashedin"
     # "error_bad_request"
@@ -238,6 +272,13 @@ def _response(request: Request, resp: models.HttpResponse | None) -> HTMLRespons
 
     data = _RESPONSES[responseid]
 
+    timeout = None
+    if data.timeout_milliseconds and data.timeout_url_builder:
+        timeout = Timeout(
+            url=data.timeout_url_builder(request, resp),
+            milliseconds=data.timeout_milliseconds,
+        )
+
     template = _ENV.get_template("index.html.j2")
 
     content = template.render(
@@ -246,7 +287,7 @@ def _response(request: Request, resp: models.HttpResponse | None) -> HTMLRespons
         user=user,
         voucher=voucher,
         scan_url=data.scan_url_builder(request, resp),
-        timeout_url=data.timeout_url_builder(request, resp),
+        timeout=timeout,
         **data.model_dump(),
     )
 
