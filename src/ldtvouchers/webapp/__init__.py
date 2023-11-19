@@ -16,6 +16,8 @@ app = FastAPI()
 
 _ACTION_ORIGIN_HTTPAPI = "httpapi"
 
+_TITLE = "Bons solidaires"
+
 # Dependencies
 
 
@@ -179,12 +181,16 @@ def user(
 
 def _response(request: Request, resp: models.HttpResponse | None) -> HTMLResponse:
     responseid = None
-    level = None
+    level = "info"
     domain = None
+    user = None
+    voucher = None
     if resp:
         responseid = resp.status.responseid
         level = resp.status.level
         domain = resp.status.domain
+        user = resp.user
+        voucher = resp.voucher
 
     template = _ENV.get_template("index.html.j2")
     import pprint
@@ -199,6 +205,9 @@ def _response(request: Request, resp: models.HttpResponse | None) -> HTMLRespons
         scan=_DOMAINS[domain]["scan"],
         timeout=_DOMAINS[domain]["timeout"],
         timeout_nexturl=_DOMAINS[domain]["timeout_nexturl_builder"](request, resp),
+        title=_TITLE,
+        user=user,
+        voucher=voucher,
     )
 
     status_code = _RESPONSES[responseid]["http_return_code"]

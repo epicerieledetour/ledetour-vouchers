@@ -22,6 +22,7 @@ body {
     display: flex;
     flex-direction: column;
     row-gap: .5rem;
+    justify-content: center;
 }
 
 header {
@@ -38,6 +39,8 @@ header {
     width: 100%;
     height: 33vh;
     overflow: scroll;
+
+    background-color: grey;
 }
 
 #scan-preview {
@@ -94,23 +97,26 @@ header,
     font-size: 2.5rem;
 }
 
-#message-area {
+#prompt-area {
+    text-align: center;
+}
+
+#status-area {
     flex: 1;
     display: flex;
     /* justify-self: stretch; */
     /* text-align: center; */
     flex-direction: column;
-    justify-content: center;
     align-items: stretch;
     color: var(--orange);
 }
 
-#message {
+#status {
     font-size: 2.5rem;
     text-align: center;
 }
 
-#message .severity-0 {
+#status  {
     font-size: unset;
 }
 
@@ -126,18 +132,18 @@ header,
     margin-bottom: .5rem;
 }
 
-.severity-0 {
+.status-info {
     color: var(--black);
 }
 
-.severity-1 {
+.status-ok {
     color: var(--green);
 }
 
-.severity-2 {
+.status-warning {
     color: var(--orange);
 }
 
-.severity-3 {
+.status-error {
     color: var(--red);
 }

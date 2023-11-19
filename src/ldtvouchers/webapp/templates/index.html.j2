@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Bons Solidaires</title>
+  <title>{{ title }}</title>
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -23,33 +23,48 @@
   <meta name="theme-color" content="#fafafa">
 </head>
 
-<body>
-  <p>level: {{ level }}</p>
+<body class="level-{{ level }}">
   <header id="header">
-    {# <button id="exit">Exit</button> #}
-    {# <p id="user"></p> #}
-    {# <button id="history">History</button> #}
+    {% if user %}
+      <button id="exit">Exit</button>
+    {% endif %}
+
+    <p id="user">
+    {% if user %}
+      {{ user.label }}
+    {% else %}
+      {{ title }}
+    {% endif %}
+    </p>
+
+    {% if voucher and voucher.history %}
+      <button id="history">History</button>
+    {% endif %}
   </header>
-  <section id="scan">
-    <video id="scan-preview">Scan preview: {{ scan }}</video>
-  </section>
-  {# <section id="voucher">
-    <p id="voucher-title"></p>
-    <p id="voucher-id"></p>
-    <p id="voucher-expire"></p>
-    <p id="voucher-value"></p>
-  </section> #}
-  <section id="message-area">
-    <section id="message">Status: {{ status }}</section>
-  </section>
+  {% if voucher %}
+    {#
+    <section id="voucher">
+      <p id="voucher-title"></p>
+      <p id="voucher-id"></p>
+      <p id="voucher-expire"></p>
+      <p id="voucher-value"></p>
+    </section>
+    #}
+  {% else %}
+    <section id="scan">
+      <video id="scan-preview">Scan preview: {{ scan }}</video>
+    </section>
+  {% endif %}
   <section id="prompt-area">
-    <section id="prompt">Prompt: {{ prompt }}</section>
+    <section id="prompt">{{ prompt }}</section>
+  </section>
+  <section id="status-area">
+    <section id="status">{{ status }}</section>
   </section>
 
   {% if timeout %}
   <p>Timeout: {{ timeout.total_seconds() }}</p>
   <p>Next url after timeout: {{ timeout_nexturl }}</p>
-  {% else %}<p>No timeout</p>
   {% endif %}
   {# <section id="detail"></section> #}
   {# <button id="action"></button> #}
