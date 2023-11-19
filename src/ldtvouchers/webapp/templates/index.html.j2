@@ -63,10 +63,6 @@
     <section id="status">{{ status }}</section>
   </section>
 
-  {% if timeout %}
-  <p>Timeout: {{ timeout.total_seconds() }}</p>
-  <p>Next url after timeout: {{ timeout_nexturl }}</p>
-  {% endif %}
   {# <section id="detail"></section> #}
   {# <button id="action"></button> #}
 
@@ -80,7 +76,37 @@
   {# <script type="text/javascript" src="js/main.js"></script> #}
   <script type="text/javascript">
     // Scan URL: {{ scan_url }}
+    // Timeout URL: {{ timeout_url }}
   </script>
+
+  <progress id="progress" style="visibility:hidden"></progress>
+
+  {% if timeout_milliseconds and timeout_url %}
+  <script type="text/javascript">
+  const t0 = window.performance.now()
+
+  setTimeout(
+    () => window.location.href = "{{ timeout_url }}",
+    {{ timeout_milliseconds }}
+  )
+
+  const el = document.getElementById("progress")
+  el.max = {{ timeout_milliseconds }}
+  el.value = 0
+  el.style.visibility = "visible"
+
+  function updateProgress() {
+    const t = window.performance.now()
+    el.value = t - t0
+    window.requestAnimationFrame(updateProgress)
+  }
+
+  updateProgress()
+
+  </script>
+
+  {% endif %}
+
 </body>
 
 </html>

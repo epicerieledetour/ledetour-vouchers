@@ -96,8 +96,8 @@ class ResponseData(BaseModel):
         default=_noop,
         description="A callable to build the JS function that make the URL to follow after a scan",
     )
-    timeout: datetime.timedelta = Field(
-        default=datetime.timedelta(),
+    timeout_milliseconds: int = Field(
+        default=0,
         description="Timeout time",
     )
     timeout_url_builder: Callable[[Request, HTMLResponse], str] = Field(
@@ -106,9 +106,14 @@ class ResponseData(BaseModel):
     )
 
 
-def _url_for_scanning_user(request: Request, response: HTMLResponse) -> str:
+def _url_template_for_scanning_user(request: Request, response: HTMLResponse) -> str:
     url = request.url_for("user", usertoken="{scanResult}")
     return f"`{url}`"
+
+
+def _url_for_scanning_user(request: Request, response: HTMLResponse) -> str:
+    url = request.url_for("index")
+    return url
 
 
 _RESPONSES = {
@@ -116,11 +121,14 @@ _RESPONSES = {
     None: ResponseData(
         http_return_code=status.HTTP_200_OK,
         prompt="Scan an user code",
-        scan_url_builder=_url_for_scanning_user,
+        scan_url_builder=_url_template_for_scanning_user,
     ),
-    "error_voucher_unauthentified": {
-        "http_return_code": status.HTTP_401_UNAUTHORIZED,
-    },
+    # "error_voucher_unauthentified": ResponseData(
+    #     http_return_code=status.HTTP_401_UNAUTHORIZED,
+    #     status="Invalid user",
+    #     timeout=datetime.timedelta(seconds=5),
+    #     timeout_url_builder=_url_for_scanning_user,
+    # ),
     # "error_voucher_user_needs_voucher_token"
     "error_voucher_invalid": {
         "http_return_code": status.HTTP_400_BAD_REQUEST,
@@ -131,10 +139,12 @@ _RESPONSES = {
     # "error_voucher_cashedin_by_another_user"
     # "warning_voucher_cannot_undo_cashedin"
     # "warning_voucher_can_undo_cashedin"
-    "error_user_invalid_token": {
-        "http_return_code": status.HTTP_401_UNAUTHORIZED,
-        "status": "Invalid user",
-    },
+    "error_user_invalid_token": ResponseData(
+        http_return_code=status.HTTP_401_UNAUTHORIZED,
+        status="Invalid user",
+        timeout_milliseconds=5000,
+        timeout_url_builder=_url_for_scanning_user,
+    ),
     "ok_user_authentified": {
         "http_return_code": status.HTTP_200_OK,
         "status": "",
@@ -236,6 +246,7 @@ def _response(request: Request, resp: models.HttpResponse | None) -> HTMLRespons
         user=user,
         voucher=voucher,
         scan_url=data.scan_url_builder(request, resp),
+        timeout_url=data.timeout_url_builder(request, resp),
         **data.model_dump(),
     )
 
