@@ -13,12 +13,12 @@
   <meta property="og:image" content="">
 
   <link rel="manifest" href="site.webmanifest">
-  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="apple-touch-icon" href="/icon.png">
   <!-- Place favicon.ico in the root directory -->
 
-  <link rel="stylesheet" href="css/normalize.css">
-  <link rel="stylesheet" href="css/main.css">
-  <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="/css/normalize.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/app.css">
 
   <meta name="theme-color" content="#fafafa">
 </head>
@@ -50,7 +50,8 @@
       <p id="voucher-value"></p>
     </section>
     #}
-  {% else %}
+  {% endif %}
+  {% if scan_url %}
     <section id="scan">
       <video id="scan-preview">Scan preview: {{ scan }}</video>
     </section>
@@ -77,6 +78,9 @@
 
   {# <script type="text/javascript" src="https://unpkg.com/@zxing/browser@latest"></script> #}
   {# <script type="text/javascript" src="js/main.js"></script> #}
+  <script type="text/javascript">
+    // Scan URL: {{ scan_url }}
+  </script>
 </body>
 
 </html>

@@ -124,7 +124,7 @@ class PublicEmission(EmissionBase):
 
 class HttpResponseStatus(BaseModel):
     responseid: str
-    domain: str
+    domain: str  # Is this still needed ?
     level: str
 
 

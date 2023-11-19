@@ -4,11 +4,13 @@ import contextlib
 import datetime
 from pathlib import Path
 from sqlite3 import Connection
+from typing import Callable
 
 import jinja2
 from fastapi import Depends, FastAPI, Request, Response, status
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel, Field  # type: ignore
 
 from .. import db, models
 
@@ -74,10 +76,48 @@ _ENV = jinja2.Environment(
 )
 
 
+def _noop(*_, **__) -> None:
+    return None
+
+
+class ResponseData(BaseModel):
+    http_return_code: int = Field(
+        description="The HTTP code returned when reaching this page",
+    )
+    prompt: str = Field(
+        default="",
+        description="The promp message, usually a request to scan an user code or voucher",
+    )
+    status: str = Field(
+        default="",
+        description="The status message, usually a success / warning / error string",
+    )
+    scan_url_builder: Callable[[Request, HTMLResponse], str] = Field(
+        default=_noop,
+        description="A callable to build the JS function that make the URL to follow after a scan",
+    )
+    timeout: datetime.timedelta = Field(
+        default=datetime.timedelta(),
+        description="Timeout time",
+    )
+    timeout_url_builder: Callable[[Request, HTMLResponse], str] = Field(
+        default=_noop,
+        description="A callable to build the URL to follow after the timeout",
+    )
+
+
+def _url_for_scanning_user(request: Request, response: HTMLResponse) -> str:
+    url = request.url_for("user", usertoken="{scanResult}")
+    return f"`{url}`"
+
+
 _RESPONSES = {
-    None: {  # used for the start page
-        "http_return_code": status.HTTP_200_OK,
-    },
+    # used for the start page
+    None: ResponseData(
+        http_return_code=status.HTTP_200_OK,
+        prompt="Scan an user code",
+        scan_url_builder=_url_for_scanning_user,
+    ),
     "error_voucher_unauthentified": {
         "http_return_code": status.HTTP_401_UNAUTHORIZED,
     },
@@ -109,10 +149,6 @@ _RESPONSES = {
 
 def _url_for_user(request: Request, response: HTMLResponse) -> str:
     return request.url_for("user", usertoken=response.user.token)
-
-
-def _noop(*_, **__) -> None:
-    return None
 
 
 _DOMAINS = {
@@ -182,37 +218,28 @@ def user(
 def _response(request: Request, resp: models.HttpResponse | None) -> HTMLResponse:
     responseid = None
     level = "info"
-    domain = None
     user = None
     voucher = None
     if resp:
         responseid = resp.status.responseid
         level = resp.status.level
-        domain = resp.status.domain
         user = resp.user
         voucher = resp.voucher
 
-    template = _ENV.get_template("index.html.j2")
-    import pprint
+    data = _RESPONSES[responseid]
 
-    pprint.pprint(resp)
-    pprint.pprint(_DOMAINS[domain])
+    template = _ENV.get_template("index.html.j2")
 
     content = template.render(
-        level=level,
-        status=_RESPONSES[responseid].get("status", ""),
-        prompt=_DOMAINS[domain]["prompt"],
-        scan=_DOMAINS[domain]["scan"],
-        timeout=_DOMAINS[domain]["timeout"],
-        timeout_nexturl=_DOMAINS[domain]["timeout_nexturl_builder"](request, resp),
         title=_TITLE,
+        level=level,
         user=user,
         voucher=voucher,
+        scan_url=data.scan_url_builder(request, resp),
+        **data.model_dump(),
     )
 
-    status_code = _RESPONSES[responseid]["http_return_code"]
-
-    return HTMLResponse(content=content, status_code=status_code)
+    return HTMLResponse(content=content, status_code=data.http_return_code)
 
 
 @app.get("/")

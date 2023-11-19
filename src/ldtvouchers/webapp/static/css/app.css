@@ -1,7 +1,7 @@
 :root {
     --black: #111111;
     --white: #FFFFFF;
-    --red: #FF4136;
+    --red: lightcoral;
     --orange: #FF851B;
     --green: #2ECC40;
 }
@@ -23,6 +23,10 @@ body {
     flex-direction: column;
     row-gap: .5rem;
     justify-content: center;
+}
+
+body.level-error {
+    background-color: var(--red);
 }
 
 header {
@@ -104,11 +108,9 @@ header,
 #status-area {
     flex: 1;
     display: flex;
-    /* justify-self: stretch; */
-    /* text-align: center; */
+    justify-content: center;
     flex-direction: column;
     align-items: stretch;
-    color: var(--orange);
 }
 
 #status {
@@ -116,16 +118,12 @@ header,
     text-align: center;
 }
 
-#status  {
-    font-size: unset;
-}
-
 #action {
     border: none;
     border-radius: .5rem;
     height: 10vh;
     font-size: 1.5rem;
-    background-color: var(--orange);
+    /* background-color: var(--orange); */
     color: var(--white);
     margin-left: .5rem;
     margin-right: .5rem;
