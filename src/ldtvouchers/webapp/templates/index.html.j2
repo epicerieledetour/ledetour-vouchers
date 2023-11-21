@@ -52,21 +52,24 @@
     </button>
     
   </header>
-  {% if voucher %}
-    {#
-    <section id="voucher">
-      <p id="voucher-title"></p>
-      <p id="voucher-id"></p>
-      <p id="voucher-expire"></p>
-      <p id="voucher-value"></p>
-    </section>
-    #}
-  {% endif %}
+
   {% if scan_url %}
     <section id="scan">
       <video id="scan-preview">Scan preview: {{ scan }}</video>
     </section>
   {% endif %}
+
+  {% if voucher %}
+  <section id="voucher">
+    <p id="voucher-title">{{ voucher.label }}</p>
+    <p id="voucher-id">{{ voucher.token }}</p>
+    <p id="voucher-expire">TODO Expiration Date</p>
+    <p id="voucher-value">{{ voucher.value_CAN }}$</p>
+    <p id="voucher-cashedin-by">{{ voucher.cashedin_by_label }}</p>
+    <p id="voucher-cashedin-utc">{{ voucher.cashedin_utc }}</p>
+  </section>
+  {% endif %}
+
   <section id="prompt-area">
     <section id="prompt">{{ prompt }}</section>
   </section>

@@ -182,12 +182,12 @@ _RESPONSES = {
         prompt="Scan an user code",
         scan_url_builder=_url_template_for_scanning_user,
     ),
-    # "error_voucher_unauthentified": ResponseData(
-    #     http_return_code=status.HTTP_401_UNAUTHORIZED,
-    #     status="Invalid user",
-    #     timeout=datetime.timedelta(seconds=5),
-    #     timeout_url_builder=_url_for_scanning_user,
-    # ),
+    "error_voucher_unauthentified": ResponseData(
+        http_return_code=status.HTTP_401_UNAUTHORIZED,
+        status="Invalid user",
+        timeout=datetime.timedelta(seconds=5),
+        timeout_url_builder=_url_for_scanning_user,
+    ),
     # "error_voucher_user_needs_voucher_token"
     "error_voucher_invalid": ResponseData(
         http_return_code=status.HTTP_400_BAD_REQUEST,
@@ -209,7 +209,10 @@ _RESPONSES = {
         prompt="Scan a voucher",
         scan_url_builder=_url_template_for_scanning_voucher,
     ),
-    # "ok_voucher_info"
+    "ok_voucher_info": ResponseData(
+        http_return_code=status.HTTP_200_OK,
+        # timeout_url_builder=_url_for_scanning_voucher,
+    ),
     # "error_voucher_cannot_undo_cashedin"
     # "error_bad_request"
     # "ok_voucher_undo"
