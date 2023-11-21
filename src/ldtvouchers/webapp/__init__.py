@@ -123,6 +123,23 @@ def _url_for_scanning_voucher(request: Request, response: HTMLResponse) -> str:
     return request.url_for("user", usertoken=response.user.token)
 
 
+@_url
+def _url_for_exit(request: Request, response: HTMLResponse) -> str:
+    if not response:
+        return ""
+
+    if response.status.level != "ok":
+        return ""
+
+    if response.voucher:
+        return _url_for_scanning_voucher(request, response)
+
+    if response.user:
+        return _url_for_scanning_user(request, response)
+
+    return ""
+
+
 class Timeout(BaseModel):
     url: str
     milliseconds: int
@@ -141,7 +158,7 @@ class ResponseData(BaseModel):
         description="The status message, usually a success / warning / error string",
     )
     exit_url_builder: Callable[[Request, HTMLResponse], str] = Field(
-        default=_url_for_scanning_user,
+        default=_url_for_exit,
         description="The status message, usually a success / warning / error string",
     )
     scan_url_builder: Callable[[Request, HTMLResponse], str] = Field(
@@ -163,7 +180,6 @@ _RESPONSES = {
     None: ResponseData(
         http_return_code=status.HTTP_200_OK,
         prompt="Scan an user code",
-        exit_url_builder=_noop,
         scan_url_builder=_url_template_for_scanning_user,
     ),
     # "error_voucher_unauthentified": ResponseData(

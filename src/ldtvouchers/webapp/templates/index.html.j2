@@ -25,14 +25,16 @@
 
 <body class="level-{{ level }}">
   <header id="header">
+    <button
+      id="exit"
     {% if exit_url %}
-      <button
-        id="exit"
-        onclick="window.location.href='{{ exit_url }}'"
-      >
-        Exit
-      </button>
+      onclick="window.location.href='{{ exit_url }}'"
+    {% else %}
+      class="invisible"
     {% endif %}
+    >
+      Exit
+    </button>
 
     <p id="user">
     {% if user %}
