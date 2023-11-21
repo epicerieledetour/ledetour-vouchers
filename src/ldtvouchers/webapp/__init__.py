@@ -118,6 +118,11 @@ def _url_for_scanning_user(request: Request, response: HTMLResponse) -> str:
     return request.url_for("index")
 
 
+@_url
+def _url_for_scanning_voucher(request: Request, response: HTMLResponse) -> str:
+    return request.url_for("user", usertoken=response.user.token)
+
+
 class Timeout(BaseModel):
     url: str
     milliseconds: int
@@ -144,11 +149,11 @@ class ResponseData(BaseModel):
         description="A callable to build the JS function that make the URL to follow after a scan",
     )
     timeout_milliseconds: int = Field(
-        default=0,
+        default=5000,
         description="Timeout time",
     )
-    timeout_url_builder: Callable[[Request, HTMLResponse], str] = Field(
-        default=_noop,
+    timeout_url_builder: Callable[[Request, HTMLResponse], str] | None = Field(
+        default=None,
         description="A callable to build the URL to follow after the timeout",
     )
 
@@ -168,10 +173,11 @@ _RESPONSES = {
     #     timeout_url_builder=_url_for_scanning_user,
     # ),
     # "error_voucher_user_needs_voucher_token"
-    "error_voucher_invalid": {
-        "http_return_code": status.HTTP_400_BAD_REQUEST,
-        "status": "Invalid voucher",
-    },
+    "error_voucher_invalid": ResponseData(
+        http_return_code=status.HTTP_400_BAD_REQUEST,
+        status="Invalid voucher",
+        timeout_url_builder=_url_for_scanning_voucher,
+    ),
     # "error_voucher_expired"
     # "ok_voucher_cashedin"
     # "error_voucher_cashedin_by_another_user"
@@ -180,7 +186,6 @@ _RESPONSES = {
     "error_user_invalid_token": ResponseData(
         http_return_code=status.HTTP_401_UNAUTHORIZED,
         status="Invalid user",
-        timeout_milliseconds=5000,
         timeout_url_builder=_url_for_scanning_user,
     ),
     "ok_user_authentified": ResponseData(
