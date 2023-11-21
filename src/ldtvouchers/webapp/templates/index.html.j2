@@ -25,8 +25,13 @@
 
 <body class="level-{{ level }}">
   <header id="header">
-    {% if user %}
-      <button id="exit">Exit</button>
+    {% if exit_url %}
+      <button
+        id="exit"
+        onclick="window.location.href='{{ exit_url }}'"
+      >
+        Exit
+      </button>
     {% endif %}
 
     <p id="user">
@@ -37,12 +42,12 @@
     {% endif %}
     </p>
 
-    
-      <button
-        id="history"
-        {% if not (voucher and voucher.history) %}class="invisible"{% endif %}
-        >History
-      </button>
+    <button
+      id="history"
+      {% if not (voucher and voucher.history) %}class="invisible"{% endif %}
+    >
+      History
+    </button>
     
   </header>
   {% if voucher %}

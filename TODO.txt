@@ -140,7 +140,7 @@
 # TODO NEXT
 
 - FrontEnd
-  - Welcome page
+  - Rest of codes
 - systemd: send reports
 - gens: publish
 

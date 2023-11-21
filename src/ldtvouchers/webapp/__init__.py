@@ -80,37 +80,6 @@ def _noop(*_, **__) -> None:
     return None
 
 
-class Timeout(BaseModel):
-    url: str
-    milliseconds: int
-
-
-class ResponseData(BaseModel):
-    http_return_code: int = Field(
-        description="The HTTP code returned when reaching this page",
-    )
-    prompt: str = Field(
-        default="",
-        description="The promp message, usually a request to scan an user code or voucher",
-    )
-    status: str = Field(
-        default="",
-        description="The status message, usually a success / warning / error string",
-    )
-    scan_url_builder: Callable[[Request, HTMLResponse], str] = Field(
-        default=_noop,
-        description="A callable to build the JS function that make the URL to follow after a scan",
-    )
-    timeout_milliseconds: int = Field(
-        default=0,
-        description="Timeout time",
-    )
-    timeout_url_builder: Callable[[Request, HTMLResponse], str] = Field(
-        default=_noop,
-        description="A callable to build the URL to follow after the timeout",
-    )
-
-
 def _url(func):
     def wrap(*args, **kwargs):
         ret = func(*args, **kwargs)
@@ -149,11 +118,47 @@ def _url_for_scanning_user(request: Request, response: HTMLResponse) -> str:
     return request.url_for("index")
 
 
+class Timeout(BaseModel):
+    url: str
+    milliseconds: int
+
+
+class ResponseData(BaseModel):
+    http_return_code: int = Field(
+        description="The HTTP code returned when reaching this page",
+    )
+    prompt: str = Field(
+        default="",
+        description="The promp message, usually a request to scan an user code or voucher",
+    )
+    status: str = Field(
+        default="",
+        description="The status message, usually a success / warning / error string",
+    )
+    exit_url_builder: Callable[[Request, HTMLResponse], str] = Field(
+        default=_url_for_scanning_user,
+        description="The status message, usually a success / warning / error string",
+    )
+    scan_url_builder: Callable[[Request, HTMLResponse], str] = Field(
+        default=_noop,
+        description="A callable to build the JS function that make the URL to follow after a scan",
+    )
+    timeout_milliseconds: int = Field(
+        default=0,
+        description="Timeout time",
+    )
+    timeout_url_builder: Callable[[Request, HTMLResponse], str] = Field(
+        default=_noop,
+        description="A callable to build the URL to follow after the timeout",
+    )
+
+
 _RESPONSES = {
     # used for the start page
     None: ResponseData(
         http_return_code=status.HTTP_200_OK,
         prompt="Scan an user code",
+        exit_url_builder=_noop,
         scan_url_builder=_url_template_for_scanning_user,
     ),
     # "error_voucher_unauthentified": ResponseData(
@@ -286,6 +291,7 @@ def _response(request: Request, resp: models.HttpResponse | None) -> HTMLRespons
         level=level,
         user=user,
         voucher=voucher,
+        exit_url=data.exit_url_builder(request, resp),
         scan_url=data.scan_url_builder(request, resp),
         timeout=timeout,
         **data.model_dump(),
