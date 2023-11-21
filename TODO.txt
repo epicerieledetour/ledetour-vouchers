@@ -140,7 +140,12 @@
 # TODO NEXT
 
 - FrontEnd
+  - Voucher Info
+    - Voucher expire
+    - Voucher Cashed_In by
+    - Voucher Cashed_In date in localtime
   - Rest of codes
+
 - systemd: send reports
 - gens: publish
 
