@@ -145,6 +145,7 @@
     - Voucher Cashed_In by
     - Voucher Cashed_In date in localtime
   - Rest of codes
+- CLI users read shows token
 
 - systemd: send reports
 - gens: publish

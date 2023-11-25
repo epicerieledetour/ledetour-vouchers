@@ -75,6 +75,7 @@ _ENV = jinja2.Environment(
     autoescape=jinja2.select_autoescape,
 )
 
+_ENV.filters["datetime_format"] = _datetime_format
 
 def _noop(*_, **__) -> None:
     return None
@@ -197,7 +198,11 @@ _RESPONSES = {
     # "error_voucher_expired"
     # "ok_voucher_cashedin"
     # "error_voucher_cashedin_by_another_user"
-    # "warning_voucher_cannot_undo_cashedin"
+    "warning_voucher_cannot_undo_cashedin": ResponseData(
+        http_return_code=status.HTTP_200_OK,
+        status="Undo cashedin expired",
+        timeout_url_builder=_url_for_scanning_voucher
+    ),
     # "warning_voucher_can_undo_cashedin"
     "error_user_invalid_token": ResponseData(
         http_return_code=status.HTTP_401_UNAUTHORIZED,
