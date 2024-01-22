@@ -15,8 +15,8 @@
 
 ```sh
 # Install
-python -m python3 venv
-venv/bin/activate
+python -m venv venv
+source venv/bin/activate
 python -m pip install -e . -r requirements.txt
 
 # Test
