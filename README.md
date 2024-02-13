@@ -46,3 +46,9 @@ openssl req -x509 -new -nodes -key ca.key -sha256 -days 1825 -out ssl/ca.pem
 sqlite3 db.sqlite3
 > .import --csv --skip 1 --schema temp data.csv table_name
 ```
+
+## Make a new emissions
+
+1. Copy a previous emission
+2. Empty the vouchers and history tables
+3. Generate vouchers following the `File a table` procedure above
