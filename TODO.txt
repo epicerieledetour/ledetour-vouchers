@@ -1,165 +1,38 @@
 # TODO
-=======
-- Create vouchers
-- Assign distribute vouchers
-- Activate / deactivate automated report
-- No cancel scan when no more vouchers to scan
-- ID != Access Token (for users and vouchers)
-- Template pour ingestion
-- No baked status in vouchers, just events
-- Users:
-  - ID
-  - Short Name (STW, LDT, ...)
-  - Label (Share The Warmth)
-  - Token
-- Emission
-  - ID
-  - Label
-  - Expiration date
-- Voucher
-  - ID
-  - emissionid
-  - index_in_emission
-  - token
-  - value
-- UserRights:
-  - userid
-  - rightid
-- Rights:
-  - id
-  - label
-- History ?
-- Ingest template:
-  - voucherid (no access token lke 0001-ABCDE)
-  - value
-  - user (choice of distributed user in form label-id like "Le Détour - ID 0001")
 
-- SCAN: POST /api/vouchers/[token] (does not create resources)
+## Next
 
-- Publish
+- TEST: fix current error
+- WEBUI: cover all remaining codes
+- SPIKE: what is the current status on reporting ?
+- DOC: brief doc to make users, emissions, vouchers, pdf, cli list scan / undo
+- DEPLOY: deploy on vouchers2 + reporting
 
-- NEXT RELEASE:
-  - Cleaner code
-  - Better reports
-  - Keep track of previous emissions
-  - Simpler to make a new emission
-  - Allow users to "scan" vouchers by ID
+- CLEAN: Replace app.utils.sql.get_connection(args.db) by args.conn
+- CLEAN: User.id default factory https://docs.pydantic.dev/latest/usage/fields/
+- CLEAN: empty user should add event for empty (None) fields
+- DOC: Architecture documentation
+- WEBUI: Enter voucher to scan by hand
+- WEBUI: Color background
+- ADMIN: Rate limiting https://sysopstechnix.com/protect-web-servers-from-ddos-attacks-using-fail2ban/
+- CICD: Tests on GitHub
+- TEST: unused imports
+- TEST: ordered imports
+- TEST: pylints (or equivalent)
+- CICD: run tox checks
+- TEST: static analysis (mypy)
+- TEST: code coverage
+- CLI: emissions export (as csv)
+- DOC: Reorder Q questions
+- CLEAN: Email gen to file descriptor, for consistency (will pass stdout)
+- WEBUI: Voucher Info, expire, Cashed_In by, Cashed_In date in localtime
+- CLI: users read shows token
+- BACK: systemd: send reports service / timer
+- BACK: publish pdf
+- CLEAN: All IDs can be public, what matters is a user Bearers table
+- CLEAN: Remove the Token table and replace it by a Bearers table, just for user
 
-+ Try Browser QRCode reader
-+ Stop scanning for 5 seconds after successful scan
-+ Hide scan feedback after a successful scan
-+ Restore scan feedback after successful scan
+## Backlog
 
-## Refactoring
-
-- [ ] Replace app.utils.sql.get_connection(args.db) by args.conn
-- [ ] User.id default factory https://docs.pydantic.dev/latest/usage/fields/
-- [ ] Create empty user should add event for empty (None) fields
-
-
-## Core
-
-- [ ] "Undelete an entity"
-
-## Doc
-
-- [ ] Architecture documentation
-
-## Cli
-
-- [X] Display users history
-
-## Front End
-
-- [ ] https://app#usertoken (to scan vouchers as an already identified user)
-- [ ] Enter voucher to scan by hand
-- [ ] Color background
-
-## HTTP API
-
-- [ ] Rate Limiting https://sysopstechnix.com/protect-web-servers-from-ddos-attacks-using-fail2ban/
-
-## QA
-
-- [ ] tox
-- [ ] tests
-- [ ] Tests on GitHub
-- [ ] Build and store wheels on GitHub ?
-- [ ] flag unused imports
-- [ ] pylints (or equivalent)
-- [ ] tox checks
-- [ ] static analysis (mypy)
-- [ ] code coverage
-- [ ] publish code coverage on GitHub
-
-## Devenv
-
-- [ ] Reorder import statements
-- [ ] Semantic releases
-
-## Emission
-
-- [X] cli emissions create --label ... --start-date ... --end-date ...
-- [X] cli emissions read ...
-- [X] cli emissions update --label ... --start-date ... --end-date ...
-- [X] cli emissions delete ...
-- [X] cli emissions import id path
-- [ ] cli emissions export (as csv)
-
-
-## Events
-
-- [X] add userid to event
-
-## Users
-
-- [X] create
-  - CLI + test
-    - ldtvouchers users create --label=lkasdf --can_cashin=
-- [X] update user
-- [X] delete
-
-## Vouchers
-
-- [ ] Add actions.origin (cli, httpapi, sql)
-- [ ] app --user userid voucher scan voucherid
-- [ ] app --user userid voucher undo voucherid
-- [ ] httpapi scan
-- [ ] httpapi undo
-
-# Misc
-
-- models: no read in db after create / update
-- users list --distributors
-  - delete voucher token when voucher is deleted
-  - delete user token when user is deleted
-- Move every generation
-- Reorder Q questions
-- Email gen to file descriptor, for consistency (will pass stdout)
-
-# TODO NEXT
-
-- FrontEnd
-  - Voucher Info
-    - Voucher expire
-    - Voucher Cashed_In by
-    - Voucher Cashed_In date in localtime
-  - Rest of codes
-- CLI users read shows token
-
-- systemd: send reports
-- gens: publish
-
-# Refactoring
-
-* All IDs can be public, what matters is a user Bearers table
-* Remove the Token table and replace it by a Bearers table, just for user
-* Make all IDs public
-* We will be leaking internal IDs, but what matters is that
-  * User Bearer
-    * are never public
-    * can be changed quickly
-    * are shared privately
-  * VoucherID
-    * cannot be guessed easily
-* WebAPI is JSON-API, because it is a documented standard
+- WEBUI to quickly scan / undo vouchers, all vouchers in one page, one voucher per line, button
+- Log every action to Slack, flag errors to ntfy

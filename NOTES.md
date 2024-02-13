@@ -27,3 +27,12 @@
 
 - Data driver from database, no business logic should be outside of the database. If and For
   and for data presentation only
+
+- All IDS can be public ?
+* We will be leaking internal IDs, but what matters is that
+  * User Bearer
+    * are never public
+    * can be changed quickly
+    * are shared privately
+  * VoucherID
+    * cannot be guessed easily
