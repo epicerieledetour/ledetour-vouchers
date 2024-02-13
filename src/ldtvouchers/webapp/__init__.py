@@ -77,6 +77,7 @@ _ENV = jinja2.Environment(
 
 _ENV.filters["datetime_format"] = _datetime_format
 
+
 def _noop(*_, **__) -> None:
     return None
 
@@ -201,7 +202,7 @@ _RESPONSES = {
     "warning_voucher_cannot_undo_cashedin": ResponseData(
         http_return_code=status.HTTP_200_OK,
         status="Undo cashedin expired",
-        timeout_url_builder=_url_for_scanning_voucher
+        timeout_url_builder=_url_for_scanning_voucher,
     ),
     # "warning_voucher_can_undo_cashedin"
     "error_user_invalid_token": ResponseData(
