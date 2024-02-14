@@ -38,42 +38,15 @@ class DBGetter:
 get_db = DBGetter()
 
 
-# @app.get("/{requestid}/{url_token}")
-# def scan(
-#     response: Response,
-#     requestid: str,
-#     url_token: str,
-#     authorization: Annotated[str, Header()] = "",
-#     conn: Connection = Depends(get_db),
-# ):
-#     m = re.match(r"Bearer (?P<token>.+)", authorization)
-#     bearer_token = m.groupdict()["token"] if m else None
-
-#     user_token, voucher_token = (
-#         (bearer_token, url_token) if bearer_token else (url_token, None)
-#     )
-
-#     action = db.add_action(
-#         conn,
-#         models.ActionBase(
-#             origin=_ACTION_ORIGIN_HTTPAPI,
-#             req_usertoken=user_token,
-#             req_vouchertoken=voucher_token,
-#             requestid=requestid,
-#         ),
-#     )
-
-#     status_code, http_response = db.build_http_response(conn, action)
-
-#     response.status_code = status_code
-
-#     return http_response
-
-
 _ENV = jinja2.Environment(
     loader=jinja2.PackageLoader("ldtvouchers.webapp"),
     autoescape=jinja2.select_autoescape,
 )
+
+
+def _datetime_format(date):
+    return "thedate"
+
 
 _ENV.filters["datetime_format"] = _datetime_format
 
@@ -261,6 +234,29 @@ def voucher(
     vouchertoken: str,
     conn: Connection = Depends(get_db),
 ):
+    return _request(request, response, requestid, usertoken, vouchertoken, conn)
+
+
+@app.get("/{requestid}/{usertoken}")
+def user(
+    request: Request,
+    response: Response,
+    requestid: str,
+    usertoken: str,
+    conn: Connection = Depends(get_db),
+):
+    vouchertoken = None
+    return _request(request, response, requestid, usertoken, vouchertoken, conn)
+
+
+def _request(
+    request: Request,
+    response: Response,
+    requestid: str,
+    usertoken: str,
+    vouchertoken: str,
+    conn: Connection,
+):
     action = db.add_action(
         conn,
         models.ActionBase(
@@ -268,26 +264,6 @@ def voucher(
             req_usertoken=usertoken,
             req_vouchertoken=vouchertoken,
             requestid=requestid,
-        ),
-    )
-
-    return _response(request, db.build_http_response(conn, action))
-
-
-@app.get("/scan/{usertoken}")
-def user(
-    request: Request,
-    response: Response,
-    usertoken: str,
-    conn: Connection = Depends(get_db),
-):
-    action = db.add_action(
-        conn,
-        models.ActionBase(
-            origin=_ACTION_ORIGIN_HTTPAPI,
-            req_usertoken=usertoken,
-            req_vouchertoken=None,
-            requestid="scan",
         ),
     )
 

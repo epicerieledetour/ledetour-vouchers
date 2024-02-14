@@ -8,6 +8,7 @@
 - DOC: brief doc to make users, emissions, vouchers, pdf, cli list scan / undo
 - DEPLOY: deploy on vouchers2 + reporting
 
+- CLEAN: 404 should return a invalid request page with timer
 - CLEAN: Replace app.utils.sql.get_connection(args.db) by args.conn
 - CLEAN: User.id default factory https://docs.pydantic.dev/latest/usage/fields/
 - CLEAN: empty user should add event for empty (None) fields
