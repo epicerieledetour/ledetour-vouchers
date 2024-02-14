@@ -2,7 +2,6 @@
 
 ## Next
 
-- TEST: fix current error
 - WEBUI: cover all remaining codes
 - SPIKE: what is the current status on reporting ?
 - DOC: brief doc to make users, emissions, vouchers, pdf, cli list scan / undo

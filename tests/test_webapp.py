@@ -62,7 +62,7 @@ from ldtvouchers import db, models, webapp
 # - yes
 
 
-class WebAPITestCase(testutils.TestCase):
+class WebAppTestCase(testutils.TestCase):
     def setUp(self):
         super().setUp()
 
