@@ -3,6 +3,7 @@
 ## Next
 
 - WEBUI: cover all remaining codes
+- WEBUI: add scan logic
 - SPIKE: what is the current status on reporting ?
 - DOC: brief doc to make users, emissions, vouchers, pdf, cli list scan / undo
 - DEPLOY: deploy on vouchers2 + reporting

@@ -163,6 +163,11 @@ class WebAppTestCase(testutils.TestCase):
         self.assertEqual(resp.status_code, HTTPStatus.NOT_FOUND)
         self.assertDictEqual(resp.json(), {"detail": "Not Found"})
 
+    def test_start_page(self):
+        resp = self.get("/")
+
+        self.assertEqual(resp.status_code, HTTPStatus.OK)
+
     # 1
     def test_error_voucher_unauthentified(self):
         pass

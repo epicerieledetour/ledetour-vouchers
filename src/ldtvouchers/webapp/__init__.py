@@ -74,7 +74,7 @@ def _js_template(func):
 @_js_template
 @_url
 def _url_template_for_scanning_user(request: Request, response: HTMLResponse) -> str:
-    return request.url_for("user", usertoken="{scanResult}")
+    return request.url_for("user", requestid="scan", usertoken="{scanResult}")
 
 
 @_js_template
@@ -225,7 +225,7 @@ _DOMAINS = {
 }
 
 
-@app.get("/{requestid}/{usertoken}/{vouchertoken}")
+@app.get("/u/{requestid}/{usertoken}/{vouchertoken}")
 def voucher(
     request: Request,
     response: Response,
@@ -237,7 +237,7 @@ def voucher(
     return _request(request, response, requestid, usertoken, vouchertoken, conn)
 
 
-@app.get("/{requestid}/{usertoken}")
+@app.get("/u/{requestid}/{usertoken}")
 def user(
     request: Request,
     response: Response,
