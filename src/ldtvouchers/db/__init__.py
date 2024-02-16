@@ -306,10 +306,10 @@ def build_http_response(conn: Connection, action: models.Action) -> models.HttpR
         ).fetchall()
         history = [models.HttpAction(**row) for row in rows]
 
-        row = conn.execute(
+        if row := conn.execute(
             get_sql("http_response_voucher"), {"actionid": action.actionid}
-        ).fetchone()
-        voucher = models.HttpVoucher(history=history, **row)
+        ).fetchone():
+            voucher = models.HttpVoucher(history=history, **row)
 
     # Return
 
@@ -323,7 +323,6 @@ def _read_response():
 # Debug
 
 import datetime
-import random
 
 
 def filldb(conn: Connection) -> None:

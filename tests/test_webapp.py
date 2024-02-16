@@ -170,7 +170,12 @@ class WebAppTestCase(testutils.TestCase):
 
     # 1
     def test_error_voucher_unauthentified(self):
-        pass
+        resp = self.scan(
+            "invalid_user_token",
+            self.voucher1.token,
+        )
+
+        self.assertEqual(resp.status_code, HTTPStatus.UNAUTHORIZED)
 
     # 2
     def test_error_voucher_user_needs_voucher_token(self):

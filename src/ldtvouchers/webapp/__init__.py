@@ -160,7 +160,6 @@ _RESPONSES = {
     "error_voucher_unauthentified": ResponseData(
         http_return_code=status.HTTP_401_UNAUTHORIZED,
         status="Invalid user",
-        timeout=datetime.timedelta(seconds=5),
         timeout_url_builder=_url_for_scanning_user,
     ),
     # "error_voucher_user_needs_voucher_token"
@@ -297,6 +296,7 @@ def _response(request: Request, resp: models.HttpResponse | None) -> HTMLRespons
     template = _ENV.get_template("index.html.j2")
 
     content = template.render(
+        responseid=responseid,
         title=_TITLE,
         level=level,
         user=user,
