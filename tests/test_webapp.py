@@ -183,7 +183,12 @@ class WebAppTestCase(testutils.TestCase):
 
     # 3
     def test_error_voucher_invalid(self):
-        pass
+        resp = self.scan(
+            self.public_cashier1.token,
+            "invalid_voucher_token",
+        )
+
+        self.assertEqual(resp.status_code, HTTPStatus.BAD_REQUEST)
 
     # 4
     def test_error_voucher_expired(self):

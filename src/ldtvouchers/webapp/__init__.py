@@ -95,7 +95,11 @@ def _url_for_scanning_user(request: Request, response: HTMLResponse) -> str:
 
 @_url
 def _url_for_scanning_voucher(request: Request, response: HTMLResponse) -> str:
-    return request.url_for("user", usertoken=response.user.token)
+    return request.url_for(
+        "user",
+        requestid="scan",
+        usertoken=response.user.token,
+    )
 
 
 @_url

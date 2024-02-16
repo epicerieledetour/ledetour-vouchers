@@ -35,6 +35,7 @@
 - CLEAN: HTTP _response data.status should display the bad status
 - BACK: send activity to slack, warning errors to ntfy
 - CLI: list auth tokens
+- CLEAN: remove error_voucher_user_needs_voucher_token
 
 ## Backlog
 
