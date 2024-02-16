@@ -238,7 +238,11 @@ class WebAppTestCase(testutils.TestCase):
 
     # 9
     def test_error_user_invalid_token(self):
-        pass
+        resp = self.scan(
+            "invalid_user_token",
+        )
+
+        self.assertEqual(resp.status_code, HTTPStatus.UNAUTHORIZED)
 
     # 10
     def test_ok_user_authentified(self):
