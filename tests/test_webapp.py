@@ -142,16 +142,16 @@ class WebAppTestCase(testutils.TestCase):
             # self.url_scan_voucher2 = "/scan/{}".format(self.voucher2.token)
             # self.url_undo_voucher2 = "/undo/{}".format(self.voucher2.token)
 
-    def action(self, action="", usertoken="", vouchertoken=""):
-        elems = [el for el in ("", action, usertoken, vouchertoken) if el]
+    def request(self, action="", usertoken="", vouchertoken=""):
+        elems = [el for el in ("u", action, usertoken, vouchertoken) if el]
         url = "/".join(elems)
         return self.get(url)
 
     def scan(self, *args):
-        return self.action("scan", *args)
+        return self.request("scan", *args)
 
     def undo(self, *args):
-        return self.action("undo", *args)
+        return self.request("undo", *args)
 
     def get(self, *args, **kwargs):
         return self.client.get(*args, **kwargs)
@@ -262,7 +262,13 @@ class WebAppTestCase(testutils.TestCase):
 
     # 13
     def test_error_bad_request(self):
-        pass
+        resp = self.request(
+            "invalid_action_verb",
+            "user_not_important_for_this_test",
+            "voucher_not_important_for_this_test",
+        )
+
+        self.assertEqual(resp.status_code, HTTPStatus.BAD_REQUEST)
 
     # 14
     def test_ok_voucher_undo(self):

@@ -32,6 +32,8 @@
 - BACK: publish pdf
 - CLEAN: All IDs can be public, what matters is a user Bearers table
 - CLEAN: Remove the Token table and replace it by a Bearers table, just for user
+- CLEAN: HTTP _response data.status should display the bad status
+- BACK: send activity to slack, warning errors to ntfy
 
 ## Backlog
 
