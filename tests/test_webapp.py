@@ -227,7 +227,16 @@ class WebAppTestCase(testutils.TestCase):
 
     # 7
     def test_warning_voucher_cannot_undo_cashedin(self):
-        pass
+        self.scan(self.cashier1_token, self.voucher1_token)
+
+        with db.connect(self.dbpath) as conn:
+            conn.execute(
+                "UPDATE vouchers SET undo_expiration_utc = '1970-01-01 00:00:01'"
+            )
+
+        resp = self.scan(self.cashier1_token, self.voucher1_token)
+
+        self.assertResponse(resp, HTTPStatus.OK, "warning_voucher_cannot_undo_cashedin")
 
     # 8
     def test_warning_voucher_can_undo_cashedin(self):

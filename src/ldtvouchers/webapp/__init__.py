@@ -188,10 +188,14 @@ _RESPONSES = {
     ),
     "warning_voucher_cannot_undo_cashedin": ResponseData(
         http_return_code=status.HTTP_200_OK,
+        status="Already cashed, too late to undo",
+        timeout_url_builder=_url_for_scanning_voucher,
+    ),
+    "warning_voucher_can_undo_cashedin": ResponseData(
+        http_return_code=status.HTTP_200_OK,
         status="Undo cashedin expired",
         timeout_url_builder=_url_for_scanning_voucher,
     ),
-    # "warning_voucher_can_undo_cashedin"
     "error_user_invalid_token": ResponseData(
         http_return_code=status.HTTP_401_UNAUTHORIZED,
         status="Invalid user",

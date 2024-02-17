@@ -29,6 +29,10 @@ body.level-error {
     background-color: var(--red);
 }
 
+body.level-warning {
+    background-color: var(--orange);
+}
+
 header {
     display: flex;
     flex-direction: row;
