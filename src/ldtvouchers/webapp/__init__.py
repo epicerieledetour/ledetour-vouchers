@@ -177,7 +177,10 @@ _RESPONSES = {
         status="Voucher has expired",
         timeout_url_builder=_url_for_scanning_voucher,
     ),
-    # "ok_voucher_cashedin"
+    "ok_voucher_cashedin": ResponseData(
+        http_return_code=status.HTTP_200_OK,
+        timeout_url_builder=_url_for_scanning_voucher,
+    ),
     # "error_voucher_cashedin_by_another_user"
     "warning_voucher_cannot_undo_cashedin": ResponseData(
         http_return_code=status.HTTP_200_OK,

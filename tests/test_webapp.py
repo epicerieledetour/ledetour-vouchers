@@ -211,37 +211,9 @@ class WebAppTestCase(testutils.TestCase):
 
     # 5
     def test_ok_voucher_cashedin(self):
-        pass
-        # resp = self.scan(
-        #     self.public_cashier1.token,
-        #     self.voucher1.token,
-        # )
+        resp = self.scan(self.cashier1_token, self.voucher1_token)
 
-        # self.assertEqual(resp.status_code, HTTPStatus.OK)
-
-        # self.assertEqual(resp.status.level, "ok")
-        # self.assertEqual(resp.user, self.public_cashier1)
-
-        # self.assertEqual(resp.voucher.token, self.voucher1.token)
-        # self.assertEqual(resp.voucher.value_CAN, self.voucher1.value_CAN)
-        # self.assertEqual(resp.voucher.cashedin_by_label, self.cashier1.label)
-        # self.assertEqual(
-        #     resp.voucher.cashedin_by_description, self.cashier1.description
-        # )
-        # self.assertAlmostNow(resp.voucher.cashedin_utc)
-        # self.assertLater(resp.voucher.undo_expiration_utc)
-
-        # self.assertEqual(len(resp.voucher.history), 1)
-        # self.assertEqual(
-        #     resp.voucher.history[0],
-        #     models.HttpAction(
-        #         timestamp_utc=resp.voucher.cashedin_utc,
-        #         user_label=self.cashier1.label,
-        #         user_description=self.cashier1.description,
-        #         requestid="scan",
-        #         responseid="ok_voucher_cashedin",
-        #     ),
-        # )
+        self.assertResponse(resp, HTTPStatus.OK, "ok_voucher_cashedin")
 
     # 6
     def test_error_voucher_cashedin_by_another_user(self):
