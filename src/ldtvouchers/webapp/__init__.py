@@ -209,7 +209,11 @@ _RESPONSES = {
         timeout_url_builder=_url_for_scanning_user,
     ),
     # "ok_voucher_undo"
-    # "error_voucher_cannot_undo_not_cashedin"
+    "error_voucher_cannot_undo_not_cashedin": ResponseData(
+        http_return_code=status.HTTP_403_FORBIDDEN,
+        status="Voucher has not been cashed in, cannot be undone",
+        timeout_url_builder=_url_for_scanning_voucher,
+    ),
 }
 
 

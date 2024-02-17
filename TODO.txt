@@ -42,6 +42,7 @@
 - CLEAN: remove error_voucher_user_needs_voucher_token
 - WEBUI: error_voucher_expired should show expiration date
 - BACK: handle database is locked (when inspecting db with sqlitebrowser)
+- CLEAN: error_voucher_cannot_undo_not_cashedin should be ok_voucher_info
 
 ## Backlog
 
