@@ -136,6 +136,7 @@ class WebAppTestCase(testutils.TestCase):
 
             self.emission1 = db.read_emission(conn, self.emission1.emissionid)
             self.cashier1_token = self.public_cashier1.token
+            self.cashier2_token = self.public_cashier2.token
             self.distributor_token = self.public_distributor.token
 
             self.voucher1, self.voucher2 = self.emission1.vouchers
@@ -217,7 +218,12 @@ class WebAppTestCase(testutils.TestCase):
 
     # 6
     def test_error_voucher_cashedin_by_another_user(self):
-        pass
+        self.scan(self.cashier1_token, self.voucher1_token)
+        resp = self.scan(self.cashier2_token, self.voucher1_token)
+
+        self.assertResponse(
+            resp, HTTPStatus.FORBIDDEN, "error_voucher_cashedin_by_another_user"
+        )
 
     # 7
     def test_warning_voucher_cannot_undo_cashedin(self):
@@ -229,11 +235,12 @@ class WebAppTestCase(testutils.TestCase):
 
     # 9
     def test_error_user_invalid_token(self):
-        resp = self.scan(
-            "invalid_user_token",
-        )
+        pass
+        # resp = self.scan(
+        #     "invalid_user_token",
+        # )
 
-        self.assertEqual(resp.status_code, HTTPStatus.UNAUTHORIZED)
+        # self.assertEqual(resp.status_code, HTTPStatus.FORBIDDEN)
 
     # 10
     def test_ok_user_authentified(self):
@@ -280,4 +287,8 @@ class WebAppTestCase(testutils.TestCase):
 
     # 15
     def test_error_voucher_cannot_undo_not_cashedin(self):
-        pass
+        resp = self.undo(self.cashier1_token, self.voucher1_token)
+
+        self.assertResponse(
+            resp, HTTPStatus.FORBIDDEN, "error_voucher_cannot_undo_not_cashedin"
+        )

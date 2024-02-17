@@ -181,7 +181,11 @@ _RESPONSES = {
         http_return_code=status.HTTP_200_OK,
         timeout_url_builder=_url_for_scanning_voucher,
     ),
-    # "error_voucher_cashedin_by_another_user"
+    "error_voucher_cashedin_by_another_user": ResponseData(
+        http_return_code=status.HTTP_403_FORBIDDEN,
+        status="Voucher already cashed in",
+        timeout_url_builder=_url_for_scanning_voucher,
+    ),
     "warning_voucher_cannot_undo_cashedin": ResponseData(
         http_return_code=status.HTTP_200_OK,
         status="Undo cashedin expired",
