@@ -167,6 +167,12 @@ class WebAppTestCase(testutils.TestCase):
         return self.client.get(*args, **kwargs)
         # return resp.status_code, models.HttpResponse(**resp.json())
 
+    def set_vouchers_undo_expiration_to_the_past(self):
+        with db.connect(self.dbpath) as conn:
+            conn.execute(
+                "UPDATE vouchers SET undo_expiration_utc = '1970-01-01 00:00:01'"
+            )
+
     def test_invalid_action_url(self):
         resp = self.get("/this/endpoint/does/not/exist")
 
@@ -229,10 +235,7 @@ class WebAppTestCase(testutils.TestCase):
     def test_warning_voucher_cannot_undo_cashedin(self):
         self.scan(self.cashier1_token, self.voucher1_token)
 
-        with db.connect(self.dbpath) as conn:
-            conn.execute(
-                "UPDATE vouchers SET undo_expiration_utc = '1970-01-01 00:00:01'"
-            )
+        self.set_vouchers_undo_expiration_to_the_past()
 
         resp = self.scan(self.cashier1_token, self.voucher1_token)
 
@@ -278,7 +281,13 @@ class WebAppTestCase(testutils.TestCase):
 
     # 12
     def test_error_voucher_cannot_undo_cashedin(self):
-        pass
+        self.scan(self.cashier1_token, self.voucher1_token)
+        self.set_vouchers_undo_expiration_to_the_past()
+        resp = self.undo(self.cashier1_token, self.voucher1_token)
+
+        self.assertResponse(
+            resp, HTTPStatus.FORBIDDEN, "error_voucher_cannot_undo_cashedin"
+        )
 
     # 13
     def test_error_bad_request(self):

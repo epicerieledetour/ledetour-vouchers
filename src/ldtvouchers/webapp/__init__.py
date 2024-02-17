@@ -210,7 +210,11 @@ _RESPONSES = {
         http_return_code=status.HTTP_200_OK,
         timeout_url_builder=_url_for_scanning_voucher,
     ),
-    # "error_voucher_cannot_undo_cashedin"
+    "error_voucher_cannot_undo_cashedin": ResponseData(
+        http_return_code=status.HTTP_403_FORBIDDEN,
+        status="Cannot undo cashed in anymore",
+        timeout_url_builder=_url_for_scanning_voucher,
+    ),
     "error_bad_request": ResponseData(
         http_return_code=status.HTTP_400_BAD_REQUEST,
         status="Invalid action",
