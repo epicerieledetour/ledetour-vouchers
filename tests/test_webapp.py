@@ -243,7 +243,10 @@ class WebAppTestCase(testutils.TestCase):
 
     # 8
     def test_warning_voucher_can_undo_cashedin(self):
-        pass
+        self.scan(self.cashier1_token, self.voucher1_token)
+        resp = self.scan(self.cashier1_token, self.voucher1_token)
+
+        self.assertResponse(resp, HTTPStatus.OK, "warning_voucher_can_undo_cashedin")
 
     # 9
     def test_error_user_invalid_token(self):
@@ -301,7 +304,10 @@ class WebAppTestCase(testutils.TestCase):
 
     # 14
     def test_ok_voucher_undo(self):
-        pass
+        self.scan(self.cashier1_token, self.voucher1_token)
+        resp = self.undo(self.cashier1_token, self.voucher1_token)
+
+        self.assertResponse(resp, HTTPStatus.OK, "ok_voucher_undo")
 
     # 15
     def test_error_voucher_cannot_undo_not_cashedin(self):

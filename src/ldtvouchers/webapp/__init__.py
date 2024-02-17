@@ -193,7 +193,7 @@ _RESPONSES = {
     ),
     "warning_voucher_can_undo_cashedin": ResponseData(
         http_return_code=status.HTTP_200_OK,
-        status="Undo cashedin expired",
+        status="Voucher already cashed by you, can still undo",
         timeout_url_builder=_url_for_scanning_voucher,
     ),
     "error_user_invalid_token": ResponseData(
@@ -220,7 +220,11 @@ _RESPONSES = {
         status="Invalid action",
         timeout_url_builder=_url_for_scanning_user,
     ),
-    # "ok_voucher_undo"
+    "ok_voucher_undo": ResponseData(
+        http_return_code=status.HTTP_200_OK,
+        status="Cashedin undone",
+        timeout_url_builder=_url_for_scanning_voucher,
+    ),
     "error_voucher_cannot_undo_not_cashedin": ResponseData(
         http_return_code=status.HTTP_403_FORBIDDEN,
         status="Voucher has not been cashed in, cannot be undone",
