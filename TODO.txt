@@ -4,9 +4,13 @@
 
 - WEBUI: cover all remaining codes
 - WEBUI: add scan logic
+- WEBUI: add redirected after time expire
 - SPIKE: what is the current status on reporting ?
 - DOC: brief doc to make users, emissions, vouchers, pdf, cli list scan / undo
 - DEPLOY: deploy on vouchers2 + reporting
+- WEBUI: style voucher
+- TEST: test action code stored in meta
+- CLEAN: test cli / webui code only
 
 - CLEAN: 404 should return a invalid request page with timer
 - CLEAN: Replace app.utils.sql.get_connection(args.db) by args.conn
@@ -36,6 +40,8 @@
 - BACK: send activity to slack, warning errors to ntfy
 - CLI: list auth tokens
 - CLEAN: remove error_voucher_user_needs_voucher_token
+- WEBUI: error_voucher_expired should show expiration date
+- BACK: handle database is locked (when inspecting db with sqlitebrowser)
 
 ## Backlog
 

@@ -172,7 +172,11 @@ _RESPONSES = {
         status="Invalid voucher",
         timeout_url_builder=_url_for_scanning_voucher,
     ),
-    # "error_voucher_expired"
+    "error_voucher_expired": ResponseData(
+        http_return_code=status.HTTP_403_FORBIDDEN,
+        status="Voucher has expired",
+        timeout_url_builder=_url_for_scanning_voucher,
+    ),
     # "ok_voucher_cashedin"
     # "error_voucher_cashedin_by_another_user"
     "warning_voucher_cannot_undo_cashedin": ResponseData(
@@ -193,7 +197,7 @@ _RESPONSES = {
     ),
     "ok_voucher_info": ResponseData(
         http_return_code=status.HTTP_200_OK,
-        # timeout_url_builder=_url_for_scanning_voucher,
+        timeout_url_builder=_url_for_scanning_voucher,
     ),
     # "error_voucher_cannot_undo_cashedin"
     "error_bad_request": ResponseData(

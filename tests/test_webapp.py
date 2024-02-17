@@ -1,5 +1,6 @@
 import datetime
 from http import HTTPStatus
+from xml.etree import ElementTree as ET
 
 import testutils
 from fastapi.testclient import TestClient
@@ -106,6 +107,7 @@ class WebAppTestCase(testutils.TestCase):
                     can_cashin=False,
                 ),
             )
+            self.public_distributor = db.read_public_user(conn, self.distributor.userid)
 
             self.now = datetime.datetime.utcnow()
             self.expiration_timedelta = datetime.timedelta(90)
@@ -132,8 +134,15 @@ class WebAppTestCase(testutils.TestCase):
                     )
                 )
 
-            self.emission1 = db.read_public_emission(conn, self.emission1.emissionid)
+            self.emission1 = db.read_emission(conn, self.emission1.emissionid)
+            self.cashier1_token = self.public_cashier1.token
+            self.distributor_token = self.public_distributor.token
+
             self.voucher1, self.voucher2 = self.emission1.vouchers
+            self.voucher1_token, self.voucher2_token = [
+                voucher.token
+                for voucher in db._read_public_vouchers(conn, self.emission1.emissionid)
+            ]
 
             # self.url_scan_cashier1 = "/scan/{}".format(self.public_cashier1.token)
             # self.url_scan_cashier2 = "/scan/{}".format(self.public_cashier2.token)
@@ -170,10 +179,7 @@ class WebAppTestCase(testutils.TestCase):
 
     # 1
     def test_error_voucher_unauthentified(self):
-        resp = self.scan(
-            "invalid_user_token",
-            self.voucher1.token,
-        )
+        resp = self.scan("invalid_user_token", self.voucher1_token)
 
         self.assertEqual(resp.status_code, HTTPStatus.UNAUTHORIZED)
 
@@ -183,16 +189,19 @@ class WebAppTestCase(testutils.TestCase):
 
     # 3
     def test_error_voucher_invalid(self):
-        resp = self.scan(
-            self.public_cashier1.token,
-            "invalid_voucher_token",
-        )
+        resp = self.scan(self.cashier1_token, "invalid_voucher_token")
 
         self.assertEqual(resp.status_code, HTTPStatus.BAD_REQUEST)
 
     # 4
     def test_error_voucher_expired(self):
-        pass
+        with db.connect(self.dbpath) as conn:
+            self.emission1.expiration_utc -= self.expiration_timedelta * 2
+            db.update_emission(conn, self.emission1)
+
+        resp = self.scan(self.cashier1_token, self.voucher1_token)
+
+        self.assert_(resp.status_code, HTTPStatus.FORBIDDEN)
 
     def assertAlmostNow(self, date):
         return date - datetime.datetime.utcnow() < datetime.timedelta(seconds=1.0)
@@ -266,9 +275,18 @@ class WebAppTestCase(testutils.TestCase):
         # self.assertEqual(resp.user, self.public_cashier1)
         # self.assertIsNone(resp.voucher)
 
+    def assertResponse(self, resp, status_code, responseid):
+        self.assertEqual(resp.status_code, status_code)
+
+        html = ET.fromstring(resp.content.decode())
+        meta = html.find(".//meta[@name='responseid']")
+        self.assertEqual(meta.attrib.get("content"), responseid)
+
     # 11
     def test_ok_voucher_info(self):
-        pass
+        resp = self.scan(self.distributor_token, self.voucher1_token)
+
+        self.assertResponse(resp, HTTPStatus.OK, "ok_voucher_info")
 
     # 12
     def test_error_voucher_cannot_undo_cashedin(self):
