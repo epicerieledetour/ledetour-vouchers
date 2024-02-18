@@ -28,14 +28,14 @@
 <body class="level-{{ level }}">
   <header id="header">
     <button
-      id="exit"
-    {% if exit_url %}
-      onclick="window.location.href='{{ exit_url }}'"
+      id="logout"
+    {% if logout_url %}
+      onclick="window.location.href='{{ logout_url }}'"
     {% else %}
       class="invisible"
     {% endif %}
     >
-      Exit
+      Logout
     </button>
 
     <p id="user">
