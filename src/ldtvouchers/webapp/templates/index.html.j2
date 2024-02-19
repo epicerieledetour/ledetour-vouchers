@@ -63,9 +63,15 @@
 
   {% if voucher %}
   <section id="voucher">
-    <p>Id</p><p id="voucher-id">{{ voucher.token }}</p>
-    <p>Value</p><p id="voucher-value">{{ voucher.value_CAN }}$</p>
-    <p>Expire</p><p id="voucher-expire">{{ voucher.expiration_utc | date }}</p>
+    <p>Id</p>
+    <p id="voucher-id">{{ voucher.token }}</p>
+
+    <p>Value</p>
+    <p id="voucher-value">{{ voucher.value_CAN }}$</p>
+
+    <p>Expire</p>
+    <p id="voucher-expire">{{ voucher.expiration_utc | date }}</p>
+
     <p>Cashedin by</p>
     <p id="voucher-cashedin-by">
       {% if voucher.cashedin_by_label %}
@@ -74,18 +80,15 @@
         Not cashedin yet
       {% endif %}
     </p>
+
     <p>Cashedin date</p>
-    <p id="voucher-cashedin-utc">
-      {% if voucher.cashedin_utc %}
-        {{ voucher.cashedin_utc | datetime }}        
-      {% endif %}
-    </p>
+    <p id="voucher-cashedin-utc">{{ voucher.cashedin_utc | datetime }}</p>
+
+    <p>Can undo</p>
+    <p>{{ voucher.can_undo | boolstr }}</p>
+
     <p>Can undo until</p>
-    <p id="voucher-undotimeout">
-      {% if voucher.undo_expiration_utc %}
-        {{ voucher.undo_expiration_utc | datetime }}
-      {% endif %}
-    </p>
+    <p id="voucher-undotimeout">{{ voucher.undo_expiration_utc | datetime }}</p>
   </section>
   {% endif %}
 

@@ -2,7 +2,6 @@
 
 ## Next
 
-- WEBUI: add can undo until in all case
 - WEBUI: add scan logic
 - WEBUI: add redirected after time expire
 - SPIKE: what is the current status on reporting ?

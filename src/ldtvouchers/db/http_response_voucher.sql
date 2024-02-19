@@ -5,11 +5,8 @@ SELECT
 	u.label AS cashedin_by_label,
 	u.description AS cashedin_by_description,
 	v.cashedin_utc AS cashedin_utc,
-	CASE
-		WHEN r.can_undo
-		THEN v.undo_expiration_utc
-		ELSE NULL
-	END AS undo_expiration_utc
+	r.can_undo AS can_undo,
+	v.undo_expiration_utc AS undo_expiration_utc
 FROM actions a, responses r, users u, vouchers v, emissions e
 ON
 	v.voucherid = a.voucherid

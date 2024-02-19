@@ -150,6 +150,9 @@ class HttpVoucher(BaseModel):
         default=None,
         description="Date the voucher has been cashed in in UTC time",
     )
+    can_undo: bool = Field(
+        description="Tell if the voucher can still be undone",
+    )
     undo_expiration_utc: datetime.datetime | None = Field(
         default=None,
         description="The date until a cashed in voucher can be undone in UTC time",

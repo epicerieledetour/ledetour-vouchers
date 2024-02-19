@@ -46,13 +46,15 @@ _ENV = jinja2.Environment(
 )
 
 
-def _datetime_format(date: datetime.datetime, format: str) -> str:
+def _datetime_format(date: datetime.datetime | None, format: str) -> str:
+    if not date:
+        return ""
     utc = pytz.utc.localize(date)
     est = utc.astimezone(pytz.timezone("Canada/Eastern"))
-    # return est.isoformat()
     return est.strftime(format)
 
 
+_ENV.filters["boolstr"] = lambda v: "TRUE" if v else "FALSE"
 _ENV.filters["date"] = functools.partial(_datetime_format, format="%Y-%m-%d")
 _ENV.filters["datetime"] = functools.partial(
     _datetime_format, format="%Y-%m-%d %H:%M:%S"
