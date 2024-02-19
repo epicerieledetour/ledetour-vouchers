@@ -141,6 +141,9 @@ class HttpVoucher(BaseModel):
     value_CAN: int = Field(
         description="Value in CAN",
     )
+    expiration_utc: datetime.datetime = Field(
+        description="Date the voucher expires",
+    )
     cashedin_by_label: str | None
     cashedin_by_description: str | None
     cashedin_utc: datetime.datetime | None = Field(

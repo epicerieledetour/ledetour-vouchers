@@ -2,11 +2,13 @@
 
 import contextlib
 import datetime
+import functools
 from pathlib import Path
 from sqlite3 import Connection
 from typing import Callable
 
 import jinja2
+import pytz
 from fastapi import Depends, FastAPI, Request, Response, status
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -44,11 +46,17 @@ _ENV = jinja2.Environment(
 )
 
 
-def _datetime_format(date):
-    return "thedate"
+def _datetime_format(date: datetime.datetime, format: str) -> str:
+    utc = pytz.utc.localize(date)
+    est = utc.astimezone(pytz.timezone("Canada/Eastern"))
+    # return est.isoformat()
+    return est.strftime(format)
 
 
-_ENV.filters["datetime_format"] = _datetime_format
+_ENV.filters["date"] = functools.partial(_datetime_format, format="%Y-%m-%d")
+_ENV.filters["datetime"] = functools.partial(
+    _datetime_format, format="%Y-%m-%d %H:%M:%S"
+)
 
 
 def _noop(*_, **__) -> None:

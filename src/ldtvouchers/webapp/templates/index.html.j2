@@ -63,13 +63,29 @@
 
   {% if voucher %}
   <section id="voucher">
-    <p id="voucher-title">{{ voucher.label }}</p>
-    <p id="voucher-id">{{ voucher.token }}</p>
-    <p id="voucher-expire">TODO Expiration Date</p>
-    <p id="voucher-undotimeout">TODO Undo Timeout Date</p>
-    <p id="voucher-value">{{ voucher.value_CAN }}$</p>
-    <p id="voucher-cashedin-by">{{ voucher.cashedin_by_label }}</p>
-    <p id="voucher-cashedin-utc">{{ voucher.cashedin_utc }}</p>
+    <p>Id</p><p id="voucher-id">{{ voucher.token }}</p>
+    <p>Value</p><p id="voucher-value">{{ voucher.value_CAN }}$</p>
+    <p>Expire</p><p id="voucher-expire">{{ voucher.expiration_utc | date }}</p>
+    <p>Cashedin by</p>
+    <p id="voucher-cashedin-by">
+      {% if voucher.cashedin_by_label %}
+        {{ voucher.cashedin_by_label }}
+      {% else %}
+        Not cashedin yet
+      {% endif %}
+    </p>
+    <p>Cashedin date</p>
+    <p id="voucher-cashedin-utc">
+      {% if voucher.cashedin_utc %}
+        {{ voucher.cashedin_utc | datetime }}        
+      {% endif %}
+    </p>
+    <p>Can undo until</p>
+    <p id="voucher-undotimeout">
+      {% if voucher.undo_expiration_utc %}
+        {{ voucher.undo_expiration_utc | datetime }}
+      {% endif %}
+    </p>
   </section>
   {% endif %}
 

@@ -2,7 +2,7 @@
 
 ## Next
 
-- WEBUI: cover all remaining codes
+- WEBUI: add can undo until in all case
 - WEBUI: add scan logic
 - WEBUI: add redirected after time expire
 - SPIKE: what is the current status on reporting ?
@@ -11,6 +11,7 @@
 - WEBUI: style voucher
 - TEST: test action code stored in meta
 - CLEAN: test cli / webui code only
+- WEBUI: style history
 
 - CLEAN: 404 should return a invalid request page with timer
 - CLEAN: Replace app.utils.sql.get_connection(args.db) by args.conn
@@ -18,6 +19,7 @@
 - CLEAN: empty user should add event for empty (None) fields
 - DOC: Architecture documentation
 - WEBUI: Enter voucher to scan by hand
+- WEBUI: Super cashier, see list of vouchers, cash by button
 - WEBUI: Color background
 - ADMIN: Rate limiting https://sysopstechnix.com/protect-web-servers-from-ddos-attacks-using-fail2ban/
 - CICD: Tests on GitHub
@@ -43,6 +45,7 @@
 - WEBUI: error_voucher_expired should show expiration date
 - BACK: handle database is locked (when inspecting db with sqlitebrowser)
 - CLEAN: error_voucher_cannot_undo_not_cashedin should be ok_voucher_info
+- CLEAN: there shouldn't be a need for ResponseData timeout
 
 ## Backlog
 

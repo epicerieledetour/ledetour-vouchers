@@ -78,14 +78,14 @@ header,
 #voucher {
     display: grid;
     grid-template-columns: auto auto;
-    grid-template-rows: auto auto auto;
-    grid-template-areas:
+    /* grid-template-rows: auto auto auto; */
+    /* grid-template-areas:
         "title value"
         "id value"
-        "expire value";
-    grid-auto-flow: column;
+        "expire value"; */
+    grid-auto-flow: row;
 }
-
+/* 
 #voucher-title {
     grid-area: title;
 }
@@ -103,7 +103,7 @@ header,
     align-self: center;
     justify-self: end;
     font-size: 2.5rem;
-}
+} */
 
 #prompt-area {
     text-align: center;

@@ -21,6 +21,7 @@ dependencies = [
     "jinja2",
     "odfpy",
     "pypdf",
+    "pytz",
     "qrcode",
     "uvicorn[standard]"
 ]
