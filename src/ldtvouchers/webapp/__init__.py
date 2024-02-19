@@ -180,6 +180,7 @@ _RESPONSES = {
     ),
     "ok_voucher_cashedin": ResponseData(
         http_return_code=status.HTTP_200_OK,
+        status="Cashed in",
         timeout_url_builder=_url_for_scanning_voucher,
     ),
     "error_voucher_cashedin_by_another_user": ResponseData(
@@ -284,6 +285,17 @@ def user(
     return _request(request, response, requestid, usertoken, vouchertoken, conn)
 
 
+@app.get("/d/{responseid}")
+def debug(
+    request: Request,
+    response: Response,
+    responseid: str,
+    conn: Connection = Depends(get_db),
+):
+    action = db._read_first_action_with_responseid(conn, responseid)
+    return _response(request, db.build_http_response(conn, action) if action else None)
+
+
 def _request(
     request: Request,
     response: Response,
@@ -350,5 +362,6 @@ def index(request: Request):
 # http://localhost:8080/                      # start
 # http://localhost:8080/scan/tokusr_invalid   # invalid user
 # http://localhost:8080/scan/tokusr_ijpxzkbf  # valid user
+# http://localhost:8080/u/scan/tokusr_hpo4wu5v/0001-XUQNS
 
 app.mount("/", StaticFiles(directory=Path(__file__).parent / "static"), name="static")

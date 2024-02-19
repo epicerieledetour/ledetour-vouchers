@@ -51,3 +51,4 @@
 
 - WEBUI to quickly scan / undo vouchers, all vouchers in one page, one voucher per line, button
 - Log every action to Slack, flag errors to ntfy
+- Simplify tests: one test to validate all responses ids, reused in debug pages to test webui

@@ -274,6 +274,15 @@ def _read_action(conn: Connection, actionid: models.ActionId) -> models.Action:
     return models.Action(**row)
 
 
+def _read_first_action_with_responseid(
+    conn: Connection, responseid: str
+) -> models.Action:
+    row = conn.execute(
+        get_sql("action_read_first_with_responseid"), {"responseid": responseid}
+    ).fetchone()
+    return models.Action(**row) if row else None
+
+
 def build_http_response(conn: Connection, action: models.Action) -> models.HttpResponse:
     # TODO: just pass an actionid
     # Code and Status
