@@ -51,6 +51,10 @@ header {
     background-color: grey;
 }
 
+#user {
+    font-weight: bolder;
+}
+
 #scan-preview {
     position: relative;
     width: 100vw;
@@ -85,6 +89,7 @@ header,
         "expire value"; */
     grid-auto-flow: row;
 }
+
 /* 
 #voucher-title {
     grid-area: title;
