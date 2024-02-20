@@ -4,7 +4,6 @@
 
 - WEBUI: add scan logic
 - WEBUI: add undo button
-- WEBUI: add redirected after time expire
 - SPIKE: what is the current status on reporting ?
 - DOC: brief doc to make users, emissions, vouchers, pdf, cli list scan / undo
 - DEPLOY: deploy on vouchers2 + reporting
@@ -46,6 +45,7 @@
 - BACK: handle database is locked (when inspecting db with sqlitebrowser)
 - CLEAN: error_voucher_cannot_undo_not_cashedin should be ok_voucher_info
 - CLEAN: there shouldn't be a need for ResponseData timeout
+- WEBUI: add icon.png and faveicon.ico
 
 ## Backlog
 

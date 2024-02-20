@@ -293,7 +293,11 @@ def debug(
     conn: Connection = Depends(get_db),
 ):
     action = db._read_first_action_with_responseid(conn, responseid)
-    return _response(request, db.build_http_response(conn, action) if action else None)
+    return _response(
+        request,
+        db.build_http_response(conn, action) if action else None,
+        debug=True,
+    )
 
 
 def _request(
@@ -317,16 +321,24 @@ def _request(
     return _response(request, db.build_http_response(conn, action))
 
 
-def _response(request: Request, resp: models.HttpResponse | None) -> HTMLResponse:
+def _response(
+    request: Request,
+    resp: models.HttpResponse | None,
+    debug=False,
+) -> HTMLResponse:
     responseid = None
     level = "info"
     user = None
     voucher = None
     if resp:
         responseid = resp.status.responseid
-        level = resp.status.level
         user = resp.user
         voucher = resp.voucher
+        level = (
+            "request"
+            if resp.status.level == "ok" and not voucher
+            else resp.status.level
+        )
 
     data = _RESPONSES[responseid]
 
@@ -348,6 +360,7 @@ def _response(request: Request, resp: models.HttpResponse | None) -> HTMLRespons
         logout_url=data.logout_url_builder(request, resp),
         scan_url=data.scan_url_builder(request, resp),
         timeout=timeout,
+        debug=debug,
         **data.model_dump(),
     )
 
