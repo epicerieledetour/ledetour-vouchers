@@ -347,7 +347,7 @@ def emission_odsreport(conn: Connection, fp: StringIO) -> None:
 
 def emission_emailreport(conn: Connection) -> None:
     now_locatime = datetime.datetime.utcnow()
-    now_utc = now_locatime.astimezone(datetime.UTC)
+    now_utc = now_locatime.astimezone(datetime.timezone.utc)
 
     rows = conn.execute(
         db.get_sql("emission_emailreport"),

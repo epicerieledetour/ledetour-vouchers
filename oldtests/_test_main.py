@@ -2,9 +2,8 @@ import datetime
 
 from fastapi import status
 from fastapi.testclient import TestClient
-from requests.auth import AuthBase
-
 from pytest import fixture
+from requests.auth import AuthBase
 
 from app import main
 
@@ -81,7 +80,7 @@ def voucher_registered(con, user_admin, expiration_date):
         con,
         user_admin,
         main.VoucherBase(
-            label=f"Voucher-registered",
+            label="Voucher-registered",
             expiration_date=expiration_date,
             value=20,
             state=0,  # TODO: use an enum
@@ -96,7 +95,7 @@ def voucher_distributed(con, user_admin, user_distributor, expiration_date):
         con,
         user_admin,
         main.VoucherBase(
-            label=f"Voucher-distributed",
+            label="Voucher-distributed",
             expiration_date=expiration_date,
             value=20,
             state=0,  # TODO: use an enum
@@ -115,7 +114,7 @@ def voucher_spent(con, user_admin, user_distributor, user_cashier, expiration_da
         con,
         user_admin,
         main.VoucherBase(
-            label=f"Voucher-spent",
+            label="Voucher-spent",
             expiration_date=expiration_date,
             value=20,
             state=0,  # TODO: use an enum
