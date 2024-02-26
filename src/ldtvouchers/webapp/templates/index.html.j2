@@ -2,67 +2,60 @@
 <html class="no-js" lang="en">
 
 <head>
-  <meta charset="utf-8"/>
+  <meta charset="utf-8" />
   <title>{{ title }}</title>
-  <meta name="description" content=""/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="description" content="" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <meta property="og:title" content=""/>
-  <meta property="og:type" content=""/>
-  <meta property="og:url" content=""/>
-  <meta property="og:image" content=""/>
+  <meta property="og:title" content="" />
+  <meta property="og:type" content="" />
+  <meta property="og:url" content="" />
+  <meta property="og:image" content="" />
 
-  <link rel="manifest" href="site.webmanifest"/>
-  <link rel="apple-touch-icon" href="/icon.png"/>
+  <link rel="manifest" href="site.webmanifest" />
+  <link rel="apple-touch-icon" href="/icon.png" />
   <!-- Place favicon.ico in the root directory -->
 
-  <link rel="stylesheet" href="/css/normalize.css"/>
-  <link rel="stylesheet" href="/css/main.css"/>
-  <link rel="stylesheet" href="/css/app.css"/>
+  <link rel="stylesheet" href="/css/normalize.css" />
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/app.css" />
 
-  <meta name="theme-color" content="#fafafa"/>
+  <meta name="theme-color" content="#fafafa" />
 
-  <meta name="responseid" content="{{ responseid | default('') }}"/>
+  <meta name="responseid" content="{{ responseid | default('') }}" />
 
   {% if debug %}
-  <meta name="debug" content="{{ debug }}"/>
+  <meta name="debug" content="{{ debug }}" />
   {% endif %}
 </head>
 
 <body class="level-{{ level }}">
   <header id="header">
-    <button
-      id="logout"
-    {% if logout_url %}
-      onclick="window.location.href='{{ logout_url }}'"
-    {% else %}
-      class="invisible"
-    {% endif %}
-    >
+    <button id="logout" {% if logout_url %} onclick="window.location.href='{{ logout_url }}'" {% else %}
+      class="invisible" {% endif %}>
       Logout
     </button>
 
     <p id="user">
-    {% if user %}
+      {% if user %}
       {{ user.label }}
-    {% else %}
+      {% else %}
       {{ title }}
-    {% endif %}
+      {% endif %}
     </p>
 
-    <button
-      id="history"
-      {% if not (voucher and voucher.history) %}class="invisible"{% endif %}
-    >
+    <button id="history" {% if not (voucher and voucher.history) %}class="invisible" {% endif %}>
       History
     </button>
-    
+
   </header>
 
   {% if scan_url %}
-    <section id="scan">
-      <video id="scan-preview">Scan preview: {{ scan }}</video>
-    </section>
+  <section id="scan">
+    <video id="scan-preview">Scan preview: {{ scan }}</video>
+  </section>
+  <script type="text/javascript" src="/js/zxing-browser-0.1.4.js"></script>
+  <script type="text/javascript" src="/js/scan.js"></script>
   {% endif %}
 
   {% if voucher %}
@@ -79,9 +72,9 @@
     <p>Cashedin by</p>
     <p id="voucher-cashedin-by">
       {% if voucher.cashedin_by_label %}
-        {{ voucher.cashedin_by_label }}
+      {{ voucher.cashedin_by_label }}
       {% else %}
-        Not cashedin yet
+      Not cashedin yet
       {% endif %}
     </p>
 
@@ -112,20 +105,11 @@
     </section>
   </dialog> #}
 
-  <script type="text/javascript" src="/js/zxing-browser-0.1.4.js"></script>
-  {# <script type="text/javascript" src="js/main.js"></script> #}
-  <script type="text/javascript">
-    // Scan URL: {{ scan_url }}
-    // Timeout URL: {{ timeout_url }}
-  </script>
+
 
   {% if timeout %}
   <progress id="timeout-progress" max="{{ timeout.milliseconds }}"></progress>
-  <script
-    id="timeout-script"
-    type="text/javascript"
-    data-timeout-url="{{ timeout.url }}"
-    src="/js/timeout.js">
+  <script id="timeout-script" type="text/javascript" data-timeout-url="{{ timeout.url }}" src="/js/timeout.js">
   </script>
   {% endif %}
 
