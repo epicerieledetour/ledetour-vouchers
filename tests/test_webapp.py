@@ -182,7 +182,7 @@ class WebAppTestCase(testutils.TestCase):
     def test_start_page(self):
         resp = self.get("/")
 
-        self.assertEqual(resp.status_code, HTTPStatus.OK)
+        self.assertResponse(resp, HTTPStatus.OK, "None")
 
     # 1
     def test_error_voucher_unauthentified(self):

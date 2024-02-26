@@ -73,21 +73,11 @@ def _url(func):
     return wrap
 
 
-def _js_template(func):
-    def wrap(*args, **kwargs):
-        ret = func(*args, **kwargs)
-        return f"`{ret}`"
-
-    return wrap
-
-
-@_js_template
 @_url
 def _url_template_for_scanning_user(request: Request, response: HTMLResponse) -> str:
     return request.url_for("user", requestid="scan", usertoken="{scanResult}")
 
 
-@_js_template
 @_url
 def _url_template_for_scanning_voucher(request: Request, response: HTMLResponse) -> str:
     return request.url_for(

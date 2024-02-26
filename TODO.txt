@@ -2,7 +2,6 @@
 
 ## Next
 
-- WEBUI: add scan logic
 - WEBUI: add undo button
 - SPIKE: what is the current status on reporting ?
 - DOC: brief doc to make users, emissions, vouchers, pdf, cli list scan / undo

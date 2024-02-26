@@ -24,6 +24,10 @@
 
   <meta name="responseid" content="{{ responseid | default('') }}" />
 
+  {% if scan_url %}
+  <meta name="scan-url" content="{{ scan_url }}" />
+  {% endif %}
+
   {% if debug %}
   <meta name="debug" content="{{ debug }}" />
   {% endif %}
@@ -51,9 +55,7 @@
   </header>
 
   {% if scan_url %}
-  <section id="scan">
-    <video id="scan-preview">Scan preview: {{ scan }}</video>
-  </section>
+  <video id="scan-preview">Scan preview: {{ scan }}</video>
   <script type="text/javascript" src="/js/zxing-browser-0.1.4.js"></script>
   <script type="text/javascript" src="/js/scan.js"></script>
   {% endif %}
