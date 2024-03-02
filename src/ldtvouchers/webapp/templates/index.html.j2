@@ -48,9 +48,10 @@
       {% endif %}
     </p>
 
-    <button id="history" {% if not (voucher and voucher.history) %}class="invisible" {% endif %}>
-      History
-    </button>
+    <!--
+    <button id="history"{% if not (voucher and voucher.history) %}class="invisible" {% endif %}>    
+    -->
+    <button id="history" class="invisible">History</button>
 
   </header>
 
@@ -98,16 +99,15 @@
     <section id="status">{{ status }}</section>
   </section>
 
-  {# <section id="detail"></section> #}
-  {# <button id="action"></button> #}
-
   {# <dialog id="dialog">
     <h1 id="dialog-title"></h1>
     <section id="dialog-content">
     </section>
   </dialog> #}
 
-
+  {% if undo_url %}
+  <button>Undo cashedin</button>
+  {% endif %}
 
   {% if timeout %}
   <progress id="timeout-progress" max="{{ timeout.milliseconds }}"></progress>

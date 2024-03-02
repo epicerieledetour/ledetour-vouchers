@@ -4,14 +4,12 @@
 
 - WEBUI: add undo button
 - SPIKE: what is the current status on reporting ?
-- DOC: brief doc to make users, emissions, vouchers, pdf, cli list scan / undo
-- WEBUI: style voucher
-- TEST: test action code stored in meta
-- CLEAN: test cli / webui code only
+
 - WEBUI: style history
+- DOC: brief doc to make users, emissions, vouchers, pdf, cli list scan / undo
+- CLEAN: test cli / webui code only
 - CLEAN: remove all unused code from v1
 - DEPLOY: deploy on vouchers2 + reporting
-
 - CLEAN: 404 should return a invalid request page with timer
 - CLEAN: Replace app.utils.sql.get_connection(args.db) by args.conn
 - CLEAN: User.id default factory https://docs.pydantic.dev/latest/usage/fields/
