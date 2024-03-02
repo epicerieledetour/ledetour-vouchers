@@ -59,22 +59,7 @@ header {
     font-weight: bolder;
 }
 
-#scan-preview {
-    position: relative;
-    width: 100vw;
-    /* height: 100%; */
-    /* padding-top: 50%; */
-}
-
-#camera-selector {
-    position: absolute;
-    top: 0px;
-}
-
-header,
-#voucher,
-#message-area,
-#detail {
+header, section {
     padding-left: .5rem;
     padding-right: .5rem;
 }
@@ -86,33 +71,8 @@ header,
 #voucher {
     display: grid;
     grid-template-columns: auto auto;
-    /* grid-template-rows: auto auto auto; */
-    /* grid-template-areas:
-        "title value"
-        "id value"
-        "expire value"; */
     grid-auto-flow: row;
 }
-
-/* 
-#voucher-title {
-    grid-area: title;
-}
-
-#voucher-id {
-    grid-area: id;
-}
-
-#voucher-expire {
-    grid-area: expire;
-}
-
-#voucher-value {
-    grid-area: value;
-    align-self: center;
-    justify-self: end;
-    font-size: 2.5rem;
-} */
 
 #prompt-area {
     text-align: center;
@@ -131,30 +91,13 @@ header,
     text-align: center;
 }
 
-#action {
-    border: none;
-    border-radius: .5rem;
-    height: 10vh;
-    font-size: 1.5rem;
-    /* background-color: var(--orange); */
-    color: var(--white);
-    margin-left: .5rem;
-    margin-right: .5rem;
-    margin-bottom: .5rem;
+form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
 }
 
-.status-info {
-    color: var(--black);
-}
-
-.status-ok {
-    color: var(--green);
-}
-
-.status-warning {
-    color: var(--orange);
-}
-
-.status-error {
-    color: var(--red);
+#button-undo {
+    font-size: 2rem;
 }

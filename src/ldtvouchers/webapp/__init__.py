@@ -13,6 +13,7 @@ from fastapi import Depends, FastAPI, Request, Response, status
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field  # type: ignore
+from starlette.requests import URL
 
 from .. import db, models
 
@@ -66,7 +67,7 @@ def _noop(*_, **__) -> None:
 
 
 def _url(func):
-    def wrap(*args, **kwargs):
+    def wrap(*args, **kwargs) -> str:
         ret = func(*args, **kwargs)
         return str(ret)
 
@@ -74,12 +75,12 @@ def _url(func):
 
 
 @_url
-def _url_template_for_scanning_user(request: Request, response: HTMLResponse) -> str:
+def _url_template_for_scanning_user(request: Request, response: HTMLResponse) -> URL:
     return request.url_for("user", requestid="scan", usertoken="{scanResult}")
 
 
 @_url
-def _url_template_for_scanning_voucher(request: Request, response: HTMLResponse) -> str:
+def _url_template_for_scanning_voucher(request: Request, response: HTMLResponse) -> URL:
     return request.url_for(
         "voucher",
         requestid="scan",
@@ -89,12 +90,12 @@ def _url_template_for_scanning_voucher(request: Request, response: HTMLResponse)
 
 
 @_url
-def _url_for_scanning_user(request: Request, response: HTMLResponse) -> str:
+def _url_for_scanning_user(request: Request, response: HTMLResponse) -> URL:
     return request.url_for("index")
 
 
 @_url
-def _url_for_scanning_voucher(request: Request, response: HTMLResponse) -> str:
+def _url_for_scanning_voucher(request: Request, response: HTMLResponse) -> URL:
     return request.url_for(
         "user",
         requestid="scan",
@@ -103,11 +104,23 @@ def _url_for_scanning_voucher(request: Request, response: HTMLResponse) -> str:
 
 
 @_url
-def _url_for_logout(request: Request, response: HTMLResponse) -> str:
+def _url_for_logout(request: Request, response: HTMLResponse) -> URL:
     if response and response.user:
         return _url_for_scanning_user(request, response)
 
-    return ""
+    return URL()
+
+
+@_url
+def _url_for_undo(request: Request, response: HTMLResponse) -> URL:
+    if response and response.voucher and response.voucher.can_undo:
+        return request.url_for(
+            "voucher",
+            requestid="undo",
+            usertoken=response.user.token,
+            vouchertoken=response.voucher.token,
+        )
+    return URL()
 
 
 class Timeout(BaseModel):
@@ -134,6 +147,10 @@ class ResponseData(BaseModel):
     scan_url_builder: Callable[[Request, HTMLResponse], str] = Field(
         default=_noop,
         description="A callable to build the JS function that make the URL to follow after a scan",
+    )
+    undo_url_builder: Callable[[Request, HTMLResponse], str] = Field(
+        default=_url_for_undo,
+        description="A callable to build url to undo a cashin",
     )
     timeout_milliseconds: int = Field(
         default=5000,
@@ -349,6 +366,7 @@ def _response(
         voucher=voucher,
         logout_url=data.logout_url_builder(request, resp),
         scan_url=data.scan_url_builder(request, resp),
+        undo_url=data.undo_url_builder(request, resp),
         timeout=timeout,
         debug=debug,
         **data.model_dump(),

@@ -93,7 +93,7 @@ VALUES
         "Voucher has already been cashed by the user but too long ago so it can't be undone"
     ),
     (  -- 8
-        "warning_voucher_can_undo_cashedin", 200, "warning", NULL, 1, FALSE,
+        "warning_voucher_can_undo_cashedin", 200, "warning", NULL, 1, TRUE,
         "Voucher has already been cashed in by the user but recently enough so they can still undo"
     ),
     (  -- 9

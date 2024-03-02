@@ -106,7 +106,17 @@
   </dialog> #}
 
   {% if undo_url %}
-  <button>Undo cashedin</button>
+  <section>
+    <form>
+      <button
+        id="button-undo"
+        type="submit"
+        formmethod="get"
+        formaction="{{ undo_url }}">
+        Undo
+      </button>
+    </form>
+  </section>
   {% endif %}
 
   {% if timeout %}
