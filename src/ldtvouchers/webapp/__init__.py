@@ -386,3 +386,14 @@ def index(request: Request):
 # http://localhost:8080/u/scan/tokusr_hpo4wu5v/0001-XUQNS
 
 app.mount("/", StaticFiles(directory=Path(__file__).parent / "static"), name="static")
+
+
+"""
+
+/a/{usertoken}
+
+/m/{emissionid}/vouchers.pdf
+/m/{emissionid}/report.ods
+/m/{usertoken}/user.pdf
+
+"""

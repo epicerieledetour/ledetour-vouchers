@@ -2,7 +2,13 @@
 
 ## Next
 
+- WEBUI: put dbpath in settings
+- WEBUI: hide /d under a setting LDTVOUCHERS_DEBUG environment variable
 - REPORT: integrate link to ods report in email
+  - Make reports write to stdout by default, remove path argument
+  - Add env variable LDTVOUCHERS_MEDIADIR
+  - Add --publish to report variables
+
 - CLEAN: remove all unused code from v1
 - BACK: systemd: send reports service / timer
 - ADMIN: ansible install
