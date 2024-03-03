@@ -17,7 +17,7 @@ from starlette.requests import URL
 
 from .. import db, models
 
-app = FastAPI()
+app = FastAPI(openapi_url=None)
 
 _ACTION_ORIGIN_HTTPAPI = "httpapi"
 

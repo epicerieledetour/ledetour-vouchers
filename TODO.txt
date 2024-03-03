@@ -19,7 +19,6 @@
 - DOC: Architecture documentation
 - WEBUI: Enter voucher to scan by hand
 - WEBUI: Super cashier, see list of vouchers, cash by button
-- WEBUI: Color background
 - ADMIN: Rate limiting https://sysopstechnix.com/protect-web-servers-from-ddos-attacks-using-fail2ban/
 - CICD: Tests on GitHub
 - TEST: unused imports
