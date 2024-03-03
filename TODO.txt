@@ -2,13 +2,15 @@
 
 ## Next
 
-- SPIKE: what is the current status on reporting ?
+- REPORT: integrate link to ods report in email
+- CLEAN: remove all unused code from v1
+- BACK: systemd: send reports service / timer
+- ADMIN: ansible install
 
 - WEBUI: form for logout
 - WEBUI: style history
 - DOC: brief doc to make users, emissions, vouchers, pdf, cli list scan / undo
 - CLEAN: test cli / webui code only
-- CLEAN: remove all unused code from v1
 - DEPLOY: deploy on vouchers2 + reporting
 - CLEAN: 404 should return a invalid request page with timer
 - CLEAN: Replace app.utils.sql.get_connection(args.db) by args.conn
@@ -31,7 +33,6 @@
 - CLEAN: Email gen to file descriptor, for consistency (will pass stdout)
 - WEBUI: Voucher Info, expire, Cashed_In by, Cashed_In date in localtime
 - CLI: users read shows token
-- BACK: systemd: send reports service / timer
 - BACK: publish pdf
 - CLEAN: All IDs can be public, what matters is a user Bearers table
 - CLEAN: Remove the Token table and replace it by a Bearers table, just for user

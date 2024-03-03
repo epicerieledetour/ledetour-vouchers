@@ -212,7 +212,7 @@ def _emissions_odsreport(args: argparse.Namespace, conn: sqlite3.Connection) -> 
 
 @_connect
 def _emissions_emailreport(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
-    gen.emission_emailreport(conn)
+    gen.emission_emailreport(conn, sys.stdout)
 
 
 # vouchers

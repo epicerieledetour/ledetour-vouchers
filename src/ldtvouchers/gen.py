@@ -345,7 +345,7 @@ def emission_odsreport(conn: Connection, fp: StringIO) -> None:
     doc.write(fp)
 
 
-def emission_emailreport(conn: Connection) -> None:
+def emission_emailreport(conn: Connection, fp: StringIO) -> None:
     now_locatime = datetime.datetime.utcnow()
     now_utc = now_locatime.astimezone(datetime.timezone.utc)
 
@@ -361,7 +361,7 @@ def emission_emailreport(conn: Connection) -> None:
         for (label, vouchers) in itertools.groupby(rows, lambda r: r["user"])
     ]
 
-    print(
+    fp.write(
         _ENV.get_template("emission_emailreport.j2").render(
             date_localtime=now_locatime, vouchers_by_user=vouchers_by_user
         )
