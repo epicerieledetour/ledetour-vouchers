@@ -9,7 +9,7 @@ from typing import Annotated, Callable
 
 import jinja2
 import pytz
-from fastapi import Depends, FastAPI, Request, Response, status
+from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field  # type: ignore
@@ -31,6 +31,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="ldtvouchers")
 
     dbpath: Path = "db.sqlite3"
+    debug: bool = False
 
 
 @functools.lru_cache
@@ -303,7 +304,11 @@ def debug(
     response: Response,
     responseid: str,
     conn: Connection = Depends(get_db),
+    settings: Settings = Depends(get_settings),
 ):
+    if not settings.debug:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
     action = db._read_first_action_with_responseid(conn, responseid)
     return _response(
         request,

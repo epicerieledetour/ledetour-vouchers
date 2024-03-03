@@ -262,6 +262,7 @@ def _server_serve(args: argparse.Namespace) -> None:
 
     import ldtvouchers.webapp
 
+    ldtvouchers.webapp.get_settings().debug = args.debug
     uvicorn.run(ldtvouchers.webapp.app, port=args.port, log_level="info")
 
 
@@ -346,6 +347,13 @@ def _build_parser() -> argparse.ArgumentParser:
         default="db.sqlite3",
         type=pathlib.Path,
         help="Path to the database file",
+    )
+
+    parser.add_argument(
+        "--debug",
+        default=False,
+        action="store_true",
+        help="Activate the debug mode",
     )
 
     subparsers = parser.add_subparsers()
