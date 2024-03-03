@@ -67,7 +67,9 @@ class WebAppTestCase(testutils.TestCase):
     def setUp(self):
         super().setUp()
 
-        webapp.get_db.dbpath = self.dbpath
+        webapp.app.dependency_overrides[webapp.get_settings] = (
+            self.get_settings_override
+        )
         self.client = TestClient(webapp.app)
 
         with db.connect(self.dbpath) as conn:
@@ -151,6 +153,9 @@ class WebAppTestCase(testutils.TestCase):
             # self.url_undo_voucher1 = "/undo/{}".format(self.voucher1.token)
             # self.url_scan_voucher2 = "/scan/{}".format(self.voucher2.token)
             # self.url_undo_voucher2 = "/undo/{}".format(self.voucher2.token)
+
+    def get_settings_override(self) -> webapp.Settings:
+        return webapp.Settings(dbpath=self.dbpath)
 
     def request(self, action="", usertoken="", vouchertoken=""):
         elems = [el for el in ("u", action, usertoken, vouchertoken) if el]

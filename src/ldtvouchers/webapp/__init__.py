@@ -5,7 +5,7 @@ import datetime
 import functools
 from pathlib import Path
 from sqlite3 import Connection
-from typing import Callable
+from typing import Annotated, Callable
 
 import jinja2
 import pytz
@@ -13,6 +13,7 @@ from fastapi import Depends, FastAPI, Request, Response, status
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field  # type: ignore
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from starlette.requests import URL
 
 from .. import db, models
@@ -26,19 +27,23 @@ _TITLE = "Bons solidaires"
 # Dependencies
 
 
-class DBGetter:
-    def __init__(self):
-        self.dbpath = None
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="ldtvouchers")
 
-    def __call__(self):
-        conn = db.connect(self.dbpath)
-
-        with contextlib.closing(conn):
-            with conn:
-                yield conn
+    dbpath: Path = "db.sqlite3"
 
 
-get_db = DBGetter()
+@functools.lru_cache
+def get_settings() -> Settings:
+    return Settings()
+
+
+def get_db(settings: Annotated[Settings, Depends(get_settings)]) -> Connection:
+    conn = db.connect(settings.dbpath)
+
+    with contextlib.closing(conn):
+        with conn:
+            yield conn
 
 
 _ENV = jinja2.Environment(

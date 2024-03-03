@@ -20,6 +20,7 @@ dependencies = [
     "fastapi",
     "jinja2",
     "odfpy",
+    "pydantic-settings",
     "pypdf",
     "pytz",
     "qrcode",

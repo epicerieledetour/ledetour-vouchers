@@ -262,7 +262,6 @@ def _server_serve(args: argparse.Namespace) -> None:
 
     import ldtvouchers.webapp
 
-    ldtvouchers.webapp.get_db.dbpath = args.db
     uvicorn.run(ldtvouchers.webapp.app, port=args.port, log_level="info")
 
 
