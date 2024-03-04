@@ -3,6 +3,7 @@
 import contextlib
 import datetime
 import functools
+import logging
 from pathlib import Path
 from sqlite3 import Connection
 from typing import Annotated, Callable
@@ -18,20 +19,22 @@ from starlette.requests import URL
 
 from .. import db, models
 
-app = FastAPI(openapi_url=None)
-
 _ACTION_ORIGIN_HTTPAPI = "httpapi"
-
 _TITLE = "Bons solidaires"
+
 
 # Dependencies
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix="ldtvouchers")
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        env_prefix="ldtvouchers_",
+    )
 
-    dbpath: Path = "db.sqlite3"
-    debug: bool = False
+    dbpath: Path
+    debug: bool
 
 
 @functools.lru_cache
@@ -46,6 +49,25 @@ def get_db(settings: Annotated[Settings, Depends(get_settings)]) -> Connection:
         with conn:
             yield conn
 
+
+# App
+
+
+@contextlib.asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger = logging.getLogger("uvicorn")
+    settings = get_settings()
+    for name, value in settings:
+        logger.info("Setting %r: %s", name, value)
+    yield
+
+
+app = FastAPI(
+    openapi_url=None,
+    lifespan=lifespan,
+)
+
+# Jinja
 
 _ENV = jinja2.Environment(
     loader=jinja2.PackageLoader("ldtvouchers.webapp"),

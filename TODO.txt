@@ -3,9 +3,11 @@
 ## Next
 
 - REPORT: integrate link to ods report in email
-  - Make reports write to stdout by default, remove path argument
   - Add env variable LDTVOUCHERS_MEDIADIR
-  - Add --publish to report variables
+  - Publish to mediadir
+  - Add implements --debug to report to publish to tmp
+  - --debug emailreport
+  - Send emailreport
 
 - CLEAN: remove all unused code from v1
 - BACK: systemd: send reports service / timer
