@@ -83,20 +83,20 @@ class Message(BaseModel):
 class Action(BaseModel):
     url: str
     verb: str  # TODO: use an enum
-    body: Union[dict, None]
-    message: Union[Message, None]
+    body: Union[dict, None] = None
+    message: Union[Message, None] = None
 
 
 class NextActions(BaseModel):
-    scan: Union[Action, None]
-    button: Union[Action, None]
+    scan: Union[Action, None] = None
+    button: Union[Action, None] = None
 
 
 class ActionResponse(BaseModel):
-    user: Union[User, None]
-    voucher: Union[Voucher, None]
-    message_main: Union[Message, None]
-    message_detail: Union[Message, None]
+    user: Union[User, None] = None
+    voucher: Union[Voucher, None] = None
+    message_main: Union[Message, None] = None
+    message_detail: Union[Message, None] = None
     next_actions: NextActions
 
 
