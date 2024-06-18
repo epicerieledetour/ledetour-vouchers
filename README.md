@@ -30,8 +30,9 @@ python -m uvicorn app.main:app --reload --host 0.0.0.0 --ssl-keyfile ssl/ca.key 
 
 ```sh
 cd ssl
-openssl genrsa -des3 -out ssl/ca.key 2048
-openssl req -x509 -new -nodes -key ca.key -sha256 -days 1825 -out ssl/ca.pem
+# Enter nopasswd on the password prompt
+openssl genrsa -des3 -out ca.key 2048
+openssl req -x509 -new -nodes -key ca.key -sha256 -days 1825 -out ca.pem
 ```
 
 ## WIP operations
@@ -44,7 +45,38 @@ openssl req -x509 -new -nodes -key ca.key -sha256 -days 1825 -out ssl/ca.pem
 
 ```
 sqlite3 db.sqlite3
-> .import --csv --skip 1 --schema temp data.csv table_name
+> .import --csv --skip 1 data.csv table_name
+```
+
+For vouchers:
+```
+sqlite3 db.sqlite3
+> .import --csv --skip 1 vouchers.csv vouchers
+```
+
+4. Make an ingest.csv with at least two columns:
+  - `id`: this is the voucher ID
+  - `userid`: the ID of the user that will distribute the voucher
+
+5. Create an ingestion script ingest.sh
+
+```
+python bin/ingest.py < ingest.csv > ingest.sh
+```
+
+6. Run a server
+
+```
+export LDTVOUCHERS_DB_PATH=`pwd`/emissions/2024-07-01/ledetour-vouchers.sqlite3
+export LDTVOUCHERS_SERVE_STATIC_FILES=1
+
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --ssl-keyfile ssl/ca.key --ssl-certfile ssl/ca.pem --ssl-keyfile-password nopasswd
+```
+
+7. Run the ingestion script
+
+```
+sh ingest.sh
 ```
 
 ## Make a new emissions
