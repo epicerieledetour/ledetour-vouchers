@@ -112,9 +112,9 @@ python -m uvicorn app.main:app --reload --host 0.0.0.0 --ssl-keyfile ssl/ca.key 
 ### Genereate SSL certificate
 
 ```sh
-cd ssl
+# When asked, used password `nopasswd` to match the serve command line above
 openssl genrsa -des3 -out ssl/ca.key 2048
-openssl req -x509 -new -nodes -key ca.key -sha256 -days 1825 -out ssl/ca.pem
+openssl req -x509 -new -nodes -key ssl/ca.key -sha256 -days 1825 -out ssl/ca.pem
 ```
 
 ## WIP operations
