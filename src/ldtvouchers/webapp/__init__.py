@@ -33,8 +33,8 @@ class Settings(BaseSettings):
         env_prefix="ldtvouchers_",
     )
 
-    dbpath: Path
-    debug: bool
+    dbpath: Path | None = "ldtvouchers.sqlite3"
+    debug: bool = False
 
 
 @functools.lru_cache
