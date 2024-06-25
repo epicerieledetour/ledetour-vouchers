@@ -1,3 +1,4 @@
+import datetime
 import functools
 import pathlib
 import random
@@ -291,7 +292,7 @@ def build_http_response(conn: Connection, action: models.Action) -> models.HttpR
         get_sql("http_response_status"), {"responseid": action.responseid}
     ).fetchone()
     resp = dict(**row)
-    code = resp.pop("httpcode")
+    _ = resp.pop("httpcode")  # TODO: why is httpcode not used ?
 
     status = models.HttpResponseStatus(
         responseid=resp["responseid"],
@@ -330,8 +331,6 @@ def _read_response():
 
 
 # Debug
-
-import datetime
 
 
 def filldb(conn: Connection) -> None:
