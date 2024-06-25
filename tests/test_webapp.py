@@ -213,7 +213,7 @@ class WebAppTestCase(testutils.TestCase):
 
         resp = self.scan(self.cashier1_token, self.voucher1_token)
 
-        self.assert_(resp.status_code, HTTPStatus.FORBIDDEN)
+        self.assertTrue(resp.status_code == HTTPStatus.FORBIDDEN)
 
     def assertAlmostNow(self, date):
         return date - datetime.datetime.utcnow() < datetime.timedelta(seconds=1.0)
