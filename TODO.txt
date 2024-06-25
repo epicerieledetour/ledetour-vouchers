@@ -13,9 +13,16 @@
 - BACK: systemd: send reports service / timer
 - ADMIN: ansible install
 
+- BACK: Emitter groups
+  - allow emitter / cashier groups for geographical voucher emissions
+  - allow different verso for vouchers, depending on the emitter
+
+- DOC: brief doc to make users, emissions, vouchers, pdf, cli list scan / undo
+- CLEAN: merge v2
+
+- CICD: up coverage back to 100%
 - WEBUI: form for logout
 - WEBUI: style history
-- DOC: brief doc to make users, emissions, vouchers, pdf, cli list scan / undo
 - CLEAN: test cli / webui code only
 - DEPLOY: deploy on vouchers2 + reporting
 - CLEAN: 404 should return a invalid request page with timer
