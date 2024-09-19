@@ -8,6 +8,7 @@
   - Add implements --debug to report to publish to tmp
   - --debug emailreport
   - Send emailreport
+- DOC: manual emission from scratch
 
 - CLEAN: remove all unused code from v1
 - BACK: systemd: send reports service / timer

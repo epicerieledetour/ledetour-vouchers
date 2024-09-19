@@ -107,6 +107,10 @@ pytest
 
 # Serve
 python -m uvicorn app.main:app --reload --host 0.0.0.0 --ssl-keyfile ssl/ca.key --ssl-certfile ssl/ca.pem --ssl-keyfile-password nopasswd --env-file dev.env
+
+# or
+
+python -m ldtvouchers server serve
 ```
 
 ### Genereate SSL certificate
