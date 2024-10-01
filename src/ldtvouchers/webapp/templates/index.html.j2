@@ -42,7 +42,7 @@
 
     <p id="user">
       {% if user %}
-      {{ user.label }}
+      {{ user.description }}
       {% else %}
       {{ title }}
       {% endif %}
@@ -108,11 +108,7 @@
   {% if undo_url %}
   <section>
     <form>
-      <button
-        id="button-undo"
-        type="submit"
-        formmethod="get"
-        formaction="{{ undo_url }}">
+      <button id="button-undo" type="submit" formmethod="get" formaction="{{ undo_url }}">
         Undo
       </button>
     </form>
