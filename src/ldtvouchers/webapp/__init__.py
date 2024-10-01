@@ -417,7 +417,7 @@ def index(request: Request):
 # http://localhost:8080/scan/tokusr_ijpxzkbf  # valid user
 # http://localhost:8080/u/scan/tokusr_hpo4wu5v/0001-XUQNS
 
-app.mount("/", StaticFiles(directory=Path(__file__).parent / "static"), name="static")
+app.mount("/", StaticFiles(packages=["ldtvouchers.webapp"]), name="root")
 
 
 """
