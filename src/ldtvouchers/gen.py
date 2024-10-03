@@ -19,7 +19,7 @@ import qrcode
 import qrcode.image.svg
 from pypdf import PdfWriter
 
-from . import db, models
+from . import db, models, webapp
 
 _ENV = jinja2.Environment(
     loader=jinja2.PackageLoader("ldtvouchers"), autoescape=jinja2.select_autoescape
@@ -347,7 +347,7 @@ def emission_odsreport(conn: Connection, fp: StringIO) -> None:
     doc.write(fp)
 
 
-def emission_emailreport(conn: Connection, fp: StringIO) -> None:
+def _emission_emailreport(conn: Connection, fp: StringIO, template: str) -> None:
     now_locatime = datetime.datetime.utcnow()
     now_utc = now_locatime.astimezone(datetime.timezone.utc)
 
@@ -364,7 +364,18 @@ def emission_emailreport(conn: Connection, fp: StringIO) -> None:
     ]
 
     fp.write(
-        _ENV.get_template("emission_emailreport.j2").render(
-            date_localtime=now_locatime, vouchers_by_user=vouchers_by_user
+        _ENV.get_template(template).render(
+            date_localtime=now_locatime,
+            vouchers_by_user=vouchers_by_user,
+            # HACK, should compute url should be injected, not computed
+            report_url=f"https://vouchers.epicerieledetour.org/e/{webapp.get_settings().hack_emissiontoken}/report.ods",
         )
     )
+
+
+emission_emailreport_body = functools.partial(
+    _emission_emailreport, template="emission_emailreport_body.j2"
+)
+emission_emailreport_subject = functools.partial(
+    _emission_emailreport, template="emission_emailreport_subject.j2"
+)

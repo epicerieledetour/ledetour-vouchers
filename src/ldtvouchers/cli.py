@@ -5,10 +5,13 @@ import contextlib
 import csv
 import datetime
 import functools
+import io
 import pathlib
+import smtplib
 import sqlite3
 import sys
 from collections.abc import Callable, Iterable, Sequence
+from email.mime.text import MIMEText
 from types import NoneType, UnionType
 from typing import Any, Text
 
@@ -212,7 +215,23 @@ def _emissions_odsreport(args: argparse.Namespace, conn: sqlite3.Connection) -> 
 
 @_connect
 def _emissions_emailreport(args: argparse.Namespace, conn: sqlite3.Connection) -> None:
-    gen.emission_emailreport(conn, sys.stdout)
+    from ldtvouchers.webapp import get_settings
+
+    settings = get_settings()
+
+    with smtplib.SMTP_SSL(
+        settings.emailreport_host, settings.emailreport_port
+    ) as server, io.StringIO() as body, io.StringIO() as subject:
+        gen.emission_emailreport_body(conn, body)
+        gen.emission_emailreport_subject(conn, subject)
+
+        msg = MIMEText(body.getvalue(), "plain", _charset="utf-8")
+        msg["From"] = settings.emailreport_from
+        msg["To"] = settings.emailreport_to
+        msg["Subject"] = subject.getvalue()
+
+        server.login(settings.emailreport_user, settings.emailreport_password)
+        server.send_message(msg)
 
 
 # vouchers

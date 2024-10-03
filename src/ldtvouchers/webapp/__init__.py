@@ -34,6 +34,16 @@ class Settings(BaseSettings):
 
     dbpath: Path | None = Path("ldtvouchers.sqlite3")
     filespath: Path = Path("files")
+
+    hack_emissiontoken: str | None = None
+
+    emailreport_from: str | None = None
+    emailreport_to: str | None = None
+    emailreport_host: str | None = None
+    emailreport_port: int | None = None
+    emailreport_user: str | None = None
+    emailreport_password: str | None = None
+
     debug: bool = False
 
 
