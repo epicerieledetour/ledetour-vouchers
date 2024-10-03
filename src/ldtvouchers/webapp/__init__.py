@@ -11,7 +11,7 @@ from typing import Annotated, Callable
 import jinja2
 import pytz
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field  # type: ignore
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -21,7 +21,6 @@ from .. import db, models
 
 _ACTION_ORIGIN_HTTPAPI = "httpapi"
 _TITLE = "Bons solidaires"
-
 
 # Dependencies
 
@@ -33,7 +32,8 @@ class Settings(BaseSettings):
         env_prefix="ldtvouchers_",
     )
 
-    dbpath: Path | None = "ldtvouchers.sqlite3"
+    dbpath: Path | None = Path("ldtvouchers.sqlite3")
+    filespath: Path = Path("files")
     debug: bool = False
 
 
@@ -320,6 +320,13 @@ def user(
     return _request(request, response, requestid, usertoken, vouchertoken, conn)
 
 
+@app.get("/e/{emissiontoken}/{filename}")
+def emission_file(request: Request, emissiontoken: str, filename: str):
+    return RedirectResponse(
+        request.url_for("files", path=f"/emissions/{emissiontoken}/{filename}")
+    )
+
+
 @app.get("/d/{responseid}")
 def debug(
     request: Request,
@@ -416,6 +423,8 @@ def index(request: Request):
 # http://localhost:8080/scan/tokusr_invalid   # invalid user
 # http://localhost:8080/scan/tokusr_ijpxzkbf  # valid user
 # http://localhost:8080/u/scan/tokusr_hpo4wu5v/0001-XUQNS
+
+app.mount("/files", StaticFiles(directory=get_settings().filespath), name="files")
 
 app.mount("/", StaticFiles(packages=["ldtvouchers.webapp"]), name="root")
 
