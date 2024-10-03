@@ -1,6 +1,6 @@
-Date: {{ date_localtime }}
-
 {% for user, vouchers in vouchers_by_user%}{{ user }}: {{ vouchers | length }}
 {% for voucher in vouchers %}- {{ voucher.localtime }} {{ voucher.token }}
 {% endfor %}
 {% endfor %}
+
+Téléchargez le rapport complet: {{ report_url }}
