@@ -1,6 +1,11 @@
+Bonjour l'équipe des Bons Solidaire,
+
+Voici le rapport automatique d'activité pour le jour {{ date_localtime }}
+
 {% for user, vouchers in vouchers_by_user%}{{ user }}: {{ vouchers | length }}
 {% for voucher in vouchers %}- {{ voucher.localtime }} {{ voucher.token }}
 {% endfor %}
 {% endfor %}
 
-Téléchargez le rapport complet: {{ report_url }}
+Téléchargez le rapport complet:
+{{ report_url }}

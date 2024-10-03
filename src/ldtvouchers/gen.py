@@ -365,7 +365,7 @@ def _emission_emailreport(conn: Connection, fp: StringIO, template: str) -> None
 
     fp.write(
         _ENV.get_template(template).render(
-            date_localtime=now_locatime,
+            date_localtime=now_locatime.strftime("%Y-%m-%d"),
             vouchers_by_user=vouchers_by_user,
             # HACK, should compute url should be injected, not computed
             report_url=f"https://vouchers.epicerieledetour.org/e/{webapp.get_settings().hack_emissiontoken}/report.ods",
