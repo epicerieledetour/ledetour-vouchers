@@ -285,21 +285,16 @@ def _server_serve(args: argparse.Namespace) -> None:
 
     import ldtvouchers.webapp
 
-    kwargs = {
-        "log_level": "info",
-        "host": args.host,
-        "port": args.port,
-    }
-    if args.ssl_keyfile and args.ssl_certfile:
-        kwargs.update(
-            {
-                "ssl_keyfile": args.ssl_keyfile,
-                "ssl_certfile": args.ssl_certfile,
-            }
-        )
-
     ldtvouchers.webapp.get_settings().debug = args.debug
-    uvicorn.run(ldtvouchers.webapp.app, **kwargs)
+
+    uvicorn.run(
+        ldtvouchers.webapp.app,
+        log_level="info",
+        host=args.host,
+        port=args.port,
+        ssl_keyfile=args.ssl_keyfile,
+        ssl_certfile=args.ssl_certfile,
+    )
 
 
 # Debug
@@ -495,8 +490,12 @@ def _build_parser() -> argparse.ArgumentParser:
     par = sub.add_parser("serve")
     par.add_argument("--host", default="127.0.0.1", help="Web server host")
     par.add_argument("--port", default=8080, type=int, help="Web server port")
-    par.add_argument("--ssl_certfile", help="Web server SSL certfile")
-    par.add_argument("--ssl_keyfile", help="Web server SSL keyfile")
+    par.add_argument(
+        "--ssl_certfile", default=None, type=str, help="Web server SSL certfile"
+    )
+    par.add_argument(
+        "--ssl_keyfile", default=None, type=str, help="Web server SSL keyfile"
+    )
     par.set_defaults(command=_server_serve)
 
     # debug

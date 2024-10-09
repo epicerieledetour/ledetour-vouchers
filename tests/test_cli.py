@@ -9,7 +9,7 @@ from pathlib import Path
 import odf.opendocument
 import testutils
 
-from ldtvouchers import cli, db, models  # isort:skip
+from ldtvouchers import cli, db, models, webapp  # isort:skip
 
 
 class _Std:
@@ -514,3 +514,26 @@ class GenerateTestCase(FullDBTestCase):
 
             mimetext = server.send_message.call_args[0][0]
             self.assertIn("Subject: Rapport Bons Solidaires", mimetext.as_string())
+
+    @unittest.mock.patch("uvicorn.run")
+    def test_server_serve(self, run):
+        with self.cli(
+            "server",
+            "serve",
+            "--ssl_keyfile",
+            "keyfile",
+        ):
+            pass
+
+        (app,) = run.call_args.args
+        self.assertIs(app, webapp.app)
+        self.assertDictEqual(
+            run.call_args.kwargs,
+            {
+                "log_level": "info",
+                "host": "127.0.0.1",
+                "port": 8080,
+                "ssl_keyfile": "keyfile",
+                "ssl_certfile": None,
+            },
+        )
