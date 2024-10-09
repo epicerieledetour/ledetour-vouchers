@@ -1,7 +1,8 @@
 import datetime
 
 import testutils
-from ldtvouchers import gen, models
+
+from ldtvouchers import gen, models  # isort:skip
 
 
 class GenTestCase(testutils.TestCase):

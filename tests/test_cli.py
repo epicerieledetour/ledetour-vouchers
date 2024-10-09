@@ -1,13 +1,15 @@
 import datetime
 import json
 import unittest
+import unittest.mock
 from contextlib import contextmanager, redirect_stderr, redirect_stdout
 from io import StringIO
 from pathlib import Path
 
 import odf.opendocument
 import testutils
-from ldtvouchers import cli, db, models
+
+from ldtvouchers import cli, db, models  # isort:skip
 
 
 class _Std:
@@ -494,10 +496,21 @@ class GenerateTestCase(FullDBTestCase):
 
         odf.opendocument.load(path)
 
-    def test_emission_remailreport(self):
+    @unittest.mock.patch("ldtvouchers.cli.smtplib.SMTP_SSL")
+    def test_emission_remailreport(self, SMTP_SSL):
+        server = unittest.mock.Mock()
+
+        server.__enter__ = unittest.mock.Mock(return_value=server)
+        server.__exit__ = unittest.mock.Mock(False)
+
+        SMTP_SSL.return_value = server
+
         # TODO: better test
         with self.cli("debug", "filldb"):
             pass
 
         with self.cli("emissions", "emailreport"):
-            pass
+            server.login.assert_called_once_with(None, None)
+
+            mimetext = server.send_message.call_args[0][0]
+            self.assertIn("Subject: Rapport Bons Solidaires", mimetext.as_string())

@@ -1,9 +1,13 @@
 import contextlib
+import os
 import pathlib
 import tempfile
 import unittest
 
+os.environ["LDTVOUCHERS_FILESPATH"] = str("/tmp")
 
+
+# TODO: remove this class
 class TestCaseMixin:
     @contextlib.contextmanager
     def tmpdir(self):

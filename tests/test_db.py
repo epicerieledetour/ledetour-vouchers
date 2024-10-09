@@ -5,7 +5,8 @@ import unittest
 import unittest.mock
 
 import testutils
-from ldtvouchers import db, models
+
+from ldtvouchers import db, models  # isort:skip
 
 
 class DbTestCase(unittest.TestCase):

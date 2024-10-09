@@ -4,7 +4,8 @@ from xml.etree import ElementTree as ET
 
 import testutils
 from fastapi.testclient import TestClient
-from ldtvouchers import db, models, webapp
+
+from ldtvouchers import db, models, webapp  # isort:skip
 
 {
     "status": {
