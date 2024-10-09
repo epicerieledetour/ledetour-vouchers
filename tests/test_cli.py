@@ -497,7 +497,7 @@ class GenerateTestCase(FullDBTestCase):
         odf.opendocument.load(path)
 
     @unittest.mock.patch("ldtvouchers.cli.smtplib.SMTP_SSL")
-    def test_emission_remailreport(self, SMTP_SSL):
+    def test_emission_emailreport(self, SMTP_SSL):
         server = unittest.mock.Mock()
 
         server.__enter__ = unittest.mock.Mock(return_value=server)
