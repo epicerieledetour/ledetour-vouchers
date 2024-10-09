@@ -126,9 +126,10 @@ def emission_vouchers(
     # Convert the verso SVG to a temporary PDF
 
     verso_pdf_path = tmpdir / "verso.pdf"
-    with verso_pdf_path.open("wb") as fd, _VOUCHERS_VERSO_SVG_PATH.open(
-        "r"
-    ) as verso_fd:
+    with (
+        verso_pdf_path.open("wb") as fd,
+        _VOUCHERS_VERSO_SVG_PATH.open("r") as verso_fd,
+    ):
         _svg2pdf(file_obj=verso_fd, write_to=fd)
 
     # Initialize the jinja environment

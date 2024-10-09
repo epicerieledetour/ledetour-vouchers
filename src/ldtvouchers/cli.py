@@ -219,9 +219,13 @@ def _emissions_emailreport(args: argparse.Namespace, conn: sqlite3.Connection) -
 
     settings = get_settings()
 
-    with smtplib.SMTP_SSL(
-        settings.emailreport_host, settings.emailreport_port
-    ) as server, io.StringIO() as body, io.StringIO() as subject:
+    with (
+        smtplib.SMTP_SSL(
+            settings.emailreport_host, settings.emailreport_port
+        ) as server,
+        io.StringIO() as body,
+        io.StringIO() as subject,
+    ):
         gen.emission_emailreport_body(conn, body)
         gen.emission_emailreport_subject(conn, subject)
 
