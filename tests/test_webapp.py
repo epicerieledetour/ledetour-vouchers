@@ -216,12 +216,6 @@ class WebAppTestCase(testutils.TestCase):
 
         self.assertTrue(resp.status_code == HTTPStatus.FORBIDDEN)
 
-    def assertAlmostNow(self, date):
-        return date - datetime.datetime.utcnow() < datetime.timedelta(seconds=1.0)
-
-    def assertLater(self, date):
-        return date - datetime.datetime.utcnow() > datetime.timedelta(minutes=1.0)
-
     # 5
     def test_ok_voucher_cashedin(self):
         resp = self.scan(self.cashier1_token, self.voucher1_token)
