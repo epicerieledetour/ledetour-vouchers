@@ -63,8 +63,10 @@ def get_db(settings: Annotated[Settings, Depends(get_settings)]) -> Connection:
 # App
 
 
+# It looks like the fastapi.testclient does not run the
+# lifespan event... We keep them out of the coverage.
 @contextlib.asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI):  # pragma: no cover
     logger = logging.getLogger("uvicorn")
     settings = get_settings()
     for name, value in settings:
@@ -277,32 +279,6 @@ _RESPONSES = {
         status="Voucher has not been cashed in, cannot be undone",
         timeout_url_builder=_url_for_scanning_voucher,
     ),
-}
-
-
-def _url_for_user(request: Request, response: HTMLResponse) -> str:
-    return request.url_for("user", usertoken=response.user.token)
-
-
-_DOMAINS = {
-    None: {  # used for the start page
-        "prompt": "Scan an user code",
-        "scan": True,
-        "timeout": None,
-        "timeout_nexturl_builder": _noop,
-    },
-    "user": {
-        "prompt": "Scan a voucher",
-        "scan": True,
-        "timeout": None,
-        "timeout_nexturl_builder": _noop,
-    },
-    "voucher": {
-        "prompt": "",
-        "scan": False,
-        "timeout": datetime.timedelta(seconds=10),
-        "timeout_nexturl_builder": _url_for_user,
-    },
 }
 
 

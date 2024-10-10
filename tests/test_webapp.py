@@ -71,7 +71,7 @@ class WebAppTestCase(testutils.TestCase):
         webapp.app.dependency_overrides[webapp.get_settings] = (
             self.get_settings_override
         )
-        self.client = TestClient(webapp.app)
+        self.client = TestClient(webapp.app, follow_redirects=False)
 
         with db.connect(self.dbpath) as conn:
             db.initdb(conn)
@@ -195,6 +195,26 @@ class WebAppTestCase(testutils.TestCase):
         resp = self.get(f"/d/{response_id}")
 
         self.assertResponse(resp, HTTPStatus.OK, "None")
+
+    def test_debug__not_found_if_not_in_debug_mode(self):
+        def get_settings_override():
+            return webapp.Settings(dbpath=self.dbpath, debug=False)
+
+        webapp.app.dependency_overrides[webapp.get_settings] = get_settings_override
+        client = TestClient(webapp.app)
+        resp = client.get("/d/irrelevant_responseid")
+
+        self.assertEqual(resp.status_code, HTTPStatus.NOT_FOUND)
+        self.assertDictEqual(resp.json(), {"detail": "Not Found"})
+
+    def test_emission_file(self):
+        resp = self.get("/e/theemissiontoken/thefilename")
+
+        self.assertEqual(resp.status_code, HTTPStatus.TEMPORARY_REDIRECT)
+        self.assertEqual(
+            resp.headers["location"],
+            "http://testserver/files/emissions/theemissiontoken/thefilename",
+        )
 
     # 1
     def test_error_voucher_unauthentified(self):
