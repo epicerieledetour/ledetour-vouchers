@@ -4,7 +4,7 @@ import pathlib
 import tempfile
 import unittest
 
-os.environ["LDTVOUCHERS_FILESPATH"] = str("/tmp")
+os.environ["LDTVOUCHERS_FILESPATH"] = "/tmp"
 
 
 # TODO: remove this class

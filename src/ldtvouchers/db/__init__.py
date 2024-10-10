@@ -265,13 +265,9 @@ def add_action(conn: Connection, action: models.ActionBase) -> models.Action:
         raise ActionError(action)
 
     # TODO: test return value
-    return _read_action(conn, models.EmissionId(cur.lastrowid))
-
-
-def _read_action(conn: Connection, actionid: models.ActionId) -> models.Action:
-    row = conn.execute(get_sql("action_read"), {"actionid": actionid}).fetchone()
-    if not row:
-        raise UnknownId(Emission, actionid)
+    row = conn.execute(
+        get_sql("action_read"), {"actionid": models.ActionId(cur.lastrowid)}
+    ).fetchone()
     return models.Action(**row)
 
 
@@ -324,10 +320,6 @@ def build_http_response(conn: Connection, action: models.Action) -> models.HttpR
     # Return
 
     return models.HttpResponse(status=status, user=user, voucher=voucher)
-
-
-def _read_response():
-    pass
 
 
 # Debug

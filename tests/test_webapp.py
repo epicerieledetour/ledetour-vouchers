@@ -156,7 +156,7 @@ class WebAppTestCase(testutils.TestCase):
             # self.url_undo_voucher2 = "/undo/{}".format(self.voucher2.token)
 
     def get_settings_override(self) -> webapp.Settings:
-        return webapp.Settings(dbpath=self.dbpath)
+        return webapp.Settings(dbpath=self.dbpath, debug=True)
 
     def request(self, action="", usertoken="", vouchertoken=""):
         elems = [el for el in ("u", action, usertoken, vouchertoken) if el]
@@ -187,6 +187,12 @@ class WebAppTestCase(testutils.TestCase):
 
     def test_start_page(self):
         resp = self.get("/")
+
+        self.assertResponse(resp, HTTPStatus.OK, "None")
+
+    def test_debug(self):
+        response_id = 1
+        resp = self.get(f"/d/{response_id}")
 
         self.assertResponse(resp, HTTPStatus.OK, "None")
 
