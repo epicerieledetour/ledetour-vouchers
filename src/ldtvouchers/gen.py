@@ -17,6 +17,7 @@ import odf.table
 import odf.text
 import qrcode
 import qrcode.image.svg
+import zoneinfo
 from pypdf import PdfWriter
 
 from . import db, models, webapp
@@ -349,13 +350,13 @@ def emission_odsreport(conn: Connection, fp: StringIO) -> None:
 
 
 def _emission_emailreport(conn: Connection, fp: StringIO, template: str) -> None:
-    now_locatime = datetime.datetime.utcnow()
-    now_utc = now_locatime.astimezone(datetime.timezone.utc)
+    now_utc = datetime.datetime.now(datetime.timezone.utc)
+    now_local = now_utc.astimezone(zoneinfo.ZoneInfo("America/Montreal"))
 
     rows = conn.execute(
         db.get_sql("emission_emailreport"),
         {
-            "date_utc": now_utc,
+            "date_utc": now_utc.isoformat(),
         },
     ).fetchall()
 
@@ -366,7 +367,7 @@ def _emission_emailreport(conn: Connection, fp: StringIO, template: str) -> None
 
     fp.write(
         _ENV.get_template(template).render(
-            date_localtime=now_locatime.strftime("%Y-%m-%d"),
+            date_localtime=now_local.strftime("%Y-%m-%d"),
             vouchers_by_user=vouchers_by_user,
             # HACK, should compute url should be injected, not computed
             report_url=f"https://vouchers.epicerieledetour.org/e/{webapp.get_settings().hack_emissiontoken}/report.ods",

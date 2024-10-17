@@ -5,5 +5,5 @@ SELECT
 FROM vouchers v
 JOIN tokens tv ON v.voucherid = tv.idintable AND tv.tablename = "vouchers"
 JOIN users u ON v.cashedin_by = u.userid
-WHERE cashedin_utc >= date(:date_utc) AND cashedin_utc < date(:date_utc, "+1 day")
+WHERE cashedin_utc > date(:date_utc, "-1 day") AND cashedin_utc <= date(:date_utc)
 ORDER BY u.label ASC, v.cashedin_utc ASC;

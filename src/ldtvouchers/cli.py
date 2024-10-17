@@ -219,13 +219,9 @@ def _emissions_emailreport(args: argparse.Namespace, conn: sqlite3.Connection) -
 
     settings = get_settings()
 
-    with (
-        smtplib.SMTP_SSL(
-            settings.emailreport_host, settings.emailreport_port
-        ) as server,
-        io.StringIO() as body,
-        io.StringIO() as subject,
-    ):
+    # Generate message
+
+    with io.StringIO() as body, io.StringIO() as subject:
         gen.emission_emailreport_body(conn, body)
         gen.emission_emailreport_subject(conn, subject)
 
@@ -234,6 +230,15 @@ def _emissions_emailreport(args: argparse.Namespace, conn: sqlite3.Connection) -
         msg["To"] = settings.emailreport_to
         msg["Subject"] = subject.getvalue()
 
+    print(msg)
+    print("---- Decoded payload")
+    print(msg.get_payload(decode=True).decode())
+
+    # Send message
+
+    with smtplib.SMTP_SSL(
+        settings.emailreport_host, settings.emailreport_port
+    ) as server:
         server.login(settings.emailreport_user, settings.emailreport_password)
         server.send_message(msg)
 
