@@ -4,9 +4,11 @@ SELECT
 	v.sortnumber AS sortnumber,
 	t.token AS token,
 	v.value_CAN AS value,
-	COALESCE(ud.label, "") AS distributed_by,
-	COALESCE(uc.label, "") AS cashedin_by,
-	datetime(v.cashedin_utc, "localtime") AS cashedin_date
+	COALESCE(ud.label, "") AS distributed_by_label,
+	COALESCE(ud.description, "") AS distributed_by_description,
+	datetime(v.cashedin_utc, "localtime") AS cashedin_date,
+	COALESCE(uc.label, "") AS cashedin_by_label,
+	COALESCE(uc.description, "") AS cashedin_by_description
 FROM vouchers v
 LEFT JOIN tokens t ON v.voucherid = t.idintable AND t.tablename = "vouchers"
 LEFT JOIN users ud ON v.distributed_by = ud.userid

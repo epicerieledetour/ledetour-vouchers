@@ -248,12 +248,9 @@ def _table_cell_args(val):
 
 
 def emission_odsreport(conn: Connection, fp: StringIO) -> None:
-    def _table_column_args(val):
-        val = _transform(val)
+    def _table_column_args(key):
         ret = {}
-        if isinstance(val, bool):
-            ret["defaultcellstylename"] = "auto-bool-style"  # pragma: no cover
-        if isinstance(val, datetime.datetime):
+        if key.endswith("_date"):
             ret["defaultcellstylename"] = "auto-date-style"  # pragma: no cover
         return ret
 
@@ -267,12 +264,12 @@ def emission_odsreport(conn: Connection, fp: StringIO) -> None:
                 first_row = False
                 hcol = odf.table.TableHeaderColumns(parent=table)
 
-                for val in tuple(row):
-                    odf.table.TableColumn(parent=hcol, **_table_column_args(val))
+                for key in row.keys():
+                    odf.table.TableColumn(parent=hcol, **_table_column_args(key))
 
                 tr = odf.table.TableRow(parent=table)
-                for val in row.keys():
-                    _add_row_cell(tr, val)
+                for key in row.keys():
+                    _add_row_cell(tr, key)
 
             tr = odf.table.TableRow(parent=table)
             for val in tuple(row):
