@@ -10,7 +10,7 @@ import pathlib
 import smtplib
 import sqlite3
 import sys
-from collections.abc import Callable, Iterable, Sequence
+from collections.abc import Callable, Generator, Iterable, Sequence
 from email.mime.text import MIMEText
 from types import NoneType, UnionType
 from typing import Any, Text
@@ -179,17 +179,33 @@ def _emissions_import(
     # TODO: make set_emission_vouchers safe to make sure existing vouchers
     # are not deleted in case of csv reading / sql inserting errors
 
-    reader = csv.DictReader(args.path)
-    vouchers = (
-        models.VoucherImport(value_CAN=row["value"], distributed_by_label=row["by"])
-        for row in reader
-    )
+    def vouchers() -> Generator[models.VoucherImport, None, None]:
+        for row in csv.DictReader(args.path):
+            value = int(row["value"])
+
+            try:
+                quant = int(row["quantity"])
+            except ValueError:
+                quant = 0
+
+            for _ in range(quant):
+                yield models.VoucherImport(
+                    value_CAN=value, distributed_by_label=row["by_label"]
+                )
 
     with db.set_emission_vouchers(conn, emissionid) as create_voucher:
-        for voucher in vouchers:
+        for voucher in vouchers():
             create_voucher(voucher)
 
     return db.read_emission(conn, emissionid)
+
+
+@_connect
+def _emissions_import_template(_: argparse.Namespace, conn: sqlite3.Connection) -> None:
+    writer = csv.writer(sys.stdout)
+    writer.writerow(["by_id", "by_label", "by_description", "value", "quantity"])
+    for user in [user for user in db.list_users(conn) if user.can_cashin is False]:
+        writer.writerow([user.userid, user.label, user.description, 20, 0])
 
 
 @_connect
@@ -456,6 +472,9 @@ def _build_parser() -> argparse.ArgumentParser:
     _add_id_argument(par, models.Emission)
     par.add_argument("path", type=argparse.FileType("r"))
     par.set_defaults(command=_emissions_import)
+
+    par = sub.add_parser("import_template")
+    par.set_defaults(command=_emissions_import_template)
 
     par = sub.add_parser("vouchers")  # TODO: move to generates subparser
     _add_id_argument(par, models.Emission)
