@@ -131,6 +131,14 @@ def create_user(conn: sqlite3.Connection, user: models.UserBase) -> models.User:
     return read_user(conn, models.UserId(cur.lastrowid))
 
 
+# TODO: replace this by get_user_by_label, and User should contain the token
+def get_user_token_from_label(conn: sqlite3.Connection, userlabel: str) -> models.Token:
+    row = conn.execute(get_sql("user_get_token_from_label"), (userlabel,)).fetchone()
+    if not row:
+        raise RuntimeError(f"Unknown User label {userlabel}")
+    return row["token"]
+
+
 def read_user(conn: sqlite3.Connection, userid: models.UserId) -> models.User:
     row = conn.execute(_SQL_USER_READ, (userid,)).fetchone()
     if not row:

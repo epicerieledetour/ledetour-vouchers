@@ -67,7 +67,7 @@ class DbInitTestCase(DbTestCase, testutils.TestCaseMixin):
 
         # Testing final vouchers status
 
-        expected_cashedin_by = (2, None, None, None, 3)
+        expected_cashedin_by = (2, None, 2, None, 3)
         for by, row in zip(
             expected_cashedin_by, self.conn.execute("SELECT * FROM vouchers")
         ):
@@ -84,6 +84,7 @@ class DbInitTestCase(DbTestCase, testutils.TestCaseMixin):
             "ok_voucher_cashedin",
             "error_voucher_invalid",
             "error_voucher_expired",
+            "ok_voucher_cashedin",
             "ok_voucher_info",
             "ok_voucher_cashedin",
             "error_voucher_cannot_undo_not_cashedin",

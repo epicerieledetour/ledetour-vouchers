@@ -163,7 +163,8 @@ tokens (
     idintable INTEGER NOT NULL
 );
 
-CREATE TRIGGER IF NOT EXISTS
+DROP TRIGGER IF EXISTS create_token_on_new_user;
+CREATE TRIGGER
 create_token_on_new_user
 AFTER INSERT ON users
 BEGIN
@@ -176,7 +177,8 @@ BEGIN
         );
 END;
 
-CREATE TRIGGER IF NOT EXISTS
+DROP TRIGGER IF EXISTS create_token_on_new_voucher;
+CREATE TRIGGER
 create_token_on_new_voucher
 AFTER INSERT ON vouchers
 BEGIN
@@ -189,7 +191,8 @@ BEGIN
         );
 END;
 
-CREATE TRIGGER IF NOT EXISTS
+DROP TRIGGER IF EXISTS update_voucher_on_action;
+CREATE TRIGGER
 update_voucher_on_action
 AFTER UPDATE OF responseid ON actions
 BEGIN
@@ -219,7 +222,8 @@ BEGIN
     WHERE vouchers.voucherid = new.voucherid;
 END;
 
-CREATE TRIGGER IF NOT EXISTS
+DROP TRIGGER IF EXISTS compute_action_response;
+CREATE TRIGGER
 compute_action_response
 AFTER INSERT ON actions
 BEGIN
@@ -247,7 +251,7 @@ BEGIN
                         THEN "error_voucher_user_needs_voucher_token"
                     WHEN v.voucherid IS NULL  -- Q4
                         THEN "error_voucher_invalid"
-                    WHEN a.timestamp_utc > expiration_utc  -- Q5
+                    WHEN COALESCE(a.origin, "") != 'cli' AND a.timestamp_utc > expiration_utc  -- Q5
                         THEN "error_voucher_expired"
                     WHEN NOT u.can_cashin  -- Q9
                         THEN "ok_voucher_info"

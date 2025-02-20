@@ -265,17 +265,15 @@ def _emissions_emailreport(args: argparse.Namespace, conn: sqlite3.Connection) -
 def _action(requestid: str):
     def decorator(func):
         @functools.wraps(func)
-        def wraps(*args, **kwargs) -> None:
-            ns = args[0]
-
-            kwargs["action"] = models.ActionBase(
+        def wraps(ns, conn, *args, **kwargs) -> None:
+            action = models.ActionBase(
                 origin=_ACTION_ORIGIN_CLI,
-                userid=ns.userid,
-                voucherid=ns.voucherid,
+                req_usertoken=db.get_user_token_from_label(conn, ns.userlabel),
+                req_vouchertoken=ns.vouchertoken,
                 requestid=requestid,
             )
 
-            return func(*args, **kwargs)
+            return func(ns, conn, *args, action=action, **kwargs)
 
         return wraps
 
@@ -284,18 +282,20 @@ def _action(requestid: str):
 
 @_connect
 @_action(_ACTION_REQUEST_SCAN)
+@_json
 def _actions_scan(
     args: argparse.Namespace, conn: sqlite3.Connection, action: models.Action
 ) -> None:
-    db.add_action(conn, action)
+    return db.add_action(conn, action)
 
 
 @_connect
 @_action(_ACTION_REQUEST_UNDO)
+@_json
 def _actions_undo(
     args: argparse.Namespace, conn: sqlite3.Connection, action: models.Action
 ) -> None:
-    db.add_action(conn, action)
+    return db.add_action(conn, action)
 
 
 # Server
@@ -498,8 +498,8 @@ def _build_parser() -> argparse.ArgumentParser:
     sub = subparsers.add_parser("actions").add_subparsers()
 
     par = sub.add_parser("scan")
-    par.add_argument("--voucherid", help="Voucher ID")
-    par.add_argument("--userid", help="User ID")
+    par.add_argument("--vouchertoken", help="Voucher token")
+    par.add_argument("--userlabel", help="User label")
     par.set_defaults(command=_actions_scan)
 
     par = sub.add_parser("undo")

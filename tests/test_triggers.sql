@@ -40,8 +40,12 @@ INSERT INTO actions (req_usertoken, req_vouchertoken, requestid)
 VALUES ("tokusr_cashier", "tokvch_invalid", "scan");
 
 -- 5: error_voucher_expired
-INSERT INTO actions (req_usertoken, req_vouchertoken, timestamp_utc, requestid)
-VALUES ("tokusr_cashier", "tokvch_1", datetime('now', '+4 month'), "scan");
+INSERT INTO actions (req_usertoken, req_vouchertoken, requestid)
+VALUES ("tokusr_cashier", "tokvch_3", "scan");
+
+-- A cli origin bypasses the expiration date, expected ok_voucher_cashedin
+INSERT INTO actions (origin, req_usertoken, req_vouchertoken, requestid)
+VALUES ("cli", "tokusr_cashier", "tokvch_3", "scan");
 
 -- 6: ok_voucher_info on a voucher that has not been cashedin by an user with no can_cashin right
 INSERT INTO actions (req_usertoken, req_vouchertoken, requestid)
