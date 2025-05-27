@@ -4,6 +4,7 @@ import itertools
 import pathlib
 import string
 import tempfile
+import zoneinfo
 from io import StringIO
 from sqlite3 import Connection
 from typing import Any, BinaryIO, Callable
@@ -17,7 +18,6 @@ import odf.table
 import odf.text
 import qrcode
 import qrcode.image.svg
-import zoneinfo
 from pypdf import PdfWriter
 
 from . import db, models, webapp
@@ -148,7 +148,7 @@ def emission_vouchers(
             _svg2pdf(bytestring=svg, write_to=fd)
 
         pdf_merger.append(fileobj=pdf)
-        pdf_merger.append(fileobj=verso_pdf_path)
+        # pdf_merger.append(fileobj=verso_pdf_path)
 
     # Merge all pages and output the final PDF
 
