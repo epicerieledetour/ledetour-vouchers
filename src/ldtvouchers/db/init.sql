@@ -255,7 +255,7 @@ BEGIN
                         THEN "error_voucher_expired"
                     WHEN NOT u.can_cashin  -- Q9
                         THEN "ok_voucher_info"
-                    WHEN v.cashedin_by IS NULL  -- Q6
+                    WHEN COALESCE(a.origin, "") == 'cli' OR v.cashedin_by IS NULL  -- Q6
                         THEN
                             CASE  -- Q10
                                 WHEN a.requestid = 'scan'
