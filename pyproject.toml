@@ -27,6 +27,9 @@ dependencies = [
     "uvicorn[standard]"
 ]
 
+[project.scripts]
+ldtvouchers = "ldtvouchers.__main__:main"
+
 [build-system]
 build-backend = "setuptools.build_meta"
 requires = [
